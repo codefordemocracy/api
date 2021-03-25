@@ -1,0 +1,15 @@
+runtime: python
+service: api
+env: flex
+entrypoint: gunicorn main:app -w 1 -k uvicorn.workers.UvicornWorker --forwarded-allow-ips="*" --timeout 600
+
+runtime_config:
+  python_version: 3.7
+
+manual_scaling:
+  instances: 1
+
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10

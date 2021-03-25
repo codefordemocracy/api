@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+    <title>API | Code for Democracy</title>
+    <link rel="stylesheet" href="//assets.codefordemocracy.org/css/style.css" />
+    <link rel="stylesheet" href="{{ url_for('static', path='css/app.css') }}" />
+    <link rel="icon" type="image/png" href="//assets.codefordemocracy.org/img/favicon.png" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-142391396-9"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-142391396-9');
+    </script>
+
+  </head>
+  <body>
+
+    <div class="container-fluid py-3 h-100">
+      <div class="row pb-3 h-100">
+        <div class="col-12 my-auto d-flex justify-content-center">
+          <div class="d-flex flex-column" id="splash">
+            <a href="https://codefordemocracy.org" target="_blank" class="img-responsive mb-3"><img src="//assets.codefordemocracy.org/img/logo.png" /></a>
+            <p class="mb-3">Our API is currently in private alpha and not available for public use. <a href="mailto:info@codefordemocracy.org?subject=API%20Credentials">Contact us</a> to request API credentials.<p>
+            <a class="btn btn-sm btn-block btn-gray" href="/view/endpoints/">View Available Endpoints</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
