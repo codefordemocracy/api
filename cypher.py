@@ -998,6 +998,71 @@ def graph_traverse_relationships_contribution_recipient(tx, ids, skip, limit):
     c+= "LIMIT $limit"
     return tx.run(c, ids=ids, skip=skip, limit=limit).graph()
 
+
+#########################################################
+# calculate recipes
+#########################################################
+
+# committee
+
+def data_calculate_recipe_committee(tx, ids, skip, limit):
+    c = "MATCH (a:Committee) "
+    c+= "WHERE a.cmte_id IN $ids "
+    c+= "RETURN a.cmte_id AS cmte_id, a.cmte_nm AS cmte_nm "
+    c+= "SKIP $skip "
+    c+= "LIMIT $limit"
+    return tx.run(c, ids=ids, skip=skip, limit=limit).data()
+
+def data_calculate_recipe_committee_WUICZMVC(tx, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+    c = "MATCH (a:Committee)-[:CONTRIBUTED_TO]->(c:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
+    c+= "MATCH (c)-[:HAPPENED_ON]->(d:Day) "
+    c+= "WHERE a.cmte_id IN $A "
+    c+= "AND d.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
+    c+= "AND d.date <= date({year: $max_year, month: $max_month, day: $max_day}) "
+    c+= "RETURN DISTINCT b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, a.cmte_id AS contributor_cmte_id, a.cmte_nm AS contributor_cmte_nm "
+    c+= "SKIP $skip "
+    c+= "LIMIT $limit"
+    return tx.run(c, A=ids[0], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
+
+def data_calculate_recipe_committee_IUYKTGSR(tx, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+    c = "MATCH (a:Committee)<-[:CONTRIBUTED_TO]-(x:Contribution)<-[:CONTRIBUTED_TO]-(c:Committee)-[:CONTRIBUTED_TO]->(y:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
+    c+= "MATCH (x)-[:HAPPENED_ON]->(d:Day) "
+    c+= "MATCH (y)-[:HAPPENED_ON]->(e:Day) "
+    c+= "WHERE a.cmte_id IN $A "
+    c+= "AND NOT b.cmte_id IN $A "
+    c+= "AND NOT c.cmte_id IN $A "
+    c+= "AND d.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
+    c+= "AND d.date <= date({year: $max_year, month: $max_month, day: $max_day}) "
+    c+= "AND e.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
+    c+= "AND e.date <= date({year: $max_year, month: $max_month, day: $max_day}) "
+    c+= "RETURN DISTINCT b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, c.cmte_id AS intermediate_cmte_id, c.cmte_nm AS intermediate_cmte_nm "
+    c+= "SKIP $skip "
+    c+= "LIMIT $limit"
+    return tx.run(c, A=ids[0], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
+
+# contribution
+
+def data_calculate_recipe_contribution(tx, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+    c = "MATCH (a:Contribution) "
+    c+= "WHERE a.sub_id IN $ids "
+    c+= "RETURN left(toString(a.datetime), 10) AS date, a.transaction_amt AS transaction_amt "
+    c+= "SKIP $skip "
+    c+= "LIMIT $limit"
+    return tx.run(c, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
+
+def data_calculate_recipe_contribution_HPPIQLNO(tx, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+    c = "MATCH (a:Committee)-[:CONTRIBUTED_TO]->(c:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
+    c+= "MATCH (c)-[:HAPPENED_ON]->(d:Day) "
+    c+= "WHERE a.cmte_id IN $A "
+    c+= "AND b.cmte_id IN $B "
+    c+= "AND a.cmte_id <> b.cmte_id "
+    c+= "AND d.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
+    c+= "AND d.date <= date({year: $max_year, month: $max_month, day: $max_day}) "
+    c+= "RETURN DISTINCT a.cmte_id AS source_cmte_id, a.cmte_nm AS source_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt, b.cmte_id AS target_cmte_id, b.cmte_nm AS target_cmte_nm "
+    c+= "SKIP $skip "
+    c+= "LIMIT $limit"
+    return tx.run(c, A=ids[0], B=ids[1], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
+
 #########################################################
 # analyze elements
 #########################################################

@@ -6,6 +6,7 @@ from fastapi.responses import ORJSONResponse
 
 from neo4j import GraphDatabase
 from elasticsearch import Elasticsearch
+from google.cloud import firestore
 
 import datetime
 import pytz
@@ -38,6 +39,9 @@ driver = GraphDatabase.driver(credentials.neo4j_connection, auth=(credentials.ne
 
 # connect to ElasticSearch
 es = Elasticsearch(credentials.elastic_host, http_auth=(credentials.elastic_username_api, credentials.elastic_password_api), scheme="https", port=443)
+
+# connect to Firestore
+db = firestore.Client()
 
 # set default min and max years
 def get_years():
@@ -727,6 +731,75 @@ def documents_browse_facebook_ads(text: str = None, histogram: bool = False, ski
     mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
     maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
     return query.documents_browse_facebook_ads(es, text=text, histogram=histogram, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate)
+
+#########################################################
+# pull lists
+#########################################################
+
+@app.get("/data/pull/list/", summary="Pull Definition for a List", tags=["pull"])
+def data_pull_list(list: str, user: str = Depends(get_auth)):
+    doc = db.collection('lists').document(list).get().to_dict()
+    return doc["include"]["ids"]
+
+#########################################################
+# calculate recipes
+#########################################################
+
+@app.get("/data/calculate/recipe/committee/", summary="Calculate Recipe and Produce Committees", tags=["calculate"])
+def data_calculate_recipe_committee(lists: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
+    try:
+        lists = [i for i in lists.split(",")]
+    except:
+        lists = []
+    try:
+        ids = [i for i in ids.split(",")]
+    except:
+        ids = []
+    # grab list members from firestore
+    for list in lists:
+        ids.append(data_pull_list(list, user))
+    # grab elements
+    elements = []
+    if len(ids) > 0:
+        if template == "WUICZMVC":
+            # Find committees that received contributions from List A
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee_WUICZMVC, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "IUYKTGSR":
+            # Find committees that received contributions from committees that contributed to List A
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee_IUYKTGSR, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        else:
+            # Find committees in List A
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee, ids=ids, skip=skip, limit=limit)
+    return elements
+
+@app.get("/data/calculate/recipe/contribution/", summary="Calculate Recipe and Produce Contributions", tags=["calculate"])
+def data_calculate_recipe_contribution(lists: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
+    try:
+        lists = [i for i in lists.split(",")]
+    except:
+        lists = []
+    try:
+        ids = [i for i in ids.split(",")]
+    except:
+        ids = []
+    # grab list members from firestore
+    for list in lists:
+        ids.append(data_pull_list(list, user))
+    # grab elements
+    elements = []
+    if len(ids) > 0:
+        if template == "HPPIQLNO":
+            # Find contributions from List A to List B
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_HPPIQLNO, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        else:
+            # Find contributions in List A
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution, ids=ids, skip=skip, limit=limit)
+    return elements
 
 #########################################################
 # analyze elements
