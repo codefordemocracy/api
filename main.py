@@ -739,66 +739,100 @@ def documents_browse_facebook_ads(text: str = None, histogram: bool = False, ski
 @app.get("/data/pull/list/", summary="Pull Definition for a List", tags=["pull"])
 def data_pull_list(list: str, user: str = Depends(get_auth)):
     doc = db.collection('lists').document(list).get().to_dict()
-    return doc["include"]["ids"]
+    return doc["include"]
 
 #########################################################
 # calculate recipes
 #########################################################
 
 @app.get("/data/calculate/recipe/committee/", summary="Calculate Recipe and Produce Committees", tags=["calculate"])
-def data_calculate_recipe_committee(lists: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
+def data_calculate_recipe_committee(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
     try:
         lists = [i for i in lists.split(",")]
     except:
         lists = []
     try:
+        terms = [i for i in terms.split(",")]
+    except:
+        terms = []
+    try:
         ids = [i for i in ids.split(",")]
     except:
         ids = []
-    # grab list members from firestore
+    # grab list definition from firestore
     for list in lists:
-        ids.append(data_pull_list(list, user))
+        include = data_pull_list(list, user)
+        list_terms = include.get("terms")
+        list_ids = include.get("ids")
+        if list_terms is not None and len(list_terms) > 0:
+            terms.append(list_terms)
+        else:
+            terms.append(None)
+        if list_ids is not None and len(list_ids) > 0:
+            ids.append(list_ids)
+        else:
+            ids.append(None)
+    # set empty values to none
+    if terms is not None and len(terms) == 0:
+        terms = None
+    if ids is not None and len(ids) == 0:
+        ids = None
     # grab elements
     elements = []
-    if len(ids) > 0:
+    if terms is not None or ids is not None:
         if template == "WUICZMVC":
             # Find committees that received contributions from List A
             with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee_WUICZMVC, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee_WUICZMVC, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
         elif template == "IUYKTGSR":
             # Find committees that received contributions from committees that contributed to List A
             with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee_IUYKTGSR, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee_IUYKTGSR, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
         else:
             # Find committees in List A
             with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee, ids=ids, skip=skip, limit=limit)
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee, terms=terms, ids=ids, skip=skip, limit=limit)
     return elements
 
 @app.get("/data/calculate/recipe/contribution/", summary="Calculate Recipe and Produce Contributions", tags=["calculate"])
-def data_calculate_recipe_contribution(lists: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
+def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
     try:
         lists = [i for i in lists.split(",")]
     except:
         lists = []
     try:
+        terms = [i for i in terms.split(",")]
+    except:
+        terms = []
+    try:
         ids = [i for i in ids.split(",")]
     except:
         ids = []
-    # grab list members from firestore
+    # grab list definition from firestore
     for list in lists:
-        ids.append(data_pull_list(list, user))
+        include = data_pull_list(list, user)
+        list_terms = include.get("terms")
+        list_ids = include.get("ids")
+        if list_terms is not None and len(list_terms) > 0:
+            terms.append(list_terms)
+        else:
+            terms.append(None)
+        if list_ids is not None and len(list_ids) > 0:
+            ids.append(list_ids)
+        else:
+            ids.append(None)
+    # set empty values to none
+    if terms is not None and len(terms) == 0:
+        terms = None
+    if ids is not None and len(ids) == 0:
+        ids = None
     # grab elements
     elements = []
-    if len(ids) > 0:
+    if terms is not None or ids is not None:
         if template == "HPPIQLNO":
             # Find contributions from List A to List B
             with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_HPPIQLNO, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
-        else:
-            # Find contributions in List A
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution, ids=ids, skip=skip, limit=limit)
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_HPPIQLNO, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
     return elements
 
 #########################################################

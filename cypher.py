@@ -1005,32 +1005,71 @@ def graph_traverse_relationships_contribution_recipient(tx, ids, skip, limit):
 
 # committee
 
-def data_calculate_recipe_committee(tx, ids, skip, limit):
-    c = "MATCH (a:Committee) "
-    c+= "WHERE a.cmte_id IN $ids "
-    c+= "RETURN a.cmte_id AS cmte_id, a.cmte_nm AS cmte_nm "
+def data_calculate_recipe_committee(tx, terms, ids, skip, limit):
+    c = ""
+    if terms is not None:
+        c+= "CALL db.index.fulltext.queryNodes('committee_name', '" + (" OR ").join(terms) + "') "
+        c+= "YIELD node, score "
+        c+= "WHERE score > 1 "
+        c+= "RETURN node.cmte_id AS cmte_id, node.cmte_nm AS cmte_nm  "
+        if ids is not None:
+            c+= "UNION "
+    if ids is not None:
+        c+= "MATCH (a:Committee) "
+        c+= "WHERE a.cmte_id IN $ids "
+        c+= "RETURN a.cmte_id AS cmte_id, a.cmte_nm AS cmte_nm "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, ids=ids, skip=skip, limit=limit).data()
 
-def data_calculate_recipe_committee_WUICZMVC(tx, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
-    c = "MATCH (a:Committee)-[:CONTRIBUTED_TO]->(c:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
+def data_calculate_recipe_committee_WUICZMVC(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+    c = ""
+    if terms[0] is not None or ids[0] is not None:
+        c+= "CALL { "
+        if terms[0] is not None:
+            c+= "CALL db.index.fulltext.queryNodes('committee_name', '" + (" OR ").join(terms[0]) + "') "
+            c+= "YIELD node, score "
+            c+= "WHERE score > 1 "
+            c+= "RETURN node AS i  "
+            if ids[0] is not None:
+                c+= "UNION "
+        if ids[0] is not None:
+            c+= "MATCH (i:Committee) "
+            c+= "WHERE i.cmte_id IN $A "
+            c+= "RETURN i "
+        c+= "} "
+        c+= "WITH i AS a "
+    c+= "MATCH (a:Committee)-[:CONTRIBUTED_TO]->(c:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
     c+= "MATCH (c)-[:HAPPENED_ON]->(d:Day) "
-    c+= "WHERE a.cmte_id IN $A "
-    c+= "AND d.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
+    c+= "WHERE d.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
     c+= "AND d.date <= date({year: $max_year, month: $max_month, day: $max_day}) "
     c+= "RETURN DISTINCT b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, a.cmte_id AS contributor_cmte_id, a.cmte_nm AS contributor_cmte_nm "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, A=ids[0], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_committee_IUYKTGSR(tx, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
-    c = "MATCH (a:Committee)<-[:CONTRIBUTED_TO]-(x:Contribution)<-[:CONTRIBUTED_TO]-(c:Committee)-[:CONTRIBUTED_TO]->(y:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
+def data_calculate_recipe_committee_IUYKTGSR(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+    c = ""
+    if terms[0] is not None or ids[0] is not None:
+        c+= "CALL { "
+        if terms[0] is not None:
+            c+= "CALL db.index.fulltext.queryNodes('committee_name', '" + (" OR ").join(terms[0]) + "') "
+            c+= "YIELD node, score "
+            c+= "WHERE score > 1 "
+            c+= "RETURN node AS i  "
+            if ids[0] is not None:
+                c+= "UNION "
+        if ids[0] is not None:
+            c+= "MATCH (i:Committee) "
+            c+= "WHERE i.cmte_id IN $A "
+            c+= "RETURN i "
+        c+= "} "
+        c+= "WITH i AS a, collect(i) AS filter "
+    c+= "MATCH (a:Committee)<-[:CONTRIBUTED_TO]-(x:Contribution)<-[:CONTRIBUTED_TO]-(c:Committee)-[:CONTRIBUTED_TO]->(y:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
     c+= "MATCH (x)-[:HAPPENED_ON]->(d:Day) "
     c+= "MATCH (y)-[:HAPPENED_ON]->(e:Day) "
-    c+= "WHERE a.cmte_id IN $A "
-    c+= "AND NOT b.cmte_id IN $A "
-    c+= "AND NOT c.cmte_id IN $A "
+    c+= "WHERE NOT b IN filter "
+    c+= "AND NOT c IN filter "
     c+= "AND d.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
     c+= "AND d.date <= date({year: $max_year, month: $max_month, day: $max_day}) "
     c+= "AND e.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
@@ -1042,20 +1081,44 @@ def data_calculate_recipe_committee_IUYKTGSR(tx, ids, skip, limit, min_year, max
 
 # contribution
 
-def data_calculate_recipe_contribution(tx, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
-    c = "MATCH (a:Contribution) "
-    c+= "WHERE a.sub_id IN $ids "
-    c+= "RETURN left(toString(a.datetime), 10) AS date, a.transaction_amt AS transaction_amt "
-    c+= "SKIP $skip "
-    c+= "LIMIT $limit"
-    return tx.run(c, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
-
-def data_calculate_recipe_contribution_HPPIQLNO(tx, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
-    c = "MATCH (a:Committee)-[:CONTRIBUTED_TO]->(c:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
+def data_calculate_recipe_contribution_HPPIQLNO(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+    c = ""
+    if terms[0] is not None or ids[0] is not None:
+        c+= "CALL { "
+        if terms[0] is not None:
+            c+= "CALL db.index.fulltext.queryNodes('committee_name', '" + (" OR ").join(terms[0]) + "') "
+            c+= "YIELD node, score "
+            c+= "WHERE score > 1 "
+            c+= "RETURN node AS i  "
+            if ids[0] is not None:
+                c+= "UNION "
+        if ids[0] is not None:
+            c+= "MATCH (i:Committee) "
+            c+= "WHERE i.cmte_id IN $A "
+            c+= "RETURN i "
+        c+= "} "
+        c+= "WITH i AS a "
+    if terms[1] is not None or ids[1] is not None:
+        c+= "CALL { "
+        if terms[1] is not None:
+            c+= "CALL db.index.fulltext.queryNodes('committee_name', '" + (" OR ").join(terms[1]) + "') "
+            c+= "YIELD node, score "
+            c+= "WHERE score > 1 "
+            c+= "RETURN node AS j  "
+            if ids[1] is not None:
+                c+= "UNION "
+        if ids[1] is not None:
+            c+= "MATCH (j:Committee) "
+            c+= "WHERE j.cmte_id IN $B "
+            c+= "RETURN j "
+        c+= "} "
+        if terms[0] is not None or ids[0] is not None:
+            c+= "WITH a, j AS b "
+        else:
+            c+= "WITH j AS b "
+    c+= "MATCH (a:Committee)-[:CONTRIBUTED_TO]->(c:Contribution)-[:CONTRIBUTED_TO]->(b:Committee) "
     c+= "MATCH (c)-[:HAPPENED_ON]->(d:Day) "
-    c+= "WHERE a.cmte_id IN $A "
-    c+= "AND b.cmte_id IN $B "
-    c+= "AND a.cmte_id <> b.cmte_id "
+    c+= "WHERE a.cmte_id <> b.cmte_id "
     c+= "AND d.date >= date({year: $min_year, month: $min_month, day: $min_day}) "
     c+= "AND d.date <= date({year: $max_year, month: $max_month, day: $max_day}) "
     c+= "RETURN DISTINCT a.cmte_id AS source_cmte_id, a.cmte_nm AS source_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt, b.cmte_id AS target_cmte_id, b.cmte_nm AS target_cmte_nm "
