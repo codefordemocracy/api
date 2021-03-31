@@ -745,55 +745,6 @@ def data_pull_list(list: str, user: str = Depends(get_auth)):
 # calculate recipes
 #########################################################
 
-@app.get("/data/calculate/recipe/committee/", summary="Calculate Recipe and Produce Committees", tags=["calculate"])
-def data_calculate_recipe_committee(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
-    try:
-        lists = [i for i in lists.split(",")]
-    except:
-        lists = []
-    try:
-        terms = [i for i in terms.split(",")]
-    except:
-        terms = []
-    try:
-        ids = [i for i in ids.split(",")]
-    except:
-        ids = []
-    # grab list definition from firestore
-    for list in lists:
-        include = data_pull_list(list, user)
-        list_terms = include.get("terms")
-        list_ids = include.get("ids")
-        if list_terms is not None and len(list_terms) > 0:
-            terms.append(list_terms)
-        else:
-            terms.append(None)
-        if list_ids is not None and len(list_ids) > 0:
-            ids.append(list_ids)
-        else:
-            ids.append(None)
-    # set empty values to none
-    if terms is not None and len(terms) == 0:
-        terms = None
-    if ids is not None and len(ids) == 0:
-        ids = None
-    # grab elements
-    elements = []
-    if terms is not None or ids is not None:
-        if template == "WUICZMVC":
-            # Find committees that received contributions from List A
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee_WUICZMVC, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
-        elif template == "IUYKTGSR":
-            # Find committees that received contributions from committees that contributed to List A
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee_IUYKTGSR, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
-        else:
-            # Find committees in List A
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee, terms=terms, ids=ids, skip=skip, limit=limit)
-    return elements
-
 @app.get("/data/calculate/recipe/contribution/", summary="Calculate Recipe and Produce Contributions", tags=["calculate"])
 def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
     try:
@@ -829,10 +780,162 @@ def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids
     # grab elements
     elements = []
     if terms is not None or ids is not None:
-        if template == "HPPIQLNO":
+        if template == "ReqQ":
+            # Find contributions from List A
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_ReqQ, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "m4YC":
+            # Find contributions from donors associated with List A
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_m4YC, terms=terms, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "7v4P":
+            # Find contributions from donors who work as List A
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_7v4P, terms=terms, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "T5xv":
+            # Find contributions from donors who work as List A for List B
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_T5xv, terms=terms, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "Bs5W":
+            # Find contributions from donors associated with List A to List B
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_Bs5W, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "6peF":
+            # Find contributions from donors who work as List A to List B
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_6peF, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "F2mS":
+            # Find contributions from donors who work as List A for List B to List C
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_F2mS, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "IQL2":
             # Find contributions from List A to List B
             with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_HPPIQLNO, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_IQL2, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+        elif template == "jUBm":
+            # Find contributions from committees that contributed to List A
+            with driver.session() as neo4j:
+                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_jUBm, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+    return elements
+
+@app.get("/data/calculate/recipe/committee/", summary="Calculate Recipe and Produce Committees", tags=["calculate"])
+def data_calculate_recipe_committee(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
+    try:
+        lists = [i for i in lists.split(",")]
+    except:
+        lists = []
+    try:
+        terms = [i for i in terms.split(",")]
+    except:
+        terms = []
+    try:
+        ids = [i for i in ids.split(",")]
+    except:
+        ids = []
+    # grab list definition from firestore
+    for list in lists:
+        include = data_pull_list(list, user)
+        list_terms = include.get("terms")
+        list_ids = include.get("ids")
+        if list_terms is not None and len(list_terms) > 0:
+            terms.append(list_terms)
+        else:
+            terms.append(None)
+        if list_ids is not None and len(list_ids) > 0:
+            ids.append(list_ids)
+        else:
+            ids.append(None)
+    # set empty values to none
+    if terms is not None and len(terms) == 0:
+        terms = None
+    if ids is not None and len(ids) == 0:
+        ids = None
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        # Find committees in List A
+        with driver.session() as neo4j:
+            elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee, terms=terms, ids=ids, skip=skip, limit=limit)
+    return elements
+
+@app.get("/data/calculate/recipe/employer/", summary="Calculate Recipe and Produce Employers", tags=["calculate"])
+def data_calculate_recipe_employer(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
+    try:
+        lists = [i for i in lists.split(",")]
+    except:
+        lists = []
+    try:
+        terms = [i for i in terms.split(",")]
+    except:
+        terms = []
+    try:
+        ids = [i for i in ids.split(",")]
+    except:
+        ids = []
+    # grab list definition from firestore
+    for list in lists:
+        include = data_pull_list(list, user)
+        list_terms = include.get("terms")
+        list_ids = include.get("ids")
+        if list_terms is not None and len(list_terms) > 0:
+            terms.append(list_terms)
+        else:
+            terms.append(None)
+        if list_ids is not None and len(list_ids) > 0:
+            ids.append(list_ids)
+        else:
+            ids.append(None)
+    # set empty values to none
+    if terms is not None and len(terms) == 0:
+        terms = None
+    if ids is not None and len(ids) == 0:
+        ids = None
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        # Find employers in List A
+        with driver.session() as neo4j:
+            elements = neo4j.read_transaction(cypher.data_calculate_recipe_employer, terms=terms, ids=ids, skip=skip, limit=limit)
+    return elements
+
+@app.get("/data/calculate/recipe/job/", summary="Calculate Recipe and Produce Jobs", tags=["calculate"])
+def data_calculate_recipe_job(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
+    try:
+        lists = [i for i in lists.split(",")]
+    except:
+        lists = []
+    try:
+        terms = [i for i in terms.split(",")]
+    except:
+        terms = []
+    try:
+        ids = [i for i in ids.split(",")]
+    except:
+        ids = []
+    # grab list definition from firestore
+    for list in lists:
+        include = data_pull_list(list, user)
+        list_terms = include.get("terms")
+        list_ids = include.get("ids")
+        if list_terms is not None and len(list_terms) > 0:
+            terms.append(list_terms)
+        else:
+            terms.append(None)
+        if list_ids is not None and len(list_ids) > 0:
+            ids.append(list_ids)
+        else:
+            ids.append(None)
+    # set empty values to none
+    if terms is not None and len(terms) == 0:
+        terms = None
+    if ids is not None and len(ids) == 0:
+        ids = None
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        # Find jobs in List A
+        with driver.session() as neo4j:
+            elements = neo4j.read_transaction(cypher.data_calculate_recipe_job, terms=terms, ids=ids, skip=skip, limit=limit)
     return elements
 
 #########################################################
