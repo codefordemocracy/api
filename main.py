@@ -813,7 +813,7 @@ def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids
             with driver.session() as neo4j:
                 elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_IQL2, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
         elif template == "jUBm":
-            # Find contributions from committees that contributed to List A
+            # Find contributions from committees that contributed to List A to other recipients
             with driver.session() as neo4j:
                 elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_jUBm, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
     return elements
