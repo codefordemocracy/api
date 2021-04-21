@@ -1005,7 +1005,7 @@ def graph_traverse_relationships_contribution_recipient(tx, ids, skip, limit):
 
 # contribution
 
-def data_calculate_recipe_contribution_ReqQ(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_ReqQ(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None or ids[0] is not None:
         c+= "CALL { "
@@ -1031,11 +1031,15 @@ def data_calculate_recipe_contribution_ReqQ(tx, terms, ids, skip, limit, min_yea
         c+= "RETURN count(c) AS count "
     else:
         c+= "RETURN DISTINCT a.cmte_id AS contributor_cmte_id, a.cmte_nm AS contributor_cmte_nm, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, A=ids[0], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_contribution_m4YC(tx, terms, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_m4YC(tx, terms, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None:
         c+= "CALL db.index.fulltext.queryNodes('employer_name', '" + (" OR ").join(terms[0]) + "') "
@@ -1051,11 +1055,15 @@ def data_calculate_recipe_contribution_m4YC(tx, terms, skip, limit, min_year, ma
         c+= "RETURN count(c) AS count "
     else:
         c+= "RETURN DISTINCT d.name AS donor_name, d.zip_code AS donor_zip_code, d.employer AS disclosed_employer, d.occupation AS disclosed_occupation, a.name AS associated_employer, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_contribution_7v4P(tx, terms, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_7v4P(tx, terms, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None:
         c+= "CALL db.index.fulltext.queryNodes('donor_occupation', '" + (" OR ").join(terms[0]) + "') "
@@ -1071,11 +1079,15 @@ def data_calculate_recipe_contribution_7v4P(tx, terms, skip, limit, min_year, ma
         c+= "RETURN count(c) AS count "
     else:
         c+= "RETURN DISTINCT a.name AS donor_name, a.zip_code AS donor_zip_code, a.employer AS disclosed_employer, a.occupation AS disclosed_occupation, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_contribution_T5xv(tx, terms, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_T5xv(tx, terms, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None and terms[1] is not None:
         occupations = ["occupation: " + i for i in terms[0]]
@@ -1103,11 +1115,15 @@ def data_calculate_recipe_contribution_T5xv(tx, terms, skip, limit, min_year, ma
         c+= "RETURN count(c) AS count "
     else:
         c+= "RETURN DISTINCT a.name AS donor_name, a.zip_code AS donor_zip_code, a.employer AS disclosed_employer, a.occupation AS disclosed_occupation, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_contribution_Bs5W(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_Bs5W(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None:
         c+= "CALL db.index.fulltext.queryNodes('employer_name', '" + (" OR ").join(terms[0]) + "') "
@@ -1132,11 +1148,15 @@ def data_calculate_recipe_contribution_Bs5W(tx, terms, ids, skip, limit, min_yea
         c+= "RETURN count(c) AS count "
     else:
         c+= "RETURN DISTINCT d.name AS donor_name, d.zip_code AS donor_zip_code, d.employer AS disclosed_employer, d.occupation AS disclosed_occupation, a.name AS associated_employer, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, B=ids[1], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_contribution_6peF(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_6peF(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None:
         c+= "CALL db.index.fulltext.queryNodes('donor_occupation', '" + (" OR ").join(terms[0]) + "') "
@@ -1161,11 +1181,15 @@ def data_calculate_recipe_contribution_6peF(tx, terms, ids, skip, limit, min_yea
         c+= "RETURN count(c) AS count "
     else:
         c+= "RETURN DISTINCT a.name AS donor_name, a.zip_code AS donor_zip_code, a.employer AS disclosed_employer, a.occupation AS disclosed_occupation, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, B=ids[1], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_contribution_F2mS(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_F2mS(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None and terms[1] is not None:
         occupations = ["occupation: " + i for i in terms[0]]
@@ -1202,11 +1226,15 @@ def data_calculate_recipe_contribution_F2mS(tx, terms, ids, skip, limit, min_yea
         c+= "RETURN count(c) AS count "
     else:
         c+= "RETURN DISTINCT a.name AS donor_name, a.zip_code AS donor_zip_code, a.employer AS disclosed_employer, a.occupation AS disclosed_occupation, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, C=ids[2], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_contribution_IQL2(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_IQL2(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None or ids[0] is not None:
         c+= "CALL { "
@@ -1250,11 +1278,15 @@ def data_calculate_recipe_contribution_IQL2(tx, terms, ids, skip, limit, min_yea
         c+= "RETURN count(c) AS count "
     else:
         c+= "RETURN DISTINCT a.cmte_id AS contributor_cmte_id, a.cmte_nm AS contributor_cmte_nm, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(c.datetime), 10) AS date, c.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, A=ids[0], B=ids[1], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
 
-def data_calculate_recipe_contribution_jUBm(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, count):
+def data_calculate_recipe_contribution_jUBm(tx, terms, ids, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, orderby, orderdir, count):
     c = ""
     if terms[0] is not None or ids[0] is not None:
         c+= "CALL { "
@@ -1284,6 +1316,10 @@ def data_calculate_recipe_contribution_jUBm(tx, terms, ids, skip, limit, min_yea
         c+= "RETURN count(y) AS count "
     else:
         c+= "RETURN DISTINCT c.cmte_id AS intermediate_cmte_id, c.cmte_nm AS intermediate_cmte_nm, b.cmte_id AS recipient_cmte_id, b.cmte_nm AS recipient_cmte_nm, left(toString(y.datetime), 10) AS date, y.transaction_amt AS transaction_amt "
+        if orderby == "amount":
+            c+= "ORDER BY transaction_amt " + orderdir + " "
+        elif orderby == "date":
+            c+= "ORDER BY date " + orderdir + " "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
     return tx.run(c, A=ids[0], skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).data()
