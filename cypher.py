@@ -385,6 +385,12 @@ def graph_traverse_neighbors(tx, ids, labels, skip, limit):
     c+= "LIMIT $limit"
     return tx.run(c, ids=ids, skip=skip, limit=limit).graph()
 
+def graph_uncover_contributions(tx, ids):
+    c  = "MATCH (a) <-[c1:CONTRIBUTED_TO]-(t:Contribution)<-[c2:CONTRIBUTED_TO]- (d)"
+    c += "WHERE ID(a) IN $ids "
+    c += "RETURN a, t, d"
+    return tx.run(c, ids=ids).graph()
+
 def graph_traverse_associations_candidate_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, intermediaries, sup_opp, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
     if intermediaries == "linkage":
         c = "MATCH (a:Candidate)<-[:ASSOCIATED_WITH]-(b:Committee) "

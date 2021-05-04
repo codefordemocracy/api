@@ -206,6 +206,20 @@ def graph_traverse_neighbors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), 
         with driver.session() as neo4j:
             return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_neighbors, ids=ids, labels=labels, skip=skip, limit=limit))
 
+
+# Uncover contributors
+
+@app.get("/graph/traverse/uncover_contributors/", summary="Uncover contributors to nodes", tags=["uncover"])
+def graph_uncover_contributors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), user: str = Depends(get_auth)):
+    try:
+        ids = [int(i) for i in ids.split(",")]
+    except:
+        ids = None
+    if ids is not None:
+        with driver.session() as neo4j:
+            return helpers.format_graph(neo4j.read_transaction(cypher.graph_uncover_contributions, ids=ids))
+
+
 # associations - candidates
 
 @app.get("/graph/traverse/associations/candidate/committee/", summary="Traverse Graph and Find Associations Between Candidates and Committees", tags=["traverse"])
