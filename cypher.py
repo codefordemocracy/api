@@ -385,11 +385,11 @@ def graph_traverse_neighbors(tx, ids, labels, skip, limit):
     c+= "LIMIT $limit"
     return tx.run(c, ids=ids, skip=skip, limit=limit).graph()
 
-def graph_uncover_donors(tx, ids, min_transaction_amt, limit):
-    print("processing uncover donors request")
-    print("min_transaction_amt", min_transaction_amt)
+def graph_uncover_donors(tx, ids, labels, min_transaction_amt, limit):
     c  = f"MATCH (a) <-[c1:CONTRIBUTED_TO]-(t:Contribution)<-[c2:CONTRIBUTED_TO]- (d) "
     c += f"WHERE ID(a) IN {ids} AND t.transaction_amt > {min_transaction_amt} "
+    if labels is not None:
+        c+= f"AND ( {labels} )"
     c += f"RETURN a, t, d, c1, c2 "
     c += f"LIMIT {limit} "
     query_out = tx.run(c, ids=ids)
