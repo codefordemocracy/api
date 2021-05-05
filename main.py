@@ -209,15 +209,28 @@ def graph_traverse_neighbors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), 
 
 # Uncover contributors
 
-@app.get("/graph/traverse/uncover_contributors/", summary="Uncover contributors to nodes", tags=["uncover"])
-def graph_uncover_contributors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), user: str = Depends(get_auth)):
+@app.get(
+    "/graph/traverse/uncoverdonors/", 
+    summary="Uncover contributors to nodes", 
+    tags=["uncover"])
+def graph_uncover_donors(
+        ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), 
+        minTransactionAmt: int = Query(None, ge=1, le=999999999),
+        limit: int = Query(None, ge=1, le=999999999),
+        user: str = Depends(get_auth)):
     try:
-        ids = [int(i) for i in ids.split(",")]
+        ids = [int(id) for id in ids.split(",")]
     except:
         ids = None
     if ids is not None:
         with driver.session() as neo4j:
-            return helpers.format_graph(neo4j.read_transaction(cypher.graph_uncover_contributions, ids=ids))
+            return helpers.format_graph(
+                neo4j.read_transaction(
+                    cypher.graph_uncover_donors, 
+                    ids=ids, 
+                    min_transaction_amt=minTransactionAmt,
+                    limit=limit
+                    ))
 
 
 # associations - candidates
