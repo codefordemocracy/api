@@ -19,7 +19,7 @@ watchdog_client_id = secrets.access_secret_version(request={"name": "projects/95
 watchdog_client_secret = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_watchdog_client_secret/versions/1"}).payload.data.decode()
 calc_client_id = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_calc_client_id/versions/1"}).payload.data.decode()
 calc_client_secret = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_calc_client_secret/versions/1"}).payload.data.decode()
-# service_url = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_service_url/versions/1"}).payload.data.decode()
+service_url = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_service_url/versions/1"}).payload.data.decode()
 
 # helper function to check for pairs of credentials
 def correct(username, password, correct_username, correct_password):
