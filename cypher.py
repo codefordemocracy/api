@@ -385,6 +385,16 @@ def graph_traverse_neighbors(tx, ids, labels, skip, limit):
     c+= "LIMIT $limit"
     return tx.run(c, ids=ids, skip=skip, limit=limit).graph()
 
+def graph_uncover_donors(tx, ids, labels, min_transaction_amt, limit):
+    c  = f"MATCH (a) <-[c1:CONTRIBUTED_TO]-(t:Contribution)<-[c2:CONTRIBUTED_TO]- (d) "
+    c += f"WHERE ID(a) IN {ids} AND t.transaction_amt > {min_transaction_amt} "
+    if labels is not None:
+        c+= f"AND ( {labels} )"
+    c += f"RETURN a, t, d, c1, c2 "
+    c += f"LIMIT {limit} "
+    query_out = tx.run(c, ids=ids)
+    return query_out.graph()
+
 def graph_traverse_associations_candidate_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, intermediaries, sup_opp, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
     if intermediaries == "linkage":
         c = "MATCH (a:Candidate)<-[:ASSOCIATED_WITH]-(b:Committee) "
