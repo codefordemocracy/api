@@ -210,11 +210,11 @@ def graph_traverse_neighbors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), 
 # Uncover contributors
 
 @app.get(
-    "/graph/traverse/uncoverdonors/", 
-    summary="Uncover contributors to nodes", 
+    "/graph/traverse/uncoverdonors/",
+    summary="Uncover contributors to nodes",
     tags=["uncover"])
 def graph_uncover_donors(
-        ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), 
+        ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"),
         labels: str = None,
         minTransactionAmt: int = Query(None, ge=1, le=999999999),
         limit: int = Query(None, ge=1, le=999999999),
@@ -235,8 +235,8 @@ def graph_uncover_donors(
         with driver.session() as neo4j:
             return helpers.format_graph(
                 neo4j.read_transaction(
-                    cypher.graph_uncover_donors, 
-                    ids=ids, 
+                    cypher.graph_uncover_donors,
+                    ids=ids,
                     labels=labels,
                     min_transaction_amt=minTransactionAmt,
                     limit=limit
