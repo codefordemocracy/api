@@ -855,6 +855,54 @@ def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids
                 elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_jUBm, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
     return elements
 
+@app.get("/data/calculate/recipe/lobbying/", summary="Calculate Recipe and Produce Lobbying Activity", tags=["calculate"])
+    try:
+        lists = [i for i in lists.split(",")]
+    except:
+        lists = []
+    try:
+        terms = [i for i in terms.split(",")]
+    except:
+        terms = []
+    try:
+        ids = [i for i in ids.split(",")]
+    except:
+        ids = []
+    # grab list definition from firestore
+    for list in lists:
+        include = data_pull_list(list, user)
+        list_terms = include.get("terms")
+        list_ids = include.get("ids")
+        if list_terms is not None and len(list_terms) > 0:
+            terms.append(list_terms)
+        else:
+            terms.append(None)
+        if list_ids is not None and len(list_ids) > 0:
+            ids.append(list_ids)
+        else:
+            ids.append(None)
+    # set empty values to none
+    if terms is not None and len(terms) == 0:
+        terms = None
+    if ids is not None and len(ids) == 0:
+        ids = None
+def data_calculate_recipe_lobbying(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query("none", regex="none|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        if template == "kMER":
+            # Find lobbying activity for lobbying done on behalf of List A
+            return query.data_calculate_recipe_lobbying("kMER", es, terms=terms, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+        elif template == "wLvp":
+            # Find lobbying activity for lobbying done by List A
+            return query.data_calculate_recipe_lobbying("wLvp", es, terms=terms, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+        elif template == "MJdb":
+            # Find lobbying activity related to List A
+            return query.data_calculate_recipe_lobbying("MJdb", es, terms=terms, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+    return elements
+
 @app.get("/data/calculate/recipe/committee/", summary="Calculate Recipe and Produce Committees", tags=["calculate"])
 def data_calculate_recipe_committee(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
     try:
@@ -973,6 +1021,48 @@ def data_calculate_recipe_job(lists: str = None, terms: str = None, ids: str = N
         # Find jobs in List A
         with driver.session() as neo4j:
             elements = neo4j.read_transaction(cypher.data_calculate_recipe_job, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+    return elements
+
+@app.get("/data/calculate/recipe/topic/", summary="Calculate Recipe and Produce Topics", tags=["calculate"])
+def data_calculate_recipe_topic(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
+    try:
+        lists = [i for i in lists.split(",")]
+    except:
+        lists = []
+    try:
+        terms = [i for i in terms.split(",")]
+    except:
+        terms = []
+    try:
+        ids = [i for i in ids.split(",")]
+    except:
+        ids = []
+    # grab list definition from firestore
+    for list in lists:
+        include = data_pull_list(list, user)
+        list_terms = include.get("terms")
+        list_ids = include.get("ids")
+        if list_terms is not None and len(list_terms) > 0:
+            terms.append(list_terms)
+        else:
+            terms.append(None)
+        if list_ids is not None and len(list_ids) > 0:
+            ids.append(list_ids)
+        else:
+            ids.append(None)
+    # set empty values to none
+    if terms is not None and len(terms) == 0:
+        terms = None
+    if ids is not None and len(ids) == 0:
+        ids = None
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        # Return the topics
+        for term in terms:
+            elements.append({
+                "term": term
+            })
     return elements
 
 #########################################################
