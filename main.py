@@ -770,50 +770,14 @@ def documents_browse_facebook_ads(text: str = None, histogram: bool = False, ski
     return query.documents_browse_facebook_ads(es, text=text, histogram=histogram, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate)
 
 #########################################################
-# pull lists
-#########################################################
-
-@app.get("/data/pull/list/", summary="Pull Definition for a List", tags=["pull"])
-def data_pull_list(list: str, user: str = Depends(get_auth)):
-    doc = db.collection('lists').document(list).get().to_dict()
-    return doc["include"]
-
-#########################################################
 # calculate recipes
 #########################################################
 
 @app.get("/data/calculate/recipe/contribution/", summary="Calculate Recipe and Produce Contributions", tags=["calculate"])
 def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query("none", regex="none|amount|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
-    try:
-        lists = [i for i in lists.split(",")]
-    except:
-        lists = []
-    try:
-        terms = [i for i in terms.split(",")]
-    except:
-        terms = []
-    try:
-        ids = [i for i in ids.split(",")]
-    except:
-        ids = []
-    # grab list definition from firestore
-    for list in lists:
-        include = data_pull_list(list, user)
-        list_terms = include.get("terms")
-        list_ids = include.get("ids")
-        if list_terms is not None and len(list_terms) > 0:
-            terms.append(list_terms)
-        else:
-            terms.append(None)
-        if list_ids is not None and len(list_ids) > 0:
-            ids.append(list_ids)
-        else:
-            ids.append(None)
-    # set empty values to none
-    if terms is not None and len(terms) == 0:
-        terms = None
-    if ids is not None and len(ids) == 0:
-        ids = None
+    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
     # grab elements
     elements = []
     if terms is not None or ids is not None:
@@ -856,37 +820,10 @@ def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids
     return elements
 
 @app.get("/data/calculate/recipe/lobbying/", summary="Calculate Recipe and Produce Lobbying Activity", tags=["calculate"])
-    try:
-        lists = [i for i in lists.split(",")]
-    except:
-        lists = []
-    try:
-        terms = [i for i in terms.split(",")]
-    except:
-        terms = []
-    try:
-        ids = [i for i in ids.split(",")]
-    except:
-        ids = []
-    # grab list definition from firestore
-    for list in lists:
-        include = data_pull_list(list, user)
-        list_terms = include.get("terms")
-        list_ids = include.get("ids")
-        if list_terms is not None and len(list_terms) > 0:
-            terms.append(list_terms)
-        else:
-            terms.append(None)
-        if list_ids is not None and len(list_ids) > 0:
-            ids.append(list_ids)
-        else:
-            ids.append(None)
-    # set empty values to none
-    if terms is not None and len(terms) == 0:
-        terms = None
-    if ids is not None and len(ids) == 0:
-        ids = None
 def data_calculate_recipe_lobbying(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query("none", regex="none|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
     # grab elements
     elements = []
     if terms is not None or ids is not None:
@@ -905,36 +842,9 @@ def data_calculate_recipe_lobbying(lists: str = None, terms: str = None, ids: st
 
 @app.get("/data/calculate/recipe/committee/", summary="Calculate Recipe and Produce Committees", tags=["calculate"])
 def data_calculate_recipe_committee(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
-    try:
-        lists = [i for i in lists.split(",")]
-    except:
-        lists = []
-    try:
-        terms = [i for i in terms.split(",")]
-    except:
-        terms = []
-    try:
-        ids = [i for i in ids.split(",")]
-    except:
-        ids = []
-    # grab list definition from firestore
-    for list in lists:
-        include = data_pull_list(list, user)
-        list_terms = include.get("terms")
-        list_ids = include.get("ids")
-        if list_terms is not None and len(list_terms) > 0:
-            terms.append(list_terms)
-        else:
-            terms.append(None)
-        if list_ids is not None and len(list_ids) > 0:
-            ids.append(list_ids)
-        else:
-            ids.append(None)
-    # set empty values to none
-    if terms is not None and len(terms) == 0:
-        terms = None
-    if ids is not None and len(ids) == 0:
-        ids = None
+    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
     # grab elements
     elements = []
     if terms is not None or ids is not None:
@@ -945,36 +855,9 @@ def data_calculate_recipe_committee(lists: str = None, terms: str = None, ids: s
 
 @app.get("/data/calculate/recipe/employer/", summary="Calculate Recipe and Produce Employers", tags=["calculate"])
 def data_calculate_recipe_employer(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
-    try:
-        lists = [i for i in lists.split(",")]
-    except:
-        lists = []
-    try:
-        terms = [i for i in terms.split(",")]
-    except:
-        terms = []
-    try:
-        ids = [i for i in ids.split(",")]
-    except:
-        ids = []
-    # grab list definition from firestore
-    for list in lists:
-        include = data_pull_list(list, user)
-        list_terms = include.get("terms")
-        list_ids = include.get("ids")
-        if list_terms is not None and len(list_terms) > 0:
-            terms.append(list_terms)
-        else:
-            terms.append(None)
-        if list_ids is not None and len(list_ids) > 0:
-            ids.append(list_ids)
-        else:
-            ids.append(None)
-    # set empty values to none
-    if terms is not None and len(terms) == 0:
-        terms = None
-    if ids is not None and len(ids) == 0:
-        ids = None
+    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
     # grab elements
     elements = []
     if terms is not None or ids is not None:
@@ -985,36 +868,9 @@ def data_calculate_recipe_employer(lists: str = None, terms: str = None, ids: st
 
 @app.get("/data/calculate/recipe/job/", summary="Calculate Recipe and Produce Jobs", tags=["calculate"])
 def data_calculate_recipe_job(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
-    try:
-        lists = [i for i in lists.split(",")]
-    except:
-        lists = []
-    try:
-        terms = [i for i in terms.split(",")]
-    except:
-        terms = []
-    try:
-        ids = [i for i in ids.split(",")]
-    except:
-        ids = []
-    # grab list definition from firestore
-    for list in lists:
-        include = data_pull_list(list, user)
-        list_terms = include.get("terms")
-        list_ids = include.get("ids")
-        if list_terms is not None and len(list_terms) > 0:
-            terms.append(list_terms)
-        else:
-            terms.append(None)
-        if list_ids is not None and len(list_ids) > 0:
-            ids.append(list_ids)
-        else:
-            ids.append(None)
-    # set empty values to none
-    if terms is not None and len(terms) == 0:
-        terms = None
-    if ids is not None and len(ids) == 0:
-        ids = None
+    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
     # grab elements
     elements = []
     if terms is not None or ids is not None:
@@ -1025,36 +881,9 @@ def data_calculate_recipe_job(lists: str = None, terms: str = None, ids: str = N
 
 @app.get("/data/calculate/recipe/topic/", summary="Calculate Recipe and Produce Topics", tags=["calculate"])
 def data_calculate_recipe_topic(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
-    try:
-        lists = [i for i in lists.split(",")]
-    except:
-        lists = []
-    try:
-        terms = [i for i in terms.split(",")]
-    except:
-        terms = []
-    try:
-        ids = [i for i in ids.split(",")]
-    except:
-        ids = []
-    # grab list definition from firestore
-    for list in lists:
-        include = data_pull_list(list, user)
-        list_terms = include.get("terms")
-        list_ids = include.get("ids")
-        if list_terms is not None and len(list_terms) > 0:
-            terms.append(list_terms)
-        else:
-            terms.append(None)
-        if list_ids is not None and len(list_ids) > 0:
-            ids.append(list_ids)
-        else:
-            ids.append(None)
-    # set empty values to none
-    if terms is not None and len(terms) == 0:
-        terms = None
-    if ids is not None and len(ids) == 0:
-        ids = None
+    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
     # grab elements
     elements = []
     if terms is not None or ids is not None:

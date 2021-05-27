@@ -38,6 +38,42 @@ def format_graph(graph):
         })))
     return elements
 
+def prepare_recipe_calculation(lists, terms, ids, db):
+    try:
+        lists = [i for i in lists.split(",")]
+    except:
+        lists = []
+    try:
+        terms = [i for i in terms.split(",")]
+    except:
+        terms = []
+    try:
+        ids = [i for i in ids.split(",")]
+    except:
+        ids = []
+    # grab list definition from firestore
+    for list in lists:
+        include = db.collection('lists').document(list).get().to_dict().get("include")
+        list_terms = include.get("terms")
+        list_ids = include.get("ids")
+        if list_terms is not None and len(list_terms) > 0:
+            terms.append(list_terms)
+        else:
+            terms.append(None)
+        if list_ids is not None and len(list_ids) > 0:
+            ids.append(list_ids)
+        else:
+            ids.append(None)
+    # set empty values to none
+    if terms is not None and len(terms) == 0:
+        terms = None
+    if ids is not None and len(ids) == 0:
+        ids = None
+    return {
+        "terms": terms,
+        "ids": ids
+    }
+
 def calc_affinity(count_a, count_b, count_both, count_total):
     support_a = count_a/count_total if count_total != 0 else 0
     support_b = count_b/count_total if count_total != 0 else 0
