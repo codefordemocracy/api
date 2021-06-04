@@ -38,7 +38,7 @@ def format_graph(graph):
         })))
     return elements
 
-def prepare_recipe_calculation(lists, terms, ids, db):
+def prepare_lists(lists, terms, ids, db):
     try:
         lists = [i for i in lists.split(",")]
     except:

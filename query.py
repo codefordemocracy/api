@@ -195,6 +195,209 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
         except:
             return []
 
+def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count):
+    q = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "range": {
+                            "processed.transaction_dt": {
+                                "gte": mindate,
+                                "lte": maxdate
+                            }
+                        }
+                    }
+                ],
+                "filter": {
+                    "bool": {
+                        "must_not": [
+                            {
+                                "match": {
+                                    "processed.target.committee.cmte_id": "C00401224" # actblue
+                                }
+                            },
+                            {
+                                "match": {
+                                    "processed.target.committee.cmte_id": "C00694323" # winred
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+    if len(terms) > 0 or len(ids) > 0:
+        # Contributions
+        if template in ["P3JF"]:
+            q["query"]["bool"]["must"].append({
+                "range": {
+                    "processed.transaction_amt": {
+                        "lt": 0
+                    }
+                }
+            })
+        # List A
+        subquery = {
+            "bool": {
+                "should": [],
+                "minimum_should_match": 1
+            }
+        }
+        if len(terms) > 0:
+            if terms[0] is not None:
+                for term in terms[0]:
+                    if template in ["ReqQ", "IQL2", "P3JF"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.source.committee.cmte_nm": term
+                            }
+                        })
+                    elif template in ["m4YC", "Bs5W"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.source.donor.employer": term
+                            }
+                        })
+                    elif template in ["7v4P", "T5xv", "6peF", "F2mS"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.source.donor.occupation": term
+                            }
+                        })
+        if len(ids) > 0:
+            if ids[0] is not None:
+                for id in ids[0]:
+                    if template in ["ReqQ", "IQL2", "P3JF"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.source.committee.cmte_id": id
+                            }
+                        })
+        q["query"]["bool"]["must"].append(subquery)
+        # List B
+        subquery = {
+            "bool": {
+                "should": [],
+                "minimum_should_match": 1
+            }
+        }
+        if len(terms) > 1:
+            if terms[1] is not None:
+                for term in terms[1]:
+                    if template in ["T5xv", "F2mS"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.source.donor.employer": term
+                            }
+                        })
+                    elif template in ["Bs5W", "6peF", "IQL2"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.target.committee.cmte_nm": term
+                            }
+                        })
+        if len(ids) > 1:
+            if ids[1] is not None:
+                for id in ids[1]:
+                    if template in ["ReqQ"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.source.committee.cmte_id": id
+                            }
+                        })
+                    elif template in ["Bs5W", "6peF", "IQL2"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.target.committee.cmte_id": id
+                            }
+                        })
+        q["query"]["bool"]["must"].append(subquery)
+        # List C
+        subquery = {
+            "bool": {
+                "should": [],
+                "minimum_should_match": 1
+            }
+        }
+        if len(terms) > 2:
+            if terms[2] is not None:
+                for term in terms[2]:
+                    if template in ["F2mS"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.target.committee.cmte_nm": term
+                            }
+                        })
+        if len(ids) > 2:
+            if ids[2] is not None:
+                for id in ids[2]:
+                    if template in ["F2mS"]:
+                        subquery["bool"]["should"].append({
+                            "match": {
+                                "processed.target.committee.cmte_id": id
+                            }
+                        })
+        q["query"]["bool"]["must"].append(subquery)
+    if orderby == "date":
+        q["sort"] = {
+            "processed.transaction_dt": {"order": orderdir},
+        }
+    elif orderby == "date":
+        q["sort"] = {
+            "processed.transaction_amt": {"order": orderdir},
+        }
+    if count is True:
+        response = es.count(index="federal_fec_contributions", body=q)
+        try:
+            return [{"count": response["count"]}]
+        except:
+            return []
+    else:
+        q["from"] = skip
+        q["size"] = limit
+        response = es.search(
+            index="federal_fec_contributions",
+            body=q,
+            filter_path=["hits.hits._source.processed"]
+        )
+        try:
+            elements = []
+            for hit in response["hits"]["hits"]:
+                if template in ["ReqQ", "IQL2"]:
+                    elements.append({
+                        "contributor_cmte_id": hit["_source"]["processed"]["source"]["committee"]["cmte_id"],
+                        "contributor_cmte_nm": hit["_source"]["processed"]["source"]["committee"]["cmte_nm"],
+                        "recipient_cmte_id": hit["_source"]["processed"]["target"]["committee"]["cmte_id"],
+                        "recipient_cmte_nm": hit["_source"]["processed"]["target"]["committee"]["cmte_nm"],
+                        "date": hit["_source"]["processed"]["transaction_dt"][:10],
+                        "transaction_amt": hit["_source"]["processed"]["transaction_amt"]
+                    })
+                elif template in ["m4YC", "7v4P", "T5xv", "Bs5W", "6peF", "F2mS"]:
+                    elements.append({
+                        "donor_name": hit["_source"]["processed"]["source"]["donor"]["name"],
+                        "donor_zip_code": hit["_source"]["processed"]["source"]["donor"]["zip_code"],
+                        "donor_employer": hit["_source"]["processed"]["source"]["donor"]["employer"],
+                        "donor_occupation": hit["_source"]["processed"]["source"]["donor"]["occupation"],
+                        "recipient_cmte_id": hit["_source"]["processed"]["target"]["committee"]["cmte_id"],
+                        "recipient_cmte_nm": hit["_source"]["processed"]["target"]["committee"]["cmte_nm"],
+                        "date": hit["_source"]["processed"]["transaction_dt"][:10],
+                        "transaction_amt": hit["_source"]["processed"]["transaction_amt"]
+                    })
+                elif template in ["P3JF"]:
+                    elements.append({
+                        "contributor_cmte_id": hit["_source"]["processed"]["source"]["committee"]["cmte_id"],
+                        "contributor_cmte_nm": hit["_source"]["processed"]["source"]["committee"]["cmte_nm"],
+                        "refunding_cmte_id": hit["_source"]["processed"]["target"]["committee"]["cmte_id"],
+                        "refunding_cmte_nm": hit["_source"]["processed"]["target"]["committee"]["cmte_nm"],
+                        "date": hit["_source"]["processed"]["transaction_dt"][:10],
+                        "transaction_amt": hit["_source"]["processed"]["transaction_amt"]
+                    })
+            return elements
+        except:
+            return []
+
 def data_calculate_recipe_lobbying(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count):
     q = {
         "query": {

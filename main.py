@@ -770,58 +770,109 @@ def documents_browse_facebook_ads(text: str = None, histogram: bool = False, ski
     return query.documents_browse_facebook_ads(es, text=text, histogram=histogram, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate)
 
 #########################################################
-# calculate recipes
+# preview entities
 #########################################################
 
-@app.get("/data/calculate/recipe/contribution/", summary="Calculate Recipe and Produce Contributions", tags=["calculate"])
-def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query("none", regex="none|amount|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
-    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
+@app.get("/data/preview/committee/", summary="Preview Committees", tags=["preview"])
+def data_preview_committee(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
     elements = []
     if terms is not None or ids is not None:
+        with driver.session() as neo4j:
+            elements = neo4j.read_transaction(cypher.data_preview_committee, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+    return elements
+
+@app.get("/data/preview/employer/", summary="Preview Employers", tags=["preview"])
+def data_preview_employer(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        with driver.session() as neo4j:
+            elements = neo4j.read_transaction(cypher.data_preview_employer, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+    return elements
+
+@app.get("/data/preview/job/", summary="Preview Jobs", tags=["preview"])
+def data_preview_job(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        with driver.session() as neo4j:
+            elements = neo4j.read_transaction(cypher.data_preview_job, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+    return elements
+
+@app.get("/data/preview/topic/", summary="Preview Topics", tags=["preview"])
+def data_preview_topic(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        for term in terms:
+            elements.append({
+                "term": term
+            })
+        for id in ids:
+            elements.append({
+                "id": id
+            })
+    return elements
+
+#########################################################
+# calculate recipes
+#########################################################
+
+@app.get("/data/calculate/recipe/contribution/", summary="Calculate Recipe and Produce Contributions", tags=["calculate"])
+def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query("none", regex="none|amount|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
+    # grab elements
+    elements = []
+    if terms is not None or ids is not None:
+        mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         if template == "ReqQ":
             # Find contributions from List A
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_ReqQ, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_contribution("ReqQ", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "m4YC":
-            # Find contributions from donors associated with List A
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_m4YC, terms=terms, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
+            # Find contributions from donors employed by List A
+            return query.data_calculate_recipe_contribution("m4YC", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "7v4P":
             # Find contributions from donors who work as List A
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_7v4P, terms=terms, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_contribution("7v4P", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "T5xv":
             # Find contributions from donors who work as List A for List B
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_T5xv, terms=terms, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_contribution("T5xv", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "Bs5W":
-            # Find contributions from donors associated with List A to List B
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_Bs5W, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
+            # Find contributions from donors employed by List A to List B
+            return query.data_calculate_recipe_contribution("Bs5W", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "6peF":
             # Find contributions from donors who work as List A to List B
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_6peF, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_contribution("6peF", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "F2mS":
             # Find contributions from donors who work as List A for List B to List C
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_F2mS, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_contribution("F2mS", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "IQL2":
             # Find contributions from List A to List B
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_IQL2, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "jUBm":
-            # Find contributions from committees that contributed to List A to other recipients
-            with driver.session() as neo4j:
-                elements = neo4j.read_transaction(cypher.data_calculate_recipe_contribution_jUBm, terms=terms, ids=ids, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_contribution("IQL2", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+        elif template == "P3JF":
+            # Find contributions from List A that were refunded by the recipient
+            return query.data_calculate_recipe_contribution("P3JF", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
     return elements
 
 @app.get("/data/calculate/recipe/lobbying/", summary="Calculate Recipe and Produce Lobbying Activity", tags=["calculate"])
 def data_calculate_recipe_lobbying(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query("none", regex="none|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
-    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
+    clean = helpers.prepare_lists(lists, terms, ids, db)
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
@@ -838,64 +889,6 @@ def data_calculate_recipe_lobbying(lists: str = None, terms: str = None, ids: st
         elif template == "MJdb":
             # Find lobbying activity related to List A
             return query.data_calculate_recipe_lobbying("MJdb", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-    return elements
-
-@app.get("/data/calculate/recipe/committee/", summary="Calculate Recipe and Produce Committees", tags=["calculate"])
-def data_calculate_recipe_committee(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
-    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
-    terms = clean["terms"]
-    ids = clean["ids"]
-    # grab elements
-    elements = []
-    if terms is not None or ids is not None:
-        # Find committees in List A
-        with driver.session() as neo4j:
-            elements = neo4j.read_transaction(cypher.data_calculate_recipe_committee, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
-    return elements
-
-@app.get("/data/calculate/recipe/employer/", summary="Calculate Recipe and Produce Employers", tags=["calculate"])
-def data_calculate_recipe_employer(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
-    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
-    terms = clean["terms"]
-    ids = clean["ids"]
-    # grab elements
-    elements = []
-    if terms is not None or ids is not None:
-        # Find employers in List A
-        with driver.session() as neo4j:
-            elements = neo4j.read_transaction(cypher.data_calculate_recipe_employer, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
-    return elements
-
-@app.get("/data/calculate/recipe/job/", summary="Calculate Recipe and Produce Jobs", tags=["calculate"])
-def data_calculate_recipe_job(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
-    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
-    terms = clean["terms"]
-    ids = clean["ids"]
-    # grab elements
-    elements = []
-    if terms is not None or ids is not None:
-        # Find jobs in List A
-        with driver.session() as neo4j:
-            elements = neo4j.read_transaction(cypher.data_calculate_recipe_job, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
-    return elements
-
-@app.get("/data/calculate/recipe/topic/", summary="Calculate Recipe and Produce Topics", tags=["calculate"])
-def data_calculate_recipe_topic(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), count: bool = False, user: str = Depends(get_auth)):
-    clean = helpers.prepare_recipe_calculation(lists, terms, ids, db)
-    terms = clean["terms"]
-    ids = clean["ids"]
-    # grab elements
-    elements = []
-    if terms is not None or ids is not None:
-        # Return the topics
-        for term in terms:
-            elements.append({
-                "term": term
-            })
-        for id in ids:
-            elements.append({
-                "id": id
-            })
     return elements
 
 #########################################################
