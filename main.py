@@ -831,13 +831,13 @@ def data_calculate_recipe_lobbying(lists: str = None, terms: str = None, ids: st
         maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         if template == "kMER":
             # Find lobbying activity for lobbying done on behalf of List A
-            return query.data_calculate_recipe_lobbying("kMER", es, terms=terms, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_lobbying("kMER", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "wLvp":
             # Find lobbying activity for lobbying done by List A
-            return query.data_calculate_recipe_lobbying("wLvp", es, terms=terms, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_lobbying("wLvp", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
         elif template == "MJdb":
             # Find lobbying activity related to List A
-            return query.data_calculate_recipe_lobbying("MJdb", es, terms=terms, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+            return query.data_calculate_recipe_lobbying("MJdb", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
     return elements
 
 @app.get("/data/calculate/recipe/committee/", summary="Calculate Recipe and Produce Committees", tags=["calculate"])
@@ -891,6 +891,10 @@ def data_calculate_recipe_topic(lists: str = None, terms: str = None, ids: str =
         for term in terms:
             elements.append({
                 "term": term
+            })
+        for id in ids:
+            elements.append({
+                "id": id
             })
     return elements
 
