@@ -781,8 +781,7 @@ def data_preview_committee(lists: str = None, terms: str = None, ids: str = None
     # grab elements
     elements = []
     if terms is not None or ids is not None:
-        with driver.session() as neo4j:
-            elements = neo4j.read_transaction(cypher.data_preview_committee, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+        return query.data_preview_committee(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
     return elements
 
 @app.get("/data/preview/employer/", summary="Preview Employers", tags=["preview"])
@@ -793,8 +792,7 @@ def data_preview_employer(lists: str = None, terms: str = None, ids: str = None,
     # grab elements
     elements = []
     if terms is not None or ids is not None:
-        with driver.session() as neo4j:
-            elements = neo4j.read_transaction(cypher.data_preview_employer, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+        return query.data_preview_employer(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
     return elements
 
 @app.get("/data/preview/job/", summary="Preview Jobs", tags=["preview"])
@@ -805,8 +803,7 @@ def data_preview_job(lists: str = None, terms: str = None, ids: str = None, skip
     # grab elements
     elements = []
     if terms is not None or ids is not None:
-        with driver.session() as neo4j:
-            elements = neo4j.read_transaction(cypher.data_preview_job, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+        return query.data_preview_job(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
     return elements
 
 @app.get("/data/preview/topic/", summary="Preview Topics", tags=["preview"])

@@ -195,6 +195,128 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
         except:
             return []
 
+def data_preview_committee(es, terms, ids, skip, limit, count):
+    q = {
+        "query": {
+            "bool": {
+                "should": [],
+                "minimum_should_match": 1
+            }
+        }
+    }
+    if terms is not None:
+        for term in terms:
+            q["query"]["bool"]["should"].append({
+                "match": {
+                    "obj.cmte_nm": term
+                }
+            })
+    if ids is not None:
+        for id in ids:
+            q["query"]["bool"]["should"].append({
+                "match": {
+                    "obj.cmte_id": id
+                }
+            })
+    if count is True:
+        response = es.count(index="federal_fec_committees", body=q)
+        try:
+            return [{"count": response["count"]}]
+        except:
+            return []
+    else:
+        q["from"] = skip
+        q["size"] = limit
+        response = es.search(index="federal_fec_committees", body=q, filter_path=["hits.hits._source.obj.cmte_id", "hits.hits._source.obj.cmte_nm"])
+        try:
+            elements = []
+            for hit in response["hits"]["hits"]:
+                elements.append({
+                    "cmte_id": hit["_source"]["obj"]["cmte_id"],
+                    "cmte_nm": hit["_source"]["obj"]["cmte_nm"]
+                })
+            return elements
+        except:
+            return []
+
+def data_preview_employer(es, terms, ids, skip, limit, count):
+    q = {
+        "query": {
+            "bool": {
+                "should": [],
+                "minimum_should_match": 1
+            }
+        },
+        "collapse": {
+            "field": "processed.source.donor.employer.keyword"
+        }
+    }
+    if terms is not None:
+        for term in terms:
+            q["query"]["bool"]["should"].append({
+                "match": {
+                    "processed.source.donor.employer": term
+                }
+            })
+    if count is True:
+        response = es.count(index="federal_fec_contributions", body=q)
+        try:
+            return [{"count": response["count"]}]
+        except:
+            return []
+    else:
+        q["from"] = skip
+        q["size"] = limit
+        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.processed.source.donor.employer"])
+        try:
+            elements = []
+            for hit in response["hits"]["hits"]:
+                elements.append({
+                    "name": hit["_source"]["processed"]["source"]["donor"]["employer"]
+                })
+            return elements
+        except:
+            return []
+
+def data_preview_job(es, terms, ids, skip, limit, count):
+    q = {
+        "query": {
+            "bool": {
+                "should": [],
+                "minimum_should_match": 1
+            }
+        },
+        "collapse": {
+            "field": "processed.source.donor.occupation.keyword"
+        }
+    }
+    if terms is not None:
+        for term in terms:
+            q["query"]["bool"]["should"].append({
+                "match": {
+                    "processed.source.donor.occupation": term
+                }
+            })
+    if count is True:
+        response = es.count(index="federal_fec_contributions", body=q)
+        try:
+            return [{"count": response["count"]}]
+        except:
+            return []
+    else:
+        q["from"] = skip
+        q["size"] = limit
+        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.processed.source.donor.occupation"])
+        try:
+            elements = []
+            for hit in response["hits"]["hits"]:
+                elements.append({
+                    "name": hit["_source"]["processed"]["source"]["donor"]["occupation"]
+                })
+            return elements
+        except:
+            return []
+
 def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count):
     q = {
         "query": {
