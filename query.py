@@ -28,7 +28,7 @@ def documents_browse_news_articles_source(es, domains, text, histogram, skip, li
     if len(domains) > 0:
         q["query"]["bool"]["must"].append({
             "terms": {
-                "source.url": domains
+                "extracted.source.url": domains
             }
         })
     if histogram is True:
@@ -47,7 +47,7 @@ def documents_browse_news_articles_source(es, domains, text, histogram, skip, li
         except:
             return []
     else:
-        response = es.search(index="news_articles", body=q, filter_path=["hits.hits._id", "hits.hits._source.extracted.title", "hits.hits._source.extracted.text", "hits.hits._source.extracted.date", "hits.hits._source.url"])
+        response = es.search(index="news_articles", body=q, filter_path=["hits.hits._id", "hits.hits._source.extracted.title", "hits.hits._source.extracted.text", "hits.hits._source.extracted.date", "hits.hits._source.extracted.url"])
         try:
             return response["hits"]["hits"]
         except:
