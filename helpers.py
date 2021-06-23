@@ -74,6 +74,26 @@ def prepare_lists(lists, terms, ids, db):
         "ids": ids
     }
 
+def clean_committees_names(name):
+    name = name.replace("COMMITTEE", "")
+    name = name.replace("POLITICAL", "")
+    name = name.replace("ACTION", "")
+    name = name.replace("CORPORATION", "")
+    name = name.replace("CORP", "")
+    name = name.replace("LLC", "")
+    name = name.replace("EMPLOYEES", "")
+    name = name.replace("EMPLOYEE", "")
+    name = name.replace("INC", "")
+    name = name.replace("PAC", "")
+    name = name.replace("FEDERAL", "")
+    name = name.split("- ")[0]
+    name = name.split("(")[0]
+    name = name.split(",")[0]
+    name = name.replace(".", "")
+    name = name.replace(" '", "")
+    name = name.replace("  ", " ")
+    return name
+
 def calc_affinity(count_a, count_b, count_both, count_total):
     support_a = count_a/count_total if count_total != 0 else 0
     support_b = count_b/count_total if count_total != 0 else 0

@@ -779,21 +779,29 @@ def data_preview_committee(lists: str = None, terms: str = None, ids: str = None
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
-    elements = []
     if terms is not None or ids is not None:
         return query.data_preview_committee(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
-    return elements
+    return []
 
-@app.get("/data/preview/employer/", summary="Preview Employers", tags=["preview"])
-def data_preview_employer(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+@app.get("/data/preview/organization/", summary="Preview Organizations", tags=["preview"])
+def data_preview_organization(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
     clean = helpers.prepare_lists(lists, terms, ids, db)
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
-    elements = []
     if terms is not None or ids is not None:
-        return query.data_preview_employer(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
-    return elements
+        return query.data_preview_organization(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+    return []
+
+@app.get("/data/preview/person/", summary="Preview People", tags=["preview"])
+def data_preview_person(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
+    # grab elements
+    if terms is not None or ids is not None:
+        return query.data_preview_person(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+    return []
 
 @app.get("/data/preview/job/", summary="Preview Jobs", tags=["preview"])
 def data_preview_job(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
@@ -801,10 +809,9 @@ def data_preview_job(lists: str = None, terms: str = None, ids: str = None, skip
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
-    elements = []
     if terms is not None or ids is not None:
         return query.data_preview_job(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
-    return elements
+    return []
 
 @app.get("/data/preview/topic/", summary="Preview Topics", tags=["preview"])
 def data_preview_topic(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
@@ -828,65 +835,64 @@ def data_preview_topic(lists: str = None, terms: str = None, ids: str = None, sk
 # calculate recipes
 #########################################################
 
-@app.get("/data/calculate/recipe/contribution/", summary="Calculate Recipe and Produce Contributions", tags=["calculate"])
-def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query("none", regex="none|amount|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
+@app.get("/data/calculate/recipe/ad/", summary="Calculate Recipe for Ads", tags=["calculate"])
+def data_calculate_recipe_ad(lists: str = None, terms: str = None, ids: str = None, template: str = Query(..., regex="D3WE|BuW8|N7Jk|P2HG|8HcR"), skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query(None, regex="amount"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
     clean = helpers.prepare_lists(lists, terms, ids, db)
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
-    elements = []
     if terms is not None or ids is not None:
         mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        if template == "ReqQ":
-            # Find contributions from List A
-            return query.data_calculate_recipe_contribution("ReqQ", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "m4YC":
-            # Find contributions from donors employed by List A
-            return query.data_calculate_recipe_contribution("m4YC", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "7v4P":
-            # Find contributions from donors who work as List A
-            return query.data_calculate_recipe_contribution("7v4P", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "T5xv":
-            # Find contributions from donors who work as List A for List B
-            return query.data_calculate_recipe_contribution("T5xv", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "Bs5W":
-            # Find contributions from donors employed by List A to List B
-            return query.data_calculate_recipe_contribution("Bs5W", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "6peF":
-            # Find contributions from donors who work as List A to List B
-            return query.data_calculate_recipe_contribution("6peF", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "F2mS":
-            # Find contributions from donors who work as List A for List B to List C
-            return query.data_calculate_recipe_contribution("F2mS", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "IQL2":
-            # Find contributions from List A to List B
-            return query.data_calculate_recipe_contribution("IQL2", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "P3JF":
-            # Find contributions from List A that were refunded by the recipient
-            return query.data_calculate_recipe_contribution("P3JF", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-    return elements
+        return query.data_calculate_recipe_ad(template, es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+    return []
 
-@app.get("/data/calculate/recipe/lobbying/", summary="Calculate Recipe and Produce Lobbying Activity", tags=["calculate"])
-def data_calculate_recipe_lobbying(lists: str = None, terms: str = None, ids: str = None, template: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query("none", regex="none|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
+@app.get("/data/calculate/recipe/contribution/", summary="Calculate Recipe for Contributions", tags=["calculate"])
+def data_calculate_recipe_contribution(lists: str = None, terms: str = None, ids: str = None, template: str = Query(..., regex="ReqQ|NcFz|m4YC|7v4P|T5xv|Bs5W|6peF|F2mS|IQL2|P3JF|VqHR"), skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query(None, regex="amount|date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
     clean = helpers.prepare_lists(lists, terms, ids, db)
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
-    elements = []
     if terms is not None or ids is not None:
         mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        if template == "kMER":
-            # Find lobbying activity for lobbying done on behalf of List A
-            return query.data_calculate_recipe_lobbying("kMER", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "wLvp":
-            # Find lobbying activity for lobbying done by List A
-            return query.data_calculate_recipe_lobbying("wLvp", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-        elif template == "MJdb":
-            # Find lobbying activity related to List A
-            return query.data_calculate_recipe_lobbying("MJdb", es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
-    return elements
+        return query.data_calculate_recipe_contribution(template, es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+    return []
+
+@app.get("/data/calculate/recipe/lobbying/", summary="Calculate Recipe for Lobbying Activity", tags=["calculate"])
+def data_calculate_recipe_lobbying(lists: str = None, terms: str = None, ids: str = None, template: str = Query(..., regex="kMER|wLvp|MJdb|WGb3|PjyR|MK93|3Nrt|V5Gh|Q23x"), skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query(None, regex="date"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
+    # grab elements
+    if terms is not None or ids is not None:
+        mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        if template in ["kMER", "wLvp", "MJdb"]:
+            return query.data_calculate_recipe_lobbying_disclosures(template, es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+        elif template in ["WGb3", "PjyR", "MK93", "3Nrt", "V5Gh", "Q23x"]:
+            if template in ["WGb3", "3Nrt"]:
+                template2 = "kMER"
+            elif template in ["PjyR", "V5Gh"]:
+                template2 = "wLvp"
+            elif template in ["MK93", "Q23x"]:
+                template2 = "MJdb"
+            disclosures = query.data_calculate_recipe_lobbying_disclosures(template2, es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=False, concise=True)
+            ids[0] = [d["registrant_senate_id"] for d in disclosures]
+            return query.data_calculate_recipe_lobbying_contributions(template, es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+    return []
+
+@app.get("/data/calculate/recipe/990/", summary="Calculate Recipe for IRS 990s", tags=["calculate"])
+def data_calculate_recipe_990(lists: str = None, terms: str = None, ids: str = None, template: str = Query(..., regex="K23r|GCv2|P34n"), skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), orderby: str = Query(None, regex="amount"), orderdir: str = Query("desc", regex="asc|desc"), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
+    # grab elements
+    if terms is not None or ids is not None:
+        mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        return query.data_calculate_recipe_990(template, es, terms=terms, ids=ids, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate, orderby=orderby, orderdir=orderdir, count=count)
+    return []
 
 #########################################################
 # analyze elements
