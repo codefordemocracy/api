@@ -13,34 +13,24 @@ elastic_password_api = secrets.access_secret_version(request={"name": "projects/
 neo4j_connection = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/neo4j_connection/versions/1"}).payload.data.decode()
 neo4j_username_api = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/neo4j_username_api/versions/1"}).payload.data.decode()
 neo4j_password_api = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/neo4j_password_api/versions/1"}).payload.data.decode()
-explore_client_id = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_explore_client_id/versions/1"}).payload.data.decode()
-explore_client_secret = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_explore_client_secret/versions/1"}).payload.data.decode()
-watchdog_client_id = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_watchdog_client_id/versions/1"}).payload.data.decode()
-watchdog_client_secret = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_watchdog_client_secret/versions/1"}).payload.data.decode()
-calc_client_id = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_calc_client_id/versions/1"}).payload.data.decode()
-calc_client_secret = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_calc_client_secret/versions/1"}).payload.data.decode()
 service_url = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_service_url/versions/1"}).payload.data.decode()
+clients = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_clients/versions/1"}).payload.data.decode().split(",")
 
-# helper function to check for pairs of credentials
-def correct(username, password, correct_username, correct_password):
-    if compare_digest(username, correct_username) and compare_digest(password, correct_password):
-        return True
-    return False
+# generate pairs of keys
+pairs = []
+for client in clients:
+    client_id = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_" + client + "_client_id/versions/1"}).payload.data.decode()
+    client_secret = secrets.access_secret_version(request={"name": "projects/952416783871/secrets/api_" + client + "_client_secret/versions/1"}).payload.data.decode()
+    pairs.append({"client": client, "client_id": client_id, "client_secret": client_secret})
 
 # checks the credentials against valid ones
 def authenticate(username, password):
-    if correct(username, password, watchdog_client_id, watchdog_client_secret):
-        return {"user": "watchdog", "metered": False, "calls": 0}
-    elif correct(username, password, explore_client_id, explore_client_secret):
-        return {"user": "explore", "metered": False, "calls": 0}
-    elif correct(username, password, calc_client_id, calc_client_secret):
-        return {"user": "calc", "metered": False, "calls": 0}
-    else:
-        auth_req = google.auth.transport.requests.Request()
-        id_token = google.oauth2.id_token.fetch_id_token(auth_req, service_url)
-        response = requests.post(service_url, json={"client_id": username, "client_secret": password}, headers={'Authorization': 'Bearer ' + id_token})
-        if response.status_code == 200:
-            return json.loads(response.text)
-        else:
-            return False
+    for pair in pairs:
+        if compare_digest(username, pair["client_id"]) and compare_digest(password, pair["client_secret"]):
+            return {"user": pair["client"], "metered": False, "calls": 0}
+    auth_req = google.auth.transport.requests.Request()
+    id_token = google.oauth2.id_token.fetch_id_token(auth_req, service_url)
+    response = requests.post(service_url, json={"client_id": username, "client_secret": password}, headers={'Authorization': 'Bearer ' + id_token})
+    if response.status_code == 200:
+        return json.loads(response.text)
     return False
