@@ -206,43 +206,6 @@ def graph_traverse_neighbors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), 
         with driver.session() as neo4j:
             return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_neighbors, ids=ids, labels=labels, skip=skip, limit=limit))
 
-
-# Uncover contributors
-
-@app.get(
-    "/graph/traverse/uncoverdonors/",
-    summary="Uncover contributors to nodes",
-    tags=["uncover"])
-def graph_uncover_donors(
-        ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"),
-        labels: str = None,
-        minTransactionAmt: int = Query(None, ge=1, le=999999999),
-        limit: int = Query(None, ge=1, le=999999999),
-        user: str = Depends(get_auth)):
-    try:
-        ids = [int(id) for id in ids.split(",")]
-    except:
-        ids = None
-
-    try:
-        labels = ["OR d:" + label for label in labels.split(",")]
-        labels[0] = labels[0].replace("OR ", "")
-        labels = (" ").join(labels)
-    except:
-        labels = None
-
-    if ids is not None:
-        with driver.session() as neo4j:
-            return helpers.format_graph(
-                neo4j.read_transaction(
-                    cypher.graph_uncover_donors,
-                    ids=ids,
-                    labels=labels,
-                    min_transaction_amt=minTransactionAmt,
-                    limit=limit
-                    ))
-
-
 # associations - candidates
 
 @app.get("/graph/traverse/associations/candidate/committee/", summary="Traverse Graph and Find Associations Between Candidates and Committees", tags=["traverse"])
@@ -650,6 +613,28 @@ def graph_traverse_relationships_contribution_recipient(ids: str = Query(..., re
     if ids is not None:
         with driver.session() as neo4j:
             return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_relationships_contribution_recipient, ids=ids, skip=skip, limit=limit))
+
+#########################################################
+# uncover graph insights
+#########################################################
+
+# Uncover contributors
+
+@app.get("/graph/uncover/donors/", summary="Uncover contributors to nodes", tags=["uncover"])
+def graph_uncover_donors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), labels: str = None, minTransactionAmt: int = Query(None, ge=1, le=999999999), limit: int = Query(None, ge=1, le=999999999), user: str = Depends(get_auth)):
+    try:
+        ids = [int(id) for id in ids.split(",")]
+    except:
+        ids = None
+    try:
+        labels = ["OR d:" + label for label in labels.split(",")]
+        labels[0] = labels[0].replace("OR ", "")
+        labels = (" ").join(labels)
+    except:
+        labels = None
+    if ids is not None:
+        with driver.session() as neo4j:
+            return helpers.format_graph(neo4j.read_transaction(cypher.graph_uncover_donors, ids=ids, labels=labels, min_transaction_amt=minTransactionAmt, limit=limit))
 
 #########################################################
 # explore elasticsearch
