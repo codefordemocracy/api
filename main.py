@@ -22,7 +22,12 @@ import helpers
 # initialize app
 app = FastAPI(
     title="Code for Democracy",
-    description="Access the raw data behind Code for Democracy's automations using this API.",
+    description="""This API helps you access the data behind Code for Democracy's workflows. Use it to explore documents, audit analyses, or build your own apps.
+    <dl>
+        <dt>[Read Documentation](https://docs.codefordemocracy.org/api/)</dt>
+        <dt>[View on GitHub](https://github.com/codefordemocracy/api/)</dt>
+    </dl>
+    """,
     version="0.0.1",
     docs_url="/view/endpoints/",
     redoc_url=None,
@@ -31,7 +36,6 @@ app = FastAPI(
 security = HTTPBasic()
 
 # set up static files
-app.mount("/static/", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # connect to neo4j

@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 
     <title>API | Code for Democracy</title>
-    <link rel="stylesheet" href="//assets.codefordemocracy.org/css/style.css" />
-    <link rel="stylesheet" href="{{ url_for('static', path='css/app.css') }}" />
+    <link rel="stylesheet" href="//assets.codefordemocracy.org/css/cfd.css" />
     <link rel="icon" type="image/png" href="//assets.codefordemocracy.org/img/favicon.png" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -22,16 +21,11 @@
   </head>
   <body>
 
-    <div class="container-fluid py-3 h-100">
-      <div class="row pb-3 h-100">
-        <div class="col-12 my-auto d-flex justify-content-center">
-          <div class="d-flex flex-column" id="splash">
-            <a href="https://codefordemocracy.org" target="_blank" class="img-responsive mb-3"><img src="//assets.codefordemocracy.org/img/logo.png" /></a>
-            <p class="mb-3">Get started with our API by logging into or creating a Code for Democracy account.<p>
-            <a class="btn btn-sm btn-block btn-primary" href="https://account.codefordemocracy.org">Get Started</a>
-            <a class="btn btn-sm btn-block btn-gray" href="https://docs.codefordemocracy.org/data/api">View Documentation</a>
-          </div>
-        </div>
+    <div class="flex h-screen pb-5 px-5">
+      <div class="max-w-xs m-auto form-full form-md">
+        <a href="https://codefordemocracy.org" target="_blank" class="block mb-7"><img src="//assets.codefordemocracy.org/img/logo.png" /></a>
+        <a class="btn btn-primary" href="https://docs.codefordemocracy.org/data/api/">Read Documentation</a>
+        <a class="btn btn-gray" href="/view/endpoints">View Endpoints</a>
       </div>
     </div>
 
