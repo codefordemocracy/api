@@ -153,14 +153,14 @@ def graph_search_payees(name: str = None, context: bool = False, skip: int = Que
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_payees, name=name, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
 
 @app.get("/graph/search/tweeters/", summary="Search for Tweeters", tags=["search"])
-def graph_search_tweeters(name: str = None, screen_name: str = None, candidate: bool = False, cand_pty_affiliation: str = Query(None, min_length=3, max_length=3), cand_election_yr: int = Query(None, ge=1990, le=datetime.datetime.now().year), context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
+def graph_search_tweeters(name: str = None, username: str = None, candidate: bool = False, cand_pty_affiliation: str = Query(None, min_length=3, max_length=3), cand_election_yr: int = Query(None, ge=1990, le=datetime.datetime.now().year), context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
     if name is not None:
         name = "\""+name+"\""
-    if screen_name is not None:
-        screen_name = screen_name[1:] if screen_name.startswith("@") else screen_name
-        screen_name = "\""+screen_name+"\""
+    if username is not None:
+        username = username[1:] if username.startswith("@") else username
+        username = "\""+username+"\""
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_tweeters, name=name, screen_name=screen_name, candidate=candidate, cand_pty_affiliation=cand_pty_affiliation, cand_election_yr=cand_election_yr, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_tweeters, name=name, username=username, candidate=candidate, cand_pty_affiliation=cand_pty_affiliation, cand_election_yr=cand_election_yr, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
 
 @app.get("/graph/search/sources/", summary="Search for Sources", tags=["search"])
 def graph_search_sources(domain: str = None, bias_score: str = None, factually_questionable_flag: int = Query(None, ge=0, le=1), conspiracy_flag: int = Query(None, ge=0, le=1), hate_group_flag: int = Query(None, ge=0, le=1), propaganda_flag: int = Query(None, ge=0, le=1), satire_flag: int = Query(None, ge=0, le=1), context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31), user: str = Depends(get_auth)):
@@ -739,7 +739,7 @@ def documents_browse_twitter_tweets_candidate_dem(text: str = None, cand_electio
     mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
     maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
     with driver.session() as neo4j:
-        tweeters = neo4j.read_transaction(cypher.graph_search_tweeters, name=None, screen_name=None, candidate=True, cand_pty_affiliation="DEM", cand_election_yr=cand_election_yr, context=False, skip=0, limit=50000, min_year=0, max_year=0, min_month=0, max_month=0, min_day=0, max_day=0, concise=True)
+        tweeters = neo4j.read_transaction(cypher.graph_search_tweeters, name=None, username=None, candidate=True, cand_pty_affiliation="DEM", cand_election_yr=cand_election_yr, context=False, skip=0, limit=50000, min_year=0, max_year=0, min_month=0, max_month=0, min_day=0, max_day=0, concise=True)
     user_ids = [i["user_id"] for i in tweeters]
     return query.documents_browse_twitter_tweets_user(es, user_ids=user_ids, text=text, histogram=histogram, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate)
 
@@ -748,7 +748,7 @@ def documents_browse_twitter_tweets_candidate_rep(text: str = None, cand_electio
     mindate = datetime.datetime(min_year, min_month, min_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
     maxdate = datetime.datetime(max_year, max_month, max_day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
     with driver.session() as neo4j:
-        tweeters = neo4j.read_transaction(cypher.graph_search_tweeters, name=None, screen_name=None, candidate=True, cand_pty_affiliation="REP", cand_election_yr=cand_election_yr, context=False, skip=0, limit=50000, min_year=0, max_year=0, min_month=0, max_month=0, min_day=0, max_day=0, concise=True)
+        tweeters = neo4j.read_transaction(cypher.graph_search_tweeters, name=None, username=None, candidate=True, cand_pty_affiliation="REP", cand_election_yr=cand_election_yr, context=False, skip=0, limit=50000, min_year=0, max_year=0, min_month=0, max_month=0, min_day=0, max_day=0, concise=True)
     user_ids = [i["user_id"] for i in tweeters]
     return query.documents_browse_twitter_tweets_user(es, user_ids=user_ids, text=text, histogram=histogram, skip=skip, limit=limit, mindate=mindate, maxdate=maxdate)
 

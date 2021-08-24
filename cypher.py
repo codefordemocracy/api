@@ -14,6 +14,8 @@ def graph_find_elements_id(tx, nodes, edges):
 def graph_find_elements_uuid(tx, nodes, edges):
     c = "OPTIONAL MATCH (ad:Ad) WHERE ad.uuid in $nodes "
     c+= "WITH collect(ad) AS nodes "
+    c = "OPTIONAL MATCH (annotation:Annotation) WHERE annotation.uuid in $nodes "
+    c+= "WITH collect(annotation) AS nodes "
     c+= "OPTIONAL MATCH (buyer:Buyer) WHERE buyer.uuid in $nodes "
     c+= "WITH collect(buyer) + nodes AS nodes "
     c+= "OPTIONAL MATCH (candidate:Candidate) WHERE candidate.uuid in $nodes "
@@ -50,8 +52,6 @@ def graph_find_elements_uuid(tx, nodes, edges):
     c+= "WITH collect(payee) + nodes AS nodes "
     c+= "OPTIONAL MATCH (race:Race) WHERE race.uuid in $nodes "
     c+= "WITH collect(race) + nodes AS nodes "
-    c+= "OPTIONAL MATCH (retweet:Retweet) WHERE retweet.uuid in $nodes "
-    c+= "WITH collect(retweet) + nodes AS nodes "
     c+= "OPTIONAL MATCH (source:Source) WHERE source.uuid in $nodes "
     c+= "WITH collect(source) + nodes AS nodes "
     c+= "OPTIONAL MATCH (state:State) WHERE state.uuid in $nodes "
@@ -228,22 +228,22 @@ def graph_search_payees(tx, name, context, skip, limit, min_year, max_year, min_
     else:
         return response.graph()
 
-def graph_search_tweeters(tx, name, screen_name, candidate, cand_pty_affiliation, cand_election_yr, context, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, concise):
+def graph_search_tweeters(tx, name, username, candidate, cand_pty_affiliation, cand_election_yr, context, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, concise):
     c = ""
     if name is not None:
         c+= "CALL db.index.fulltext.queryNodes('tweeter_name', $name) "
         c+= "YIELD node, score "
         c+= "WHERE score > 2 "
         c+= "WITH collect(node) AS nodes "
-    if screen_name is not None:
-        c+= "CALL db.index.fulltext.queryNodes('tweeter_screen_name', $screen_name) "
+    if username is not None:
+        c+= "CALL db.index.fulltext.queryNodes('tweeter_username', $username) "
         c+= "YIELD node, score "
         c+= "WHERE score > 2 "
         if name is not None:
             c+= "WITH apoc.coll.intersection(nodes, collect(node)) AS nodes "
         else:
             c+= "WITH collect(node) AS nodes "
-    if name is not None or screen_name is not None:
+    if name is not None or username is not None:
         c+= "UNWIND nodes AS a "
     if candidate is True:
         c+= "MATCH (a)<-[:ASSOCIATED_WITH]-(c) "
@@ -266,7 +266,7 @@ def graph_search_tweeters(tx, name, screen_name, candidate, cand_pty_affiliation
         c+= "RETURN p "
     c+= "SKIP $skip "
     c+= "LIMIT $limit"
-    response = tx.run(c, name=name, screen_name=screen_name, cand_pty_affiliation=cand_pty_affiliation, cand_election_yr=cand_election_yr, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+    response = tx.run(c, name=name, username=username, cand_pty_affiliation=cand_pty_affiliation, cand_election_yr=cand_election_yr, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
     if concise is True:
         return response.data()
     else:

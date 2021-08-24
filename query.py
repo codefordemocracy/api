@@ -63,7 +63,7 @@ def documents_browse_twitter_tweets_user(es, user_ids, text, histogram, skip, li
                 "must": [
                     {
                         "range": {
-                            "obj.created_at": {
+                            "obj.tweet.created_at": {
                                 "gte": mindate,
                                 "lte": maxdate
                             }
@@ -76,32 +76,32 @@ def documents_browse_twitter_tweets_user(es, user_ids, text, histogram, skip, li
     if text is not None:
         q["query"]["bool"]["must"].append({
             "match": {
-                "obj.text": text
+                "obj.tweet.text": text
             }
         })
     if len(user_ids) > 0:
         q["query"]["bool"]["must"].append({
             "terms": {
-                "user_id": user_ids
+                "obj.author.id": user_ids
             }
         })
     if histogram is True:
         q["aggs"] = {
             "dates": {
                 "date_histogram": {
-                    "field": "obj.created_at",
+                    "field": "obj.tweet.created_at",
                     "calendar_interval": "day",
                     "time_zone": "America/New_York"
                 }
             }
         }
-        response = es.search(index="twitter_tweets,tweets_old", body=q, filter_path=["aggregations"])
+        response = es.search(index="twitter_tweets_new", body=q, filter_path=["aggregations"])
         try:
             return response["aggregations"]["dates"]["buckets"]
         except:
             return []
     else:
-        response = es.search(index="twitter_tweets,tweets_old", body=q, filter_path=["hits.hits._source.user_id", "hits.hits._source.user_screen_name", "hits.hits._source.obj.id", "hits.hits._source.obj.created_at", "hits.hits._source.obj.entities.hashtags"])
+        response = es.search(index="twitter_tweets_new", body=q, filter_path=["hits.hits._source.obj.author.id", "hits.hits._source.obj.author.username", "hits.hits._source.obj.tweet.id", "hits.hits._source.obj.tweet.created_at", "hits.hits._source.obj.tweet.entities.hashtags"])
         try:
             return response["hits"]["hits"]
         except:
@@ -190,7 +190,7 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
         except:
             return []
     else:
-        response = es.search(index="facebook_ads", body=q, filter_path=["hits.hits._source.type", "hits.hits._source.obj.id", "hits.hits._source.obj.page_id", "hits.hits._source.obj.page_name", "hits.hits._source.obj.funding_entity", "hits.hits._source.obj.permalink", "hits.hits._source.obj.ad_creation_time", "hits.hits._source.obj.created"])
+        response = es.search(index="facebook_ads", body=q, filter_path=["hits.hits._source.obj.id", "hits.hits._source.obj.page_id", "hits.hits._source.obj.page_name", "hits.hits._source.obj.funding_entity", "hits.hits._source.obj.permalink", "hits.hits._source.obj.ad_creation_time", "hits.hits._source.obj.created"])
         try:
             return response["hits"]["hits"]
         except:
@@ -209,14 +209,14 @@ def data_preview_committee(es, terms, ids, skip, limit, count):
         for term in terms:
             q["query"]["bool"]["should"].append({
                 "match": {
-                    "obj.cmte_nm": term
+                    "row.cmte_nm": term
                 }
             })
     if ids is not None:
         for id in ids:
             q["query"]["bool"]["should"].append({
                 "match": {
-                    "obj.cmte_id": id
+                    "row.cmte_id": id
                 }
             })
     if count is True:
@@ -228,13 +228,13 @@ def data_preview_committee(es, terms, ids, skip, limit, count):
     else:
         q["from"] = skip
         q["size"] = limit
-        response = es.search(index="federal_fec_committees", body=q, filter_path=["hits.hits._source.obj.cmte_id", "hits.hits._source.obj.cmte_nm"])
+        response = es.search(index="federal_fec_committees", body=q, filter_path=["hits.hits._source.row.cmte_id", "hits.hits._source.row.cmte_nm"])
         try:
             elements = []
             for hit in response["hits"]["hits"]:
                 elements.append({
-                    "cmte_id": hit["_source"]["obj"]["cmte_id"],
-                    "cmte_nm": hit["_source"]["obj"]["cmte_nm"]
+                    "cmte_id": hit["_source"]["row"]["cmte_id"],
+                    "cmte_nm": hit["_source"]["row"]["cmte_nm"]
                 })
             return elements
         except:
@@ -249,14 +249,14 @@ def data_preview_organization(es, terms, ids, skip, limit, count):
             }
         },
         "collapse": {
-            "field": "processed.source.donor.employer.keyword"
+            "field": "row.source.donor.employer.keyword"
         }
     }
     if terms is not None:
         for term in terms:
             q["query"]["bool"]["should"].append({
                 "match": {
-                    "processed.source.donor.employer": term
+                    "row.source.donor.employer": term
                 }
             })
     if count is True:
@@ -268,12 +268,12 @@ def data_preview_organization(es, terms, ids, skip, limit, count):
     else:
         q["from"] = skip
         q["size"] = limit
-        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.processed.source.donor.employer"])
+        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.row.source.donor.employer"])
         try:
             elements = []
             for hit in response["hits"]["hits"]:
                 elements.append({
-                    "name": hit["_source"]["processed"]["source"]["donor"]["employer"]
+                    "name": hit["_source"]["row"]["source"]["donor"]["employer"]
                 })
             return elements
         except:
@@ -330,14 +330,14 @@ def data_preview_job(es, terms, ids, skip, limit, count):
             }
         },
         "collapse": {
-            "field": "processed.source.donor.occupation.keyword"
+            "field": "row.source.donor.occupation.keyword"
         }
     }
     if terms is not None:
         for term in terms:
             q["query"]["bool"]["should"].append({
                 "match": {
-                    "processed.source.donor.occupation": term
+                    "row.source.donor.occupation": term
                 }
             })
     if count is True:
@@ -349,12 +349,12 @@ def data_preview_job(es, terms, ids, skip, limit, count):
     else:
         q["from"] = skip
         q["size"] = limit
-        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.processed.source.donor.occupation"])
+        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.row.source.donor.occupation"])
         try:
             elements = []
             for hit in response["hits"]["hits"]:
                 elements.append({
-                    "name": hit["_source"]["processed"]["source"]["donor"]["occupation"]
+                    "name": hit["_source"]["row"]["source"]["donor"]["occupation"]
                 })
             return elements
         except:
@@ -492,7 +492,7 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                 "must": [
                     {
                         "range": {
-                            "processed.transaction_dt": {
+                            "processed.date": {
                                 "gte": mindate,
                                 "lte": maxdate
                             }
@@ -504,12 +504,12 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                         "must_not": [
                             {
                                 "match": {
-                                    "processed.target.committee.cmte_id": "C00401224" # actblue
+                                    "row.target.committee.cmte_id": "C00401224" # actblue
                                 }
                             },
                             {
                                 "match": {
-                                    "processed.target.committee.cmte_id": "C00694323" # winred
+                                    "row.target.committee.cmte_id": "C00694323" # winred
                                 }
                             }
                         ]
@@ -523,7 +523,7 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
         if template in ["P3JF"]:
             q["query"]["bool"]["must"].append({
                 "range": {
-                    "processed.transaction_amt": {
+                    "row.transaction_amt": {
                         "lt": 0
                     }
                 }
@@ -541,7 +541,7 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                     if template in ["ReqQ", "IQL2", "P3JF"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.source.committee.cmte_nm": term
+                                "row.source.committee.cmte_nm": term
                             }
                         })
                     elif template in ["NcFz"]:
@@ -556,19 +556,19 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                     elif template in ["m4YC", "Bs5W"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.source.donor.employer": term
+                                "row.source.donor.employer": term
                             }
                         })
                     elif template in ["7v4P", "T5xv", "6peF", "F2mS"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.source.donor.occupation": term
+                                "row.source.donor.occupation": term
                             }
                         })
                     elif template in ["VqHR"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.target.committee.cmte_nm": term
+                                "row.target.committee.cmte_nm": term
                             }
                         })
         if len(ids) > 0:
@@ -577,13 +577,13 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                     if template in ["ReqQ", "IQL2", "P3JF"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.source.committee.cmte_id": id
+                                "row.source.committee.cmte_id": id
                             }
                         })
                     elif template in ["VqHR"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.target.committee.cmte_id": id
+                                "row.target.committee.cmte_id": id
                             }
                         })
         q["query"]["bool"]["must"].append(subquery)
@@ -600,13 +600,13 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                     if template in ["T5xv", "F2mS"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.source.donor.employer": term
+                                "row.source.donor.employer": term
                             }
                         })
                     elif template in ["Bs5W", "6peF", "IQL2"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.target.committee.cmte_nm": term
+                                "row.target.committee.cmte_nm": term
                             }
                         })
         if len(ids) > 1:
@@ -615,13 +615,13 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                     if template in ["ReqQ"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.source.committee.cmte_id": id
+                                "row.source.committee.cmte_id": id
                             }
                         })
                     elif template in ["Bs5W", "6peF", "IQL2"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.target.committee.cmte_id": id
+                                "row.target.committee.cmte_id": id
                             }
                         })
         q["query"]["bool"]["must"].append(subquery)
@@ -638,7 +638,7 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                     if template in ["F2mS"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.target.committee.cmte_nm": term
+                                "row.target.committee.cmte_nm": term
                             }
                         })
         if len(ids) > 2:
@@ -647,17 +647,17 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                     if template in ["F2mS"]:
                         subquery["bool"]["should"].append({
                             "match": {
-                                "processed.target.committee.cmte_id": id
+                                "row.target.committee.cmte_id": id
                             }
                         })
         q["query"]["bool"]["must"].append(subquery)
     if orderby == "date":
         q["sort"] = {
-            "processed.transaction_dt": {"order": orderdir},
+            "processed.date": {"order": orderdir},
         }
     elif orderby == "amount":
         q["sort"] = {
-            "processed.transaction_amt": {"order": orderdir},
+            "row.transaction_amt": {"order": orderdir},
         }
     if count is True:
         response = es.count(index="federal_fec_contributions", body=q)
@@ -671,34 +671,34 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
         response = es.search(
             index="federal_fec_contributions",
             body=q,
-            filter_path=["hits.hits._source.processed"]
+            filter_path=["hits.hits._source.processed", "hits.hits._source.row"]
         )
         try:
             elements = []
             for hit in response["hits"]["hits"]:
                 if template in ["VqHR", "ReqQ", "NcFz", "m4YC", "7v4P", "T5xv", "Bs5W", "6peF", "F2mS", "IQL2"]:
                     row = {
-                        "recipient_cmte_id": hit["_source"]["processed"]["target"]["committee"]["cmte_id"],
-                        "recipient_cmte_nm": hit["_source"]["processed"]["target"]["committee"]["cmte_nm"],
-                        "date": hit["_source"]["processed"]["transaction_dt"][:10],
-                        "transaction_amt": hit["_source"]["processed"]["transaction_amt"]
+                        "recipient_cmte_id": hit["_source"]["row"]["target"]["committee"]["cmte_id"],
+                        "recipient_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
+                        "date": hit["_source"]["processed"]["date"][:10],
+                        "transaction_amt": hit["_source"]["row"]["transaction_amt"]
                     }
-                    if "committee" in hit["_source"]["processed"]["source"]:
-                        row["contributor_cmte_id"] = hit["_source"]["processed"]["source"]["committee"]["cmte_id"]
-                        row["contributor_cmte_nm"] = hit["_source"]["processed"]["source"]["committee"]["cmte_nm"]
-                    elif "donor" in hit["_source"]["processed"]["source"]:
+                    if "committee" in hit["_source"]["row"]["source"]:
+                        row["contributor_cmte_id"] = hit["_source"]["row"]["source"]["committee"]["cmte_id"]
+                        row["contributor_cmte_nm"] = hit["_source"]["row"]["source"]["committee"]["cmte_nm"]
+                    elif "donor" in hit["_source"]["row"]["source"]:
                         row["donor_name"] = hit["_source"]["processed"]["source"]["donor"]["name"]
-                        row["donor_zip_code"] = hit["_source"]["processed"]["source"]["donor"]["zip_code"]
-                        row["donor_employer"] = hit["_source"]["processed"]["source"]["donor"]["employer"]
-                        row["donor_occupation"] = hit["_source"]["processed"]["source"]["donor"]["occupation"]
+                        row["donor_zip_code"] = hit["_source"]["row"]["source"]["donor"]["zip_code"]
+                        row["donor_employer"] = hit["_source"]["row"]["source"]["donor"]["employer"]
+                        row["donor_occupation"] = hit["_source"]["row"]["source"]["donor"]["occupation"]
                 elif template in ["P3JF"]:
                     row = {
-                        "contributor_cmte_id": hit["_source"]["processed"]["source"]["committee"]["cmte_id"],
-                        "contributor_cmte_nm": hit["_source"]["processed"]["source"]["committee"]["cmte_nm"],
-                        "refunding_cmte_id": hit["_source"]["processed"]["target"]["committee"]["cmte_id"],
-                        "refunding_cmte_nm": hit["_source"]["processed"]["target"]["committee"]["cmte_nm"],
-                        "date": hit["_source"]["processed"]["transaction_dt"][:10],
-                        "transaction_amt": hit["_source"]["processed"]["transaction_amt"]
+                        "contributor_cmte_id": hit["_source"]["row"]["source"]["committee"]["cmte_id"],
+                        "contributor_cmte_nm": hit["_source"]["row"]["source"]["committee"]["cmte_nm"],
+                        "refunding_cmte_id": hit["_source"]["row"]["target"]["committee"]["cmte_id"],
+                        "refunding_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
+                        "date": hit["_source"]["processed"]["date"][:10],
+                        "transaction_amt": hit["_source"]["row"]["transaction_amt"]
                     }
                 elements.append(row)
             return elements
@@ -893,7 +893,7 @@ def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, ma
                 "must": [
                     {
                         "range": {
-                            "obj.index.sub_date": {
+                            "row.sub_date": {
                                 "gte": mindate,
                                 "lte": maxdate
                             }
@@ -937,7 +937,7 @@ def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, ma
         q["query"]["bool"]["must"].append(subquery)
     if orderby == "date":
         q["sort"] = {
-            "obj.index.sub_date": {"order": orderdir},
+            "row.sub_date": {"order": orderdir},
         }
     if count is True:
         response = es.count(index="federal_irs_990,federal_irs_990ez,federal_irs_990pf", body=q)
@@ -951,19 +951,19 @@ def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, ma
         response = es.search(
             index="federal_irs_990,federal_irs_990ez,federal_irs_990pf",
             body=q,
-            filter_path=["hits.hits._source.obj.index"]
+            filter_path=["hits.hits._source.row"]
         )
         try:
             elements = []
             for hit in response["hits"]["hits"]:
                 row = {
-                    "submission_date": hit["_source"]["obj"]["index"]["sub_date"][:10],
-                    "ein": hit["_source"]["obj"]["index"]["ein"],
-                    "taxpayer_name": hit["_source"]["obj"]["index"]["taxpayer_name"],
-                    "return_type": hit["_source"]["obj"]["index"]["return_type"],
-                    "tax_period": hit["_source"]["obj"]["index"]["tax_period"],
-                    "xml_url": "https://s3.amazonaws.com/irs-form-990/" + hit["_source"]["obj"]["index"]["object_id"] + "_public.xml",
-                    "pdf_url": "https://apps.irs.gov/pub/epostcard/cor/" + hit["_source"]["obj"]["index"]["ein"] + "_" + hit["_source"]["obj"]["index"]["tax_period"] + "_" + hit["_source"]["obj"]["index"]["return_type"] + "_" + hit["_source"]["obj"]["index"]["sub_date"][:10].replace("-", "") + hit["_source"]["obj"]["index"]["return_id"] + ".pdf"
+                    "submission_date": hit["_source"]["row"]["sub_date"][:10],
+                    "ein": hit["_source"]["row"]["ein"],
+                    "taxpayer_name": hit["_source"]["row"]["taxpayer_name"],
+                    "return_type": hit["_source"]["row"]["return_type"],
+                    "tax_period": hit["_source"]["row"]["tax_period"],
+                    "xml_url": "https://s3.amazonaws.com/irs-form-990/" + hit["_source"]["row"]["object_id"] + "_public.xml",
+                    "pdf_url": "https://apps.irs.gov/pub/epostcard/cor/" + hit["_source"]["row"]["ein"] + "_" + hit["_source"]["row"]["tax_period"] + "_" + hit["_source"]["row"]["return_type"] + "_" + hit["_source"]["row"]["sub_date"][:10].replace("-", "") + hit["_source"]["row"]["return_id"] + ".pdf"
                 }
                 elements.append(row)
             return elements
