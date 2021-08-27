@@ -762,34 +762,44 @@ def documents_browse_facebook_ads(text: str = None, histogram: bool = False, ski
 # preview entities
 #########################################################
 
-@app.get("/data/preview/committee/", summary="Preview Committees", tags=["preview"])
-def data_preview_committee(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+@app.get("/data/preview/organization/committee/", summary="Preview Committees", tags=["preview"])
+def data_preview_organization_committee(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
     clean = helpers.prepare_lists(lists, terms, ids, db)
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
     if terms is not None or ids is not None:
-        return query.data_preview_committee(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+        return query.data_preview_organization_committee(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
     return []
 
-@app.get("/data/preview/organization/", summary="Preview Organizations", tags=["preview"])
-def data_preview_organization(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+@app.get("/data/preview/organization/employer/", summary="Preview Employers", tags=["preview"])
+def data_preview_organization_employer(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
     clean = helpers.prepare_lists(lists, terms, ids, db)
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
     if terms is not None or ids is not None:
-        return query.data_preview_organization(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+        return query.data_preview_organization_employer(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
     return []
 
-@app.get("/data/preview/person/", summary="Preview People", tags=["preview"])
-def data_preview_person(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+@app.get("/data/preview/person/candidate/", summary="Preview Candidates", tags=["preview"])
+def data_preview_person_candidate(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
     clean = helpers.prepare_lists(lists, terms, ids, db)
     terms = clean["terms"]
     ids = clean["ids"]
     # grab elements
     if terms is not None or ids is not None:
-        return query.data_preview_person(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+        return query.data_preview_person_candidate(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
+    return []
+
+@app.get("/data/preview/person/donor/", summary="Preview Donors", tags=["preview"])
+def data_preview_person_donor(lists: str = None, terms: str = None, ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False, user: str = Depends(get_auth)):
+    clean = helpers.prepare_lists(lists, terms, ids, db)
+    terms = clean["terms"]
+    ids = clean["ids"]
+    # grab elements
+    if terms is not None or ids is not None:
+        return query.data_preview_person_donor(es, terms=terms, ids=ids, skip=skip, limit=limit, count=count)
     return []
 
 @app.get("/data/preview/job/", summary="Preview Jobs", tags=["preview"])
@@ -809,15 +819,14 @@ def data_preview_topic(lists: str = None, terms: str = None, ids: str = None, sk
     ids = clean["ids"]
     # grab elements
     elements = []
-    if terms is not None or ids is not None:
-        for term in terms:
-            elements.append({
-                "term": term
-            })
-        for id in ids:
-            elements.append({
-                "id": id
-            })
+    for term in terms or []:
+        elements.append({
+            "term": term
+        })
+    for id in ids or []:
+        elements.append({
+            "id": id
+        })
     return elements
 
 #########################################################

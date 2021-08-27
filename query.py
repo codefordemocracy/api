@@ -196,7 +196,7 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
         except:
             return []
 
-def data_preview_committee(es, terms, ids, skip, limit, count):
+def data_preview_organization_committee(es, terms, ids, skip, limit, count):
     q = {
         "query": {
             "bool": {
@@ -240,7 +240,7 @@ def data_preview_committee(es, terms, ids, skip, limit, count):
         except:
             return []
 
-def data_preview_organization(es, terms, ids, skip, limit, count):
+def data_preview_organization_employer(es, terms, ids, skip, limit, count):
     q = {
         "query": {
             "bool": {
@@ -279,7 +279,51 @@ def data_preview_organization(es, terms, ids, skip, limit, count):
         except:
             return []
 
-def data_preview_person(es, terms, ids, skip, limit, count):
+def data_preview_person_candidate(es, terms, ids, skip, limit, count):
+    q = {
+        "query": {
+            "bool": {
+                "should": [],
+                "minimum_should_match": 1
+            }
+        }
+    }
+    if terms is not None:
+        for term in terms:
+            q["query"]["bool"]["should"].append({
+                "match": {
+                    "row.cand_name": term
+                }
+            })
+    if ids is not None:
+        for id in ids:
+            q["query"]["bool"]["should"].append({
+                "match": {
+                    "row.cand_id": id
+                }
+            })
+    if count is True:
+        response = es.count(index="federal_fec_candidates", body=q)
+        try:
+            return [{"count": response["count"]}]
+        except:
+            return []
+    else:
+        q["from"] = skip
+        q["size"] = limit
+        response = es.search(index="federal_fec_candidates", body=q, filter_path=["hits.hits._source.row.cand_id", "hits.hits._source.row.cand_name"])
+        try:
+            elements = []
+            for hit in response["hits"]["hits"]:
+                elements.append({
+                    "cand_id": hit["_source"]["row"]["cand_id"],
+                    "cand_name": hit["_source"]["row"]["cand_name"]
+                })
+            return elements
+        except:
+            return []
+
+def data_preview_person_donor(es, terms, ids, skip, limit, count):
     q = {
         "query": {
             "bool": {
@@ -423,7 +467,7 @@ def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, max
         if len(ids) > 0:
             if ids[0] is not None:
                 if template in ["D3WE", "BuW8"]:
-                    committees = data_preview_committee(es, None, ids[0], 0, 10000, False)
+                    committees = data_preview_organization_committee(es, None, ids[0], 0, 10000, False)
                     for committee in committees:
                         name = clean_committees_names(committee["cmte_nm"])
                         if template in ["D3WE"]:
@@ -924,7 +968,7 @@ def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, ma
         if len(ids) > 0:
             if ids[0] is not None:
                 if template in ["D3WE", "BuW8"]:
-                    committees = data_preview_committee(es, None, ids[0], 0, 10000, False)
+                    committees = data_preview_organization_committee(es, None, ids[0], 0, 10000, False)
                     for committee in committees:
                         name = clean_committees_names(committee["cmte_nm"])
                         if template in ["GCv2"]:
