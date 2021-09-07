@@ -404,7 +404,7 @@ def data_preview_job(es, terms, ids, skip, limit, count):
         except:
             return []
 
-def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count):
+def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
         "query": {
             "bool": {
@@ -507,6 +507,21 @@ def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, max
             return [{"count": response["count"]}]
         except:
             return []
+    elif histogram is True:
+        q["aggs"] = {
+            "dates": {
+                "date_histogram": {
+                    "field": "obj.ad_creation_time",
+                    "calendar_interval": "day",
+                    "time_zone": "America/New_York"
+                }
+            }
+        }
+        response = es.search(index="facebook_ads", body=q, filter_path=["aggregations"])
+        try:
+            return response["aggregations"]["dates"]["buckets"]
+        except:
+            return []
     else:
         q["from"] = skip
         q["size"] = limit
@@ -529,7 +544,7 @@ def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, max
         except:
             return []
 
-def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count):
+def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
         "query": {
             "bool": {
@@ -709,6 +724,21 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
             return [{"count": response["count"]}]
         except:
             return []
+    elif histogram is True:
+        q["aggs"] = {
+            "dates": {
+                "date_histogram": {
+                    "field": "processed.date",
+                    "calendar_interval": "day",
+                    "time_zone": "America/New_York"
+                }
+            }
+        }
+        response = es.search(index="federal_fec_contributions", body=q, filter_path=["aggregations"])
+        try:
+            return response["aggregations"]["dates"]["buckets"]
+        except:
+            return []
     else:
         q["from"] = skip
         q["size"] = limit
@@ -749,7 +779,7 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
         except:
             return []
 
-def data_calculate_recipe_lobbying_disclosures(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, concise=False):
+def data_calculate_recipe_lobbying_disclosures(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, concise=False):
     q = {
         "query": {
             "bool": {
@@ -821,6 +851,21 @@ def data_calculate_recipe_lobbying_disclosures(template, es, terms, ids, skip, l
             return [{"count": response["count"]}]
         except:
             return []
+    elif histogram is True:
+        q["aggs"] = {
+            "dates": {
+                "date_histogram": {
+                    "field": "processed.date_submitted",
+                    "calendar_interval": "day",
+                    "time_zone": "America/New_York"
+                }
+            }
+        }
+        response = es.search(index="federal_senate_lobbying_disclosures,federal_house_lobbying_disclosures", body=q, filter_path=["aggregations"])
+        try:
+            return response["aggregations"]["dates"]["buckets"]
+        except:
+            return []
     else:
         q["from"] = skip
         q["size"] = limit
@@ -855,7 +900,7 @@ def data_calculate_recipe_lobbying_disclosures(template, es, terms, ids, skip, l
         except:
             return []
 
-def data_calculate_recipe_lobbying_contributions(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count):
+def data_calculate_recipe_lobbying_contributions(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
         "query": {
             "bool": {
@@ -902,6 +947,21 @@ def data_calculate_recipe_lobbying_contributions(template, es, terms, ids, skip,
             return [{"count": response["count"]}]
         except:
             return []
+    elif histogram is True:
+        q["aggs"] = {
+            "dates": {
+                "date_histogram": {
+                    "field": "processed.date_submitted",
+                    "calendar_interval": "day",
+                    "time_zone": "America/New_York"
+                }
+            }
+        }
+        response = es.search(index="federal_senate_lobbying_contributions,federal_house_lobbying_contributions", body=q, filter_path=["aggregations"])
+        try:
+            return response["aggregations"]["dates"]["buckets"]
+        except:
+            return []
     else:
         q["from"] = skip
         q["size"] = limit
@@ -930,7 +990,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, terms, ids, skip,
         except:
             return []
 
-def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count):
+def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
         "query": {
             "bool": {
@@ -987,6 +1047,21 @@ def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, ma
         response = es.count(index="federal_irs_990,federal_irs_990ez,federal_irs_990pf", body=q)
         try:
             return [{"count": response["count"]}]
+        except:
+            return []
+    elif histogram is True:
+        q["aggs"] = {
+            "dates": {
+                "date_histogram": {
+                    "field": "row.sub_date",
+                    "calendar_interval": "day",
+                    "time_zone": "America/New_York"
+                }
+            }
+        }
+        response = es.search(index="federal_irs_990,federal_irs_990ez,federal_irs_990pf", body=q, filter_path=["aggregations"])
+        try:
+            return response["aggregations"]["dates"]["buckets"]
         except:
             return []
     else:
