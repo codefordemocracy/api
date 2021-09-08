@@ -398,7 +398,7 @@ def data_preview_job(es, terms, ids, skip, limit, count):
             elements = []
             for hit in response["hits"]["hits"]:
                 elements.append({
-                    "name": hit["_source"]["row"]["source"]["donor"]["occupation"]
+                    "term": hit["_source"]["row"]["source"]["donor"]["occupation"]
                 })
             return elements
         except:
