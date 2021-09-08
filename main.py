@@ -812,13 +812,15 @@ def data_preview_topic(lists: str = None, include_terms: str = None, include_ids
             if term in exclude or exclude in term:
                 continue
         elements.append({
-            "term": term
+            "term": term,
+            "id": None
         })
     for id in clean["include"]["ids"] or []:
         for exclude in clean["exclude"]["ids"] or []:
             if id in exclude:
                 continue
         elements.append({
+            "term": None,
             "id": id
         })
     if count is True:
