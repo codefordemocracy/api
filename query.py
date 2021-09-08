@@ -196,25 +196,40 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
         except:
             return []
 
-def data_preview_organization_committee(es, terms, ids, skip, limit, count):
+def data_preview_organization_committee(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
     q = {
         "query": {
             "bool": {
                 "should": [],
-                "minimum_should_match": 1
+                "minimum_should_match": 1,
+                "must_not": []
             }
         }
     }
-    if terms is not None:
-        for term in terms:
+    if include_terms is not None:
+        for term in include_terms:
             q["query"]["bool"]["should"].append({
                 "match": {
                     "row.cmte_nm": term
                 }
             })
-    if ids is not None:
-        for id in ids:
+    if include_ids is not None:
+        for id in include_ids:
             q["query"]["bool"]["should"].append({
+                "match": {
+                    "row.cmte_id": id
+                }
+            })
+    if exclude_terms is not None:
+        for term in exclude_terms:
+            q["query"]["bool"]["must_not"].append({
+                "match": {
+                    "row.cmte_nm": term
+                }
+            })
+    if exclude_ids is not None:
+        for id in exclude_ids:
+            q["query"]["bool"]["must_not"].append({
                 "match": {
                     "row.cmte_id": id
                 }
@@ -240,21 +255,29 @@ def data_preview_organization_committee(es, terms, ids, skip, limit, count):
         except:
             return []
 
-def data_preview_organization_employer(es, terms, ids, skip, limit, count):
+def data_preview_organization_employer(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
     q = {
         "query": {
             "bool": {
                 "should": [],
-                "minimum_should_match": 1
+                "minimum_should_match": 1,
+                "must_not": []
             }
         },
         "collapse": {
             "field": "row.source.donor.employer.keyword"
         }
     }
-    if terms is not None:
-        for term in terms:
+    if include_terms is not None:
+        for term in include_terms:
             q["query"]["bool"]["should"].append({
+                "match": {
+                    "row.source.donor.employer": term
+                }
+            })
+    if exclude_terms is not None:
+        for term in exclude_terms:
+            q["query"]["bool"]["must_not"].append({
                 "match": {
                     "row.source.donor.employer": term
                 }
@@ -279,25 +302,40 @@ def data_preview_organization_employer(es, terms, ids, skip, limit, count):
         except:
             return []
 
-def data_preview_person_candidate(es, terms, ids, skip, limit, count):
+def data_preview_person_candidate(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
     q = {
         "query": {
             "bool": {
                 "should": [],
-                "minimum_should_match": 1
+                "minimum_should_match": 1,
+                "must_not": []
             }
         }
     }
-    if terms is not None:
-        for term in terms:
+    if include_terms is not None:
+        for term in include_terms:
             q["query"]["bool"]["should"].append({
                 "match": {
                     "row.cand_name": term
                 }
             })
-    if ids is not None:
-        for id in ids:
+    if include_ids is not None:
+        for id in include_ids:
             q["query"]["bool"]["should"].append({
+                "match": {
+                    "row.cand_id": id
+                }
+            })
+    if exclude_terms is not None:
+        for term in exclude_terms:
+            q["query"]["bool"]["must_not"].append({
+                "match": {
+                    "row.cand_name": term
+                }
+            })
+    if exclude_ids is not None:
+        for id in exclude_ids:
+            q["query"]["bool"]["must_not"].append({
                 "match": {
                     "row.cand_id": id
                 }
@@ -323,21 +361,32 @@ def data_preview_person_candidate(es, terms, ids, skip, limit, count):
         except:
             return []
 
-def data_preview_person_donor(es, terms, ids, skip, limit, count):
+def data_preview_person_donor(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
     q = {
         "query": {
             "bool": {
                 "should": [],
-                "minimum_should_match": 1
+                "minimum_should_match": 1,
+                "must_not": []
             }
         },
         "collapse": {
             "field": "processed.source.donor.name.keyword"
         }
     }
-    if terms is not None:
-        for term in terms:
+    if include_terms is not None:
+        for term in include_terms:
             q["query"]["bool"]["should"].append({
+                "match_phrase": {
+                    "processed.source.donor.name": {
+                        "query": term,
+                        "slop": 2
+                    }
+                }
+            })
+    if exclude_terms is not None:
+        for term in exclude_terms:
+            q["query"]["bool"]["must_not"].append({
                 "match_phrase": {
                     "processed.source.donor.name": {
                         "query": term,
@@ -365,21 +414,29 @@ def data_preview_person_donor(es, terms, ids, skip, limit, count):
         except:
             return []
 
-def data_preview_job(es, terms, ids, skip, limit, count):
+def data_preview_job(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
     q = {
         "query": {
             "bool": {
                 "should": [],
-                "minimum_should_match": 1
+                "minimum_should_match": 1,
+                "must_not": []
             }
         },
         "collapse": {
             "field": "row.source.donor.occupation.keyword"
         }
     }
-    if terms is not None:
-        for term in terms:
+    if include_terms is not None:
+        for term in include_terms:
             q["query"]["bool"]["should"].append({
+                "match": {
+                    "row.source.donor.occupation": term
+                }
+            })
+    if exclude_terms is not None:
+        for term in exclude_terms:
+            q["query"]["bool"]["must_not"].append({
                 "match": {
                     "row.source.donor.occupation": term
                 }
@@ -404,7 +461,7 @@ def data_preview_job(es, terms, ids, skip, limit, count):
         except:
             return []
 
-def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_ad(template, es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
         "query": {
             "bool": {
@@ -421,7 +478,7 @@ def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, max
             }
         }
     }
-    if len(terms) > 0 or len(ids) > 0:
+    if len(include_terms) > 0 or len(include_ids) > 0:
         # List A
         subquery = {
             "bool": {
@@ -429,9 +486,9 @@ def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, max
                 "minimum_should_match": 1
             }
         }
-        if len(terms) > 0:
-            if terms[0] is not None:
-                for term in terms[0]:
+        if len(include_terms) > 0:
+            if include_terms[0] is not None:
+                for term in include_terms[0]:
                     if template in ["D3WE"]:
                         subquery["bool"]["should"].append({
                             "match_phrase": {
@@ -464,10 +521,10 @@ def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, max
                                 "obj.ad_creative_body": term
                             }
                         })
-        if len(ids) > 0:
-            if ids[0] is not None:
+        if len(include_ids) > 0:
+            if include_ids[0] is not None:
                 if template in ["D3WE", "BuW8"]:
-                    committees = data_preview_organization_committee(es, None, ids[0], 0, 10000, False)
+                    committees = data_preview_organization_committee(es, None, include_ids[0], 0, 10000, False)
                     for committee in committees:
                         name = clean_committees_names(committee["cmte_nm"])
                         if template in ["D3WE"]:
@@ -489,6 +546,81 @@ def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, max
                             })
                         elif template in ["BuW8"]:
                             subquery["bool"]["should"].append({
+                                "match_phrase": {
+                                    "obj.ad_creative_body": {
+                                        "query": name,
+                                        "slop": 5
+                                    }
+                                }
+                            })
+        q["query"]["bool"]["must"].append(subquery)
+    if len(exclude_terms) > 0 or len(exclude_ids) > 0:
+        # List A
+        subquery = {
+            "bool": {
+                "must_not": []
+            }
+        }
+        if len(exclude_terms) > 0:
+            if exclude_terms[0] is not None:
+                for term in exclude_terms[0]:
+                    if template in ["D3WE"]:
+                        subquery["bool"]["must_not"].append({
+                            "match_phrase": {
+                                "obj.page_name": {
+                                    "query": term,
+                                    "slop": 5
+                                }
+                            }
+                        })
+                        subquery["bool"]["must_not"].append({
+                            "match_phrase": {
+                                "obj.funding_entity": {
+                                    "query": term,
+                                    "slop": 5
+                                }
+                            }
+                        })
+                    elif template in ["BuW8", "N7Jk", "P2HG"]:
+                        subquery["bool"]["must_not"].append({
+                            "match_phrase": {
+                                "obj.ad_creative_body": {
+                                    "query": term,
+                                    "slop": 5
+                                }
+                            }
+                        })
+                    elif template in ["8HcR"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "obj.ad_creative_body": term
+                            }
+                        })
+        if len(exclude_ids) > 0:
+            if exclude_ids[0] is not None:
+                if template in ["D3WE", "BuW8"]:
+                    committees = data_preview_organization_committee(es, None, exclude_ids[0], 0, 10000, False)
+                    for committee in committees:
+                        name = clean_committees_names(committee["cmte_nm"])
+                        if template in ["D3WE"]:
+                            subquery["bool"]["must_not"].append({
+                                "match_phrase": {
+                                    "obj.page_name": {
+                                        "query": name,
+                                        "slop": 5
+                                    }
+                                }
+                            })
+                            subquery["bool"]["must_not"].append({
+                                "match_phrase": {
+                                    "obj.funding_entity": {
+                                        "query": name,
+                                        "slop": 5
+                                    }
+                                }
+                            })
+                        elif template in ["BuW8"]:
+                            subquery["bool"]["must_not"].append({
                                 "match_phrase": {
                                     "obj.ad_creative_body": {
                                         "query": name,
@@ -544,7 +676,7 @@ def data_calculate_recipe_ad(template, es, terms, ids, skip, limit, mindate, max
         except:
             return []
 
-def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_contribution(template, es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
         "query": {
             "bool": {
@@ -577,7 +709,7 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
             }
         }
     }
-    if len(terms) > 0 or len(ids) > 0:
+    if len(include_terms) > 0 or len(include_ids) > 0:
         # Contributions
         if template in ["P3JF"]:
             q["query"]["bool"]["must"].append({
@@ -594,9 +726,9 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                 "minimum_should_match": 1
             }
         }
-        if len(terms) > 0:
-            if terms[0] is not None:
-                for term in terms[0]:
+        if len(include_terms) > 0:
+            if include_terms[0] is not None:
+                for term in include_terms[0]:
                     if template in ["ReqQ", "IQL2", "P3JF"]:
                         subquery["bool"]["should"].append({
                             "match": {
@@ -630,9 +762,9 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                                 "row.target.committee.cmte_nm": term
                             }
                         })
-        if len(ids) > 0:
-            if ids[0] is not None:
-                for id in ids[0]:
+        if len(include_ids) > 0:
+            if include_ids[0] is not None:
+                for id in include_ids[0]:
                     if template in ["ReqQ", "IQL2", "P3JF"]:
                         subquery["bool"]["should"].append({
                             "match": {
@@ -653,9 +785,9 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                 "minimum_should_match": 1
             }
         }
-        if len(terms) > 1:
-            if terms[1] is not None:
-                for term in terms[1]:
+        if len(include_terms) > 1:
+            if include_terms[1] is not None:
+                for term in include_terms[1]:
                     if template in ["T5xv", "F2mS"]:
                         subquery["bool"]["should"].append({
                             "match": {
@@ -668,9 +800,9 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                                 "row.target.committee.cmte_nm": term
                             }
                         })
-        if len(ids) > 1:
-            if ids[1] is not None:
-                for id in ids[1]:
+        if len(include_ids) > 1:
+            if include_ids[1] is not None:
+                for id in include_ids[1]:
                     if template in ["ReqQ"]:
                         subquery["bool"]["should"].append({
                             "match": {
@@ -691,20 +823,141 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
                 "minimum_should_match": 1
             }
         }
-        if len(terms) > 2:
-            if terms[2] is not None:
-                for term in terms[2]:
+        if len(include_terms) > 2:
+            if include_terms[2] is not None:
+                for term in include_terms[2]:
                     if template in ["F2mS"]:
                         subquery["bool"]["should"].append({
                             "match": {
                                 "row.target.committee.cmte_nm": term
                             }
                         })
-        if len(ids) > 2:
-            if ids[2] is not None:
-                for id in ids[2]:
+        if len(include_ids) > 2:
+            if include_ids[2] is not None:
+                for id in include_ids[2]:
                     if template in ["F2mS"]:
                         subquery["bool"]["should"].append({
+                            "match": {
+                                "row.target.committee.cmte_id": id
+                            }
+                        })
+        q["query"]["bool"]["must"].append(subquery)
+    if len(exclude_terms) > 0 or len(exclude_ids) > 0:
+        # List A
+        subquery = {
+            "bool": {
+                "must_not": []
+            }
+        }
+        if len(exclude_terms) > 0:
+            if exclude_terms[0] is not None:
+                for term in exclude_terms[0]:
+                    if template in ["ReqQ", "IQL2", "P3JF"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.source.committee.cmte_nm": term
+                            }
+                        })
+                    elif template in ["NcFz"]:
+                        subquery["bool"]["must_not"].append({
+                            "match_phrase": {
+                                "processed.source.donor.name": {
+                                    "query": term,
+                                    "slop": 2
+                                }
+                            }
+                        })
+                    elif template in ["m4YC", "Bs5W"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.source.donor.employer": term
+                            }
+                        })
+                    elif template in ["7v4P", "T5xv", "6peF", "F2mS"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.source.donor.occupation": term
+                            }
+                        })
+                    elif template in ["VqHR"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.target.committee.cmte_nm": term
+                            }
+                        })
+        if len(exclude_ids) > 0:
+            if exclude_ids[0] is not None:
+                for id in exclude_ids[0]:
+                    if template in ["ReqQ", "IQL2", "P3JF"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.source.committee.cmte_id": id
+                            }
+                        })
+                    elif template in ["VqHR"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.target.committee.cmte_id": id
+                            }
+                        })
+        q["query"]["bool"]["must"].append(subquery)
+        # List B
+        subquery = {
+            "bool": {
+                "must_not": []
+            }
+        }
+        if len(exclude_terms) > 1:
+            if exclude_terms[1] is not None:
+                for term in exclude_terms[1]:
+                    if template in ["T5xv", "F2mS"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.source.donor.employer": term
+                            }
+                        })
+                    elif template in ["Bs5W", "6peF", "IQL2"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.target.committee.cmte_nm": term
+                            }
+                        })
+        if len(exclude_ids) > 1:
+            if exclude_ids[1] is not None:
+                for id in exclude_ids[1]:
+                    if template in ["ReqQ"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.source.committee.cmte_id": id
+                            }
+                        })
+                    elif template in ["Bs5W", "6peF", "IQL2"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.target.committee.cmte_id": id
+                            }
+                        })
+        q["query"]["bool"]["must"].append(subquery)
+        # List C
+        subquery = {
+            "bool": {
+                "must_not": []
+            }
+        }
+        if len(exclude_terms) > 2:
+            if exclude_terms[2] is not None:
+                for term in exclude_terms[2]:
+                    if template in ["F2mS"]:
+                        subquery["bool"]["must_not"].append({
+                            "match": {
+                                "row.target.committee.cmte_nm": term
+                            }
+                        })
+        if len(exclude_ids) > 2:
+            if exclude_ids[2] is not None:
+                for id in exclude_ids[2]:
+                    if template in ["F2mS"]:
+                        subquery["bool"]["must_not"].append({
                             "match": {
                                 "row.target.committee.cmte_id": id
                             }
@@ -779,7 +1032,7 @@ def data_calculate_recipe_contribution(template, es, terms, ids, skip, limit, mi
         except:
             return []
 
-def data_calculate_recipe_lobbying_disclosures(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, concise=False):
+def data_calculate_recipe_lobbying_disclosures(template, es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, concise=False):
     q = {
         "query": {
             "bool": {
@@ -800,15 +1053,15 @@ def data_calculate_recipe_lobbying_disclosures(template, es, terms, ids, skip, l
         q["collapse"] = {
             "field": "processed.registrant.senate_id.keyword"
         }
-    if len(terms) > 0 or len(ids) > 0:
+    if len(include_terms) > 0 or len(include_ids) > 0:
         subquery = {
             "bool": {
                 "should": [],
                 "minimum_should_match": 1
             }
         }
-        if terms[0] is not None:
-            for term in terms[0]:
+        if include_terms[0] is not None:
+            for term in include_terms[0]:
                 if template == "kMER":
                     subquery["bool"]["should"].append({
                         "match": {
@@ -832,10 +1085,50 @@ def data_calculate_recipe_lobbying_disclosures(template, es, terms, ids, skip, l
                             "processed.issues.display": term
                         }
                     })
-        if ids[0] is not None:
-            for id in ids[0]:
+        if include_ids[0] is not None:
+            for id in include_ids[0]:
                 if template == "MJdb":
                     subquery["bool"]["should"].append({
+                        "match": {
+                            "processed.issues.code": id
+                        }
+                    })
+        q["query"]["bool"]["must"].append(subquery)
+    if len(exclude_terms) > 0 or len(exclude_ids) > 0:
+        subquery = {
+            "bool": {
+                "must_not": []
+            }
+        }
+        if exclude_terms[0] is not None:
+            for term in exclude_terms[0]:
+                if template == "kMER":
+                    subquery["bool"]["must_not"].append({
+                        "match": {
+                            "processed.client.name": term
+                        }
+                    })
+                elif template == "wLvp":
+                    subquery["bool"]["must_not"].append({
+                        "match": {
+                            "processed.registrant.name": term
+                        }
+                    })
+                elif template == "MJdb":
+                    subquery["bool"]["must_not"].append({
+                        "match": {
+                            "processed.activities": term
+                        }
+                    })
+                    subquery["bool"]["must_not"].append({
+                        "match": {
+                            "processed.issues.display": term
+                        }
+                    })
+        if exclude_ids[0] is not None:
+            for id in exclude_ids[0]:
+                if template == "MJdb":
+                    subquery["bool"]["must_not"].append({
                         "match": {
                             "processed.issues.code": id
                         }
@@ -900,7 +1193,7 @@ def data_calculate_recipe_lobbying_disclosures(template, es, terms, ids, skip, l
         except:
             return []
 
-def data_calculate_recipe_lobbying_contributions(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_lobbying_contributions(template, es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
         "query": {
             "bool": {
@@ -921,17 +1214,32 @@ def data_calculate_recipe_lobbying_contributions(template, es, terms, ids, skip,
             }
         }
     }
-    if len(terms) > 0 or len(ids) > 0:
+    if len(include_terms) > 0 or len(include_ids) > 0:
         subquery = {
             "bool": {
                 "should": [],
                 "minimum_should_match": 1
             }
         }
-        if ids[0] is not None:
-            for id in ids[0]:
+        if include_ids[0] is not None:
+            for id in include_ids[0]:
                 if template in ["WGb3", "PjyR", "MK93"]:
                     subquery["bool"]["should"].append({
+                        "match": {
+                            "processed.registrant.senate_id": id
+                        }
+                    })
+        q["query"]["bool"]["must"].append(subquery)
+    if len(exclude_terms) > 0 or len(exclude_ids) > 0:
+        subquery = {
+            "bool": {
+                "must_not": []
+            }
+        }
+        if exclude_ids[0] is not None:
+            for id in exclude_ids[0]:
+                if template in ["WGb3", "PjyR", "MK93"]:
+                    subquery["bool"]["must_not"].append({
                         "match": {
                             "processed.registrant.senate_id": id
                         }
@@ -990,7 +1298,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, terms, ids, skip,
         except:
             return []
 
-def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_990(template, es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
         "query": {
             "bool": {
@@ -1007,7 +1315,7 @@ def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, ma
             }
         }
     }
-    if len(terms) > 0 or len(ids) > 0:
+    if len(include_terms) > 0 or len(include_ids) > 0:
         # List A
         subquery = {
             "bool": {
@@ -1015,9 +1323,9 @@ def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, ma
                 "minimum_should_match": 1
             }
         }
-        if len(terms) > 0:
-            if terms[0] is not None:
-                for term in terms[0]:
+        if len(include_terms) > 0:
+            if include_terms[0] is not None:
+                for term in include_terms[0]:
                     if template in ["K23r", "GCv2", "P34n"]:
                         subquery["bool"]["should"].append({
                             "multi_match": {
@@ -1025,14 +1333,45 @@ def data_calculate_recipe_990(template, es, terms, ids, skip, limit, mindate, ma
                                 "slop": 5
                             }
                         })
-        if len(ids) > 0:
-            if ids[0] is not None:
+        if len(include_ids) > 0:
+            if include_ids[0] is not None:
                 if template in ["D3WE", "BuW8"]:
-                    committees = data_preview_organization_committee(es, None, ids[0], 0, 10000, False)
+                    committees = data_preview_organization_committee(es, None, include_ids[0], 0, 10000, False)
                     for committee in committees:
                         name = clean_committees_names(committee["cmte_nm"])
                         if template in ["GCv2"]:
                             subquery["bool"]["should"].append({
+                                "multi_match": {
+                                    "query": term,
+                                    "slop": 5
+                                }
+                            })
+        q["query"]["bool"]["must"].append(subquery)
+    if len(exclude_terms) > 0 or len(exclude_ids) > 0:
+        # List A
+        subquery = {
+            "bool": {
+                "must_not": []
+            }
+        }
+        if len(exclude_terms) > 0:
+            if exclude_terms[0] is not None:
+                for term in exclude_terms[0]:
+                    if template in ["K23r", "GCv2", "P34n"]:
+                        subquery["bool"]["must_not"].append({
+                            "multi_match": {
+                                "query": term,
+                                "slop": 5
+                            }
+                        })
+        if len(exclude_ids) > 0:
+            if exclude_ids[0] is not None:
+                if template in ["D3WE", "BuW8"]:
+                    committees = data_preview_organization_committee(es, None, exclude_ids[0], 0, 10000, False)
+                    for committee in committees:
+                        name = clean_committees_names(committee["cmte_nm"])
+                        if template in ["GCv2"]:
+                            subquery["bool"]["must_not"].append({
                                 "multi_match": {
                                     "query": term,
                                     "slop": 5

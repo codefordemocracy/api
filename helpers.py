@@ -38,40 +38,70 @@ def format_graph(graph):
         })))
     return elements
 
-def prepare_lists(lists, terms, ids, db):
+def prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db):
     try:
         lists = [i for i in lists.split(",")]
     except:
         lists = []
     try:
-        terms = [i for i in terms.split(",")]
+        include_terms = [i for i in include_terms.split(",")]
     except:
-        terms = []
+        include_terms = []
     try:
-        ids = [i for i in ids.split(",")]
+        include_ids = [i for i in include_ids.split(",")]
     except:
-        ids = []
+        include_ids = []
+    try:
+        exclude_terms = [i for i in exclude_terms.split(",")]
+    except:
+        exclude_terms = []
+    try:
+        exclude_ids = [i for i in exclude_ids.split(",")]
+    except:
+        exclude_ids = []
     # grab list definition from firestore
     for list in lists:
-        include = db.collection('lists').document(list).get().to_dict().get("include")
-        list_terms = include.get("terms")
-        list_ids = include.get("ids")
-        if list_terms is not None and len(list_terms) > 0:
-            terms.append(list_terms)
+        doc = db.collection('lists').document(list).get().to_dict()
+        include = doc.get("include", {})
+        list_include_terms = include.get("terms")
+        list_include_ids = include.get("ids")
+        if list_include_terms is not None and len(list_include_terms) > 0:
+            include_terms.append(list_include_terms)
         else:
-            terms.append(None)
-        if list_ids is not None and len(list_ids) > 0:
-            ids.append(list_ids)
+            include_terms.append(None)
+        if list_include_ids is not None and len(list_include_ids) > 0:
+            include_ids.append(list_include_ids)
         else:
-            ids.append(None)
+            include_ids.append(None)
+        exclude = doc.get("exclude", {})
+        list_exclude_terms = exclude.get("terms")
+        list_exclude_ids = exclude.get("ids")
+        if list_exclude_terms is not None and len(list_exclude_terms) > 0:
+            exclude_terms.append(list_exclude_terms)
+        else:
+            exclude_terms.append(None)
+        if list_exclude_ids is not None and len(list_exclude_ids) > 0:
+            exclude_ids.append(list_exclude_ids)
+        else:
+            exclude_ids.append(None)
     # set empty values to none
-    if terms is not None and len(terms) == 0:
-        terms = None
-    if ids is not None and len(ids) == 0:
-        ids = None
+    if include_terms is not None and len(include_terms) == 0:
+        include_terms = None
+    if include_ids is not None and len(include_ids) == 0:
+        include_ids = None
+    if exclude_terms is not None and len(exclude_terms) == 0:
+        exclude_terms = None
+    if exclude_ids is not None and len(exclude_ids) == 0:
+        exclude_ids = None
     return {
-        "terms": terms,
-        "ids": ids
+        "include": {
+            "terms": include_terms,
+            "ids": include_ids
+        },
+        "exclude": {
+            "terms": exclude_terms,
+            "ids": exclude_ids
+        }
     }
 
 def clean_committees_names(name):
