@@ -821,6 +821,8 @@ def data_preview_topic(lists: str = None, include_terms: str = None, include_ids
         elements.append({
             "id": id
         })
+    if count is True:
+        return [{"count": len(elements)}]
     return elements
 
 #########################################################
