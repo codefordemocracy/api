@@ -24,7 +24,7 @@ app = FastAPI(
     title="Code for Democracy",
     description="""This API helps you access the data behind Code for Democracy's workflows. Use it to explore documents, audit analyses, or build your own apps.
     <dl>
-        <dt>[Read Documentation](https://docs.codefordemocracy.org/api/)</dt>
+        <dt>[Read Documentation](https://docs.codefordemocracy.org/data/api/)</dt>
         <dt>[View on GitHub](https://github.com/codefordemocracy/api/)</dt>
     </dl>
     """,
