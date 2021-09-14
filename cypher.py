@@ -1002,15 +1002,16 @@ def graph_traverse_relationships_contribution_recipient(tx, ids, skip, limit):
 # uncover graph insights
 #########################################################
 
-def graph_uncover_donors(tx, ids, labels, min_transaction_amt, limit):
-    c  = f"MATCH (a) <-[c1:CONTRIBUTED_TO]-(t:Contribution)<-[c2:CONTRIBUTED_TO]- (d) "
-    c += f"WHERE ID(a) IN {ids} AND t.transaction_amt > {min_transaction_amt} "
+def graph_uncover_donors(tx, ids, labels, min_transaction_amt, skip, limit):
+    c  = "MATCH p=(a)<-[:CONTRIBUTED_TO]-(t:Contribution)<-[:CONTRIBUTED_TO]-(d) "
+    c+= "WHERE ID(a) IN $ids "
+    c+= "AND t.transaction_amt >= $min_transaction_amt "
     if labels is not None:
-        c+= f"AND ( {labels} )"
-    c += f"RETURN a, t, d, c1, c2 "
-    c += f"LIMIT {limit} "
-    query_out = tx.run(c, ids=ids)
-    return query_out.graph()
+        c+= "AND (" + labels + ") "
+    c+= "RETURN p "
+    c+= "SKIP $skip "
+    c+= "LIMIT $limit "
+    return tx.run(c, ids=ids, min_transaction_amt=min_transaction_amt, skip=skip, limit=limit).graph()
 
 #########################################################
 # analyze elements
