@@ -1,0 +1,73 @@
+#########################################################
+# find graph elements
+#########################################################
+
+def graph_find_elements_id(tx, nodes, edges):
+    c = "MATCH (a) WHERE ID(a) IN $nodes "
+    if edges is not None:
+        c+= "OPTIONAL MATCH (a)-[r]-() WHERE ID(r) IN $edges "
+    c+= "RETURN a"
+    if edges is not None:
+        c+= ", r"
+    return tx.run(c, nodes=nodes, edges=edges).graph()
+
+def graph_find_elements_uuid(tx, nodes, edges):
+    c = "OPTIONAL MATCH (ad:Ad) WHERE ad.uuid in $nodes "
+    c+= "WITH collect(ad) AS nodes "
+    c = "OPTIONAL MATCH (annotation:Annotation) WHERE annotation.uuid in $nodes "
+    c+= "WITH collect(annotation) AS nodes "
+    c+= "OPTIONAL MATCH (buyer:Buyer) WHERE buyer.uuid in $nodes "
+    c+= "WITH collect(buyer) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (candidate:Candidate) WHERE candidate.uuid in $nodes "
+    c+= "WITH collect(candidate) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (committee:Committee) WHERE committee.uuid in $nodes "
+    c+= "WITH collect(committee) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (contribution:Contribution) WHERE contribution.uuid in $nodes "
+    c+= "WITH collect(contribution) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (day:Day) WHERE day.uuid in $nodes "
+    c+= "WITH collect(day) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (domain:Domain) WHERE domain.uuid in $nodes "
+    c+= "WITH collect(domain) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (donor:Donor) WHERE donor.uuid in $nodes "
+    c+= "WITH collect(donor) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (employer:Employer) WHERE employer.uuid in $nodes "
+    c+= "WITH collect(employer) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (expenditure:Expenditure) WHERE expenditure.uuid in $nodes "
+    c+= "WITH collect(expenditure) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (hashtag:Hashtag) WHERE hashtag.uuid in $nodes "
+    c+= "WITH collect(hashtag) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (job:Job) WHERE job.uuid in $nodes "
+    c+= "WITH collect(job) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (link:Link) WHERE link.uuid in $nodes "
+    c+= "WITH collect(link) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (message:Message) WHERE message.uuid in $nodes "
+    c+= "WITH collect(message) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (month:Month) WHERE month.uuid in $nodes "
+    c+= "WITH collect(month) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (page:Page) WHERE page.uuid in $nodes "
+    c+= "WITH collect(page) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (party:Party) WHERE party.uuid in $nodes "
+    c+= "WITH collect(party) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (payee:Payee) WHERE payee.uuid in $nodes "
+    c+= "WITH collect(payee) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (race:Race) WHERE race.uuid in $nodes "
+    c+= "WITH collect(race) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (source:Source) WHERE source.uuid in $nodes "
+    c+= "WITH collect(source) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (state:State) WHERE state.uuid in $nodes "
+    c+= "WITH collect(state) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (tweet:Tweet) WHERE tweet.uuid in $nodes "
+    c+= "WITH collect(tweet) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (tweeter:Tweeter) WHERE tweeter.uuid in $nodes "
+    c+= "WITH collect(tweeter) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (year:Year) WHERE year.uuid in $nodes "
+    c+= "WITH collect(year) + nodes AS nodes "
+    c+= "OPTIONAL MATCH (zip:Zip) WHERE zip.uuid in $nodes "
+    c+= "WITH collect(zip) + nodes AS nodes "
+    c+= "UNWIND nodes AS x "
+    if edges is not None:
+        c+= "OPTIONAL MATCH (x)-[r]-() WHERE r.uuid IN $edges "
+    c+= "RETURN x "
+    if edges is not None:
+        c+= ", r"
+    return tx.run(c, nodes=nodes, edges=edges).graph()
