@@ -120,8 +120,9 @@ def graph_search_committees(tx, cmte_nm, cmte_pty_affiliation, cmte_dsgn, cmte_t
         c+= "WHERE score > 2 "
         c+= "WITH node AS a "
     if context is True:
-        c+= "MATCH p=(a)<-[:CONTRIBUTED_TO]-(x:Contribution)<-[:CONTRIBUTED_TO]-() "
-        c+= "MATCH (x)-[:HAPPENED_ON]->(b:Day)"
+        c+= "MATCH (a)<-[:CONTRIBUTED_TO]-(x:Contribution)<-[:CONTRIBUTED_TO]-(c) "
+        c+= "MATCH (x)-[:HAPPENED_ON]->(b:Day) "
+        c+= "MATCH p=(a)-[:CONTRIBUTED_TO]-(c) "
     else:
         c+= "MATCH p=(a) "
     c+= "WHERE a:Committee "
@@ -172,8 +173,9 @@ def graph_search_donors(tx, name, employer, occupation, state, zip_code, entity_
     if name is not None or employer is not None or occupation is not None:
         c+= "UNWIND nodes AS a "
     if context is True:
-        c+= "MATCH p=(a)-[:CONTRIBUTED_TO]->(x:Contribution)-[:CONTRIBUTED_TO]->(:Committee) "
-        c+= "MATCH (x)-[:HAPPENED_ON]->(b:Day)"
+        c+= "MATCH (a)-[:CONTRIBUTED_TO]->(x:Contribution)-[:CONTRIBUTED_TO]->(c:Committee) "
+        c+= "MATCH (x)-[:HAPPENED_ON]->(b:Day) "
+        c+= "MATCH p=(a)-[:CONTRIBUTED_TO]-(c) "
     else:
         c+= "MATCH p=(a) "
     c+= "WHERE a:Donor "
