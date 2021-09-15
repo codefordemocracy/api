@@ -624,8 +624,8 @@ def graph_traverse_relationships_contribution_recipient(ids: str = Query(..., re
 
 # Uncover contributors
 
-@app.get("/graph/uncover/donors/", summary="Uncover contributors to nodes", tags=["uncover"])
-def graph_uncover_donors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), labels: str = None, min_transaction_amt: int = Query(None, ge=1, le=999999999), skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), user: str = Depends(get_auth)):
+@app.get("/graph/uncover/contributors/", summary="Uncover contributors to nodes", tags=["uncover"])
+def graph_uncover_contributors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), labels: str = None, min_transaction_amt: int = Query(None, ge=1, le=999999999), skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), user: str = Depends(get_auth)):
     try:
         ids = [int(id) for id in ids.split(",")]
     except:
@@ -638,7 +638,7 @@ def graph_uncover_donors(ids: str = Query(..., regex="^[0-9]+(,[0-9]+)*$"), labe
         labels = None
     if ids is not None:
         with driver.session() as neo4j:
-            return helpers.format_graph(neo4j.read_transaction(cypher.graph_uncover_donors, ids=ids, labels=labels, min_transaction_amt=min_transaction_amt, skip=skip, limit=limit))
+            return helpers.format_graph(neo4j.read_transaction(cypher.graph_uncover_contributors, ids=ids, labels=labels, min_transaction_amt=min_transaction_amt, skip=skip, limit=limit))
 
 #########################################################
 # explore elasticsearch

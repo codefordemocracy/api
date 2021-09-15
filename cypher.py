@@ -1004,7 +1004,7 @@ def graph_traverse_relationships_contribution_recipient(tx, ids, skip, limit):
 # uncover graph insights
 #########################################################
 
-def graph_uncover_donors(tx, ids, labels, min_transaction_amt, skip, limit):
+def graph_uncover_contributors(tx, ids, labels, min_transaction_amt, skip, limit):
     c  = "MATCH p=(a)<-[:CONTRIBUTED_TO]-(t:Contribution)<-[:CONTRIBUTED_TO]-(d) "
     c+= "WHERE ID(a) IN $ids "
     c+= "AND t.transaction_amt >= $min_transaction_amt "
