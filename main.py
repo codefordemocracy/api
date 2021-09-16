@@ -3,7 +3,7 @@ from fastapi.security import HTTPBasic
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import ORJSONResponse
 
-from endpoints import find, search, traverse, uncover, browse, preview, calculate
+from endpoints import find, search, traverse, uncover, browse, preview, calculate, analyze
 
 #########################################################
 # initialize app
@@ -34,6 +34,7 @@ app.include_router(uncover.router)
 app.include_router(browse.router)
 app.include_router(preview.router)
 app.include_router(calculate.router)
+app.include_router(analyze.router)
 
 #########################################################
 # serve homepage

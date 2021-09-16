@@ -39,28 +39,16 @@ def format_graph(graph):
     return elements
 
 def prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db):
-    try:
-        lists = [i for i in lists.split(",")]
-    except:
-        lists = []
-    try:
-        include_terms = [i for i in include_terms.split(",")]
-    except:
+    if include_terms is None:
         include_terms = []
-    try:
-        include_ids = [i for i in include_ids.split(",")]
-    except:
+    if include_ids is None:
         include_ids = []
-    try:
-        exclude_terms = [i for i in exclude_terms.split(",")]
-    except:
+    if exclude_terms is None:
         exclude_terms = []
-    try:
-        exclude_ids = [i for i in exclude_ids.split(",")]
-    except:
+    if exclude_ids is None:
         exclude_ids = []
     # grab list definition from firestore
-    for list in lists:
+    for list in lists or []:
         doc = db.collection('lists').document(list).get().to_dict()
         include = doc.get("include", {})
         list_include_terms = include.get("terms")

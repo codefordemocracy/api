@@ -49,7 +49,7 @@ def documents_browse_news_articles_source(es, domains, text, histogram, skip, li
     else:
         response = es.search(index="news_articles", body=q, filter_path=["hits.hits._id", "hits.hits._source.extracted.title", "hits.hits._source.extracted.text", "hits.hits._source.extracted.date", "hits.hits._source.extracted.url"])
         try:
-            return response["hits"]["hits"]
+            return [x["_source"] for x in response["hits"]["hits"]]
         except:
             return []
 
@@ -102,7 +102,7 @@ def documents_browse_twitter_tweets_user(es, user_ids, text, histogram, skip, li
     else:
         response = es.search(index="twitter_tweets_new", body=q, filter_path=["hits.hits._source.obj.author.id", "hits.hits._source.obj.author.username", "hits.hits._source.obj.tweet.id", "hits.hits._source.obj.tweet.created_at", "hits.hits._source.obj.tweet.entities.hashtags"])
         try:
-            return response["hits"]["hits"]
+            return [x["_source"] for x in response["hits"]["hits"]]
         except:
             return []
 
@@ -191,6 +191,6 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
     else:
         response = es.search(index="facebook_ads", body=q, filter_path=["hits.hits._source.obj.id", "hits.hits._source.obj.page_id", "hits.hits._source.obj.page_name", "hits.hits._source.obj.funding_entity", "hits.hits._source.obj.permalink", "hits.hits._source.obj.ad_creation_time", "hits.hits._source.obj.created"])
         try:
-            return response["hits"]["hits"]
+            return [x["_source"] for x in response["hits"]["hits"]]
         except:
             return []

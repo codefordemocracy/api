@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver
-from .dependencies.defaults import get_years
 from .dependencies import helpers
 from .dependencies.cypher import search as cypher
-
-import datetime
+from .dependencies.models import PaginationConfig, DatesConfig
+from .dependencies.models import GraphCandidateAttributesConfig, GraphCommitteeAttributesConfig, GraphDonorAttributesConfig, GraphTweeterAttributesConfig, GraphSourceAttributesConfig
 
 #########################################################
 # initialize route
@@ -19,71 +19,145 @@ router = APIRouter(
 )
 
 #########################################################
+# define models
+#########################################################
+
+class GraphSearchBaseBody(BaseModel):
+    context: bool = False
+    pagination: PaginationConfig = PaginationConfig()
+
+class GraphSearchDatesBody(GraphSearchBaseBody):
+    dates: DatesConfig = DatesConfig()
+
+class GraphSearchNamesDatesBody(GraphSearchDatesBody):
+    name: str = Field(None)
+
+class GraphSearchCandidatesBody(GraphSearchNamesDatesBody):
+    attributes: GraphCandidateAttributesConfig = GraphCandidateAttributesConfig()
+
+class GraphSearchCommitteesBody(GraphSearchNamesDatesBody):
+    attributes: GraphCommitteeAttributesConfig = GraphCommitteeAttributesConfig()
+
+class GraphSearchDonorsBody(GraphSearchNamesDatesBody):
+    attributes: GraphDonorAttributesConfig = GraphDonorAttributesConfig()
+
+class GraphSearchTweetersBody(GraphSearchNamesDatesBody):
+    attributes: GraphTweeterAttributesConfig = GraphTweeterAttributesConfig()
+    candidates: GraphCandidateAttributesConfig = GraphCandidateAttributesConfig()
+
+class GraphSearchSourcesBody(GraphSearchDatesBody):
+    domain: str = Field(None)
+    attributes: GraphSourceAttributesConfig = GraphSourceAttributesConfig()
+
+#########################################################
 # search for entities
 #########################################################
 
-@router.get("/candidates/", summary="Search for Candidates")
-def graph_search_candidates(cand_name: str = None, cand_pty_affiliation: str = Query(None, min_length=3, max_length=3), cand_office: str = Query(None, min_length=1, max_length=1), cand_office_st: str = Query(None, min_length=2, max_length=2), cand_office_district: str = Query(None, min_length=2, max_length=2), cand_election_yr: int = Query(None, ge=1990, le=datetime.datetime.now().year), cand_ici: str = Query(None, min_length=1, max_length=1), context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000)):
+@router.post("/candidates/", summary="Search for Candidates")
+def graph_search_candidates(body: GraphSearchCandidatesBody):
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_candidates, cand_name=cand_name, cand_pty_affiliation=cand_pty_affiliation, cand_office=cand_office, cand_office_st=cand_office_st, cand_office_district=cand_office_district, cand_election_yr=cand_election_yr, cand_ici=cand_ici, context=context, skip=skip, limit=limit, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_candidates,
+            cand_name=body.name, cand_pty_affiliation=body.attributes.cand_pty_affiliation, cand_office=body.attributes.cand_office, cand_office_st=body.attributes.cand_office_st, cand_office_district=body.attributes.cand_office_district, cand_election_yr=body.attributes.cand_election_yr, cand_ici=body.attributes.cand_ici,
+            context=body.context,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            concise=False
+        ))
 
-@router.get("/committees/", summary="Search for Committees")
-def graph_search_committees(cmte_nm: str = None, cmte_pty_affiliation: str = Query(None, min_length=3, max_length=3), cmte_dsgn: str = Query(None, min_length=1, max_length=1), cmte_tp: str = Query(None, min_length=1, max_length=1), context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31)):
-    if cmte_nm is not None:
-        cmte_nm = "\""+cmte_nm+"\""
+@router.post("/committees/", summary="Search for Committees")
+def graph_search_committees(body: GraphSearchCommitteesBody):
+    if body.name is not None:
+        body.name = "\""+body.name+"\""
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_committees, cmte_nm=cmte_nm, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_committees,
+            cmte_nm=body.name, cmte_pty_affiliation=body.attributes.cmte_pty_affiliation, cmte_dsgn=body.attributes.cmte_dsgn, cmte_tp=body.attributes.cmte_tp,
+            context=body.context,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
+            concise=False
+        ))
 
-@router.get("/donors/", summary="Search for Donors")
-def graph_search_donors(name: str = None, employer: str = None, occupation: str = None, state: str = Query(None, min_length=2, max_length=2), zip_code: int = Query(None, ge=500, le=99999), entity_tp: str = Query(None, min_length=3, max_length=3), context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31)):
-    if employer is not None:
-        employer = "\""+employer+"\""
-    if occupation is not None:
-        occupation = "\""+occupation+"\""
+@router.post("/donors/", summary="Search for Donors")
+def graph_search_donors(body: GraphSearchDonorsBody):
+    if body.attributes.employer is not None:
+        body.attributes.employer = "\""+body.attributes.employer+"\""
+    if body.attributes.occupation is not None:
+        body.attributes.occupation = "\""+body.attributes.occupation+"\""
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_donors, name=name, employer=employer, occupation=occupation, state=state, zip_code=zip_code, entity_tp=entity_tp, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_donors,
+            name=body.name, employer=body.attributes.employer, occupation=body.attributes.occupation, state=body.attributes.state, zip_code=body.attributes.zip_code, entity_tp=body.attributes.entity_tp,
+            context=body.context,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
+            concise=False
+        ))
 
-@router.get("/payees/", summary="Search for Payees")
-def graph_search_payees(name: str = None, context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31)):
-    if name is not None:
-        name = "\""+name+"\""
+@router.post("/payees/", summary="Search for Payees")
+def graph_search_payees(body: GraphSearchNamesDatesBody):
+    if body.name is not None:
+        body.name = "\""+body.name+"\""
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_payees, name=name, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_payees,
+            name=body.name,
+            context=body.context,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
+            concise=False
+        ))
 
-@router.get("/tweeters/", summary="Search for Tweeters")
-def graph_search_tweeters(name: str = None, username: str = None, candidate: bool = False, cand_pty_affiliation: str = Query(None, min_length=3, max_length=3), cand_election_yr: int = Query(None, ge=1990, le=datetime.datetime.now().year), context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31)):
-    if name is not None:
-        name = "\""+name+"\""
-    if username is not None:
-        username = username[1:] if username.startswith("@") else username
-        username = "\""+username+"\""
+@router.post("/tweeters/", summary="Search for Tweeters")
+def graph_search_tweeters(body: GraphSearchTweetersBody):
+    if body.name is not None:
+        body.name = "\""+body.name+"\""
+    if body.attributes.username is not None:
+        body.attributes.username = body.attributes.username[1:] if body.attributes.username.startswith("@") else body.attributes.username
+        body.attributes.username = "\""+body.attributes.username+"\""
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_tweeters, name=name, username=username, candidate=candidate, cand_pty_affiliation=cand_pty_affiliation, cand_election_yr=cand_election_yr, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_tweeters,
+            name=body.name, username=body.attributes.username, candidate=body.attributes.candidate,
+            cand_pty_affiliation=body.candidates.cand_pty_affiliation, cand_election_yr=body.candidates.cand_election_yr,
+            context=body.context,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
+            concise=False
+        ))
 
-@router.get("/sources/", summary="Search for Sources")
-def graph_search_sources(domain: str = None, bias_score: str = None, factually_questionable_flag: int = Query(None, ge=0, le=1), conspiracy_flag: int = Query(None, ge=0, le=1), hate_group_flag: int = Query(None, ge=0, le=1), propaganda_flag: int = Query(None, ge=0, le=1), satire_flag: int = Query(None, ge=0, le=1), context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31)):
-    if domain is not None:
-        if domain.startswith("www."):
-            domain = domain.split("www.",1)[1]
-        domain = "\""+domain+"\""
-    if bias_score is not None:
-        try:
-            bias_score = [int(i) for i in bias_score.split(",")]
-        except:
-            bias_score = None
+@router.post("/sources/", summary="Search for Sources")
+def graph_search_sources(body: GraphSearchSourcesBody):
+    if body.domain is not None:
+        if body.domain.startswith("www."):
+            body.domain = body.domain.split("www.",1)[1]
+        body.domain = "\""+body.domain+"\""
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_sources, domain=domain, bias_score=bias_score, factually_questionable_flag=factually_questionable_flag, conspiracy_flag=conspiracy_flag, hate_group_flag=hate_group_flag, propaganda_flag=propaganda_flag, satire_flag=satire_flag, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_sources,
+            domain=body.domain, bias_score=body.attributes.bias_score, factually_questionable_flag=body.attributes.factually_questionable_flag, conspiracy_flag=body.attributes.conspiracy_flag, hate_group_flag=body.attributes.hate_group_flag, propaganda_flag=body.attributes.propaganda_flag, satire_flag=body.attributes.satire_flag,
+            context=body.context,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
+            concise=False
+        ))
 
-@router.get("/buyers/", summary="Search for Buyers")
-def graph_search_buyers(name: str = None, context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31)):
-    if name is not None:
-        name = "\""+name+"\""
+@router.post("/buyers/", summary="Search for Buyers")
+def graph_search_buyers(body: GraphSearchNamesDatesBody):
+    if body.name is not None:
+        body.name = "\""+body.name+"\""
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_buyers, name=name, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_buyers,
+            name=body.name,
+            context=body.context,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
+            concise=False
+        ))
 
-@router.get("/pages/", summary="Search for Pages")
-def graph_search_pages(name: str = None, context: bool = False, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), min_year: int = Query(get_years()["default"]["min"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), max_year: int = Query(get_years()["default"]["max"], ge=get_years()["calendar"]["min"], le=get_years()["calendar"]["max"]), min_month: int = Query(1, ge=1, le=12), max_month: int = Query(12, ge=1, le=12), min_day: int = Query(1, ge=1, le=31), max_day: int = Query(31, ge=1, le=31)):
-    if name is not None:
-        name = "\""+name+"\""
+@router.post("/pages/", summary="Search for Pages")
+def graph_search_pages(body: GraphSearchNamesDatesBody):
+    if body.name is not None:
+        body.name = "\""+body.name+"\""
     with driver.session() as neo4j:
-        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_pages, name=name, context=context, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day, concise=False))
+        return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_pages,
+            name=body.name,
+            context=body.context,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
+            concise=False
+        ))

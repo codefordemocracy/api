@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
+from typing import List
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver, es, db
-from .dependencies.defaults import get_years
 from .dependencies import helpers
 from .dependencies.query import preview as query
+from .dependencies.models import PaginationConfig, DataListConfig
 
 #########################################################
 # initialize route
@@ -17,53 +19,83 @@ router = APIRouter(
 )
 
 #########################################################
+# define models
+#########################################################
+
+class DataPreviewBaseBody(BaseModel):
+    lists: List[str] = Field(None)
+    include: DataListConfig = DataListConfig()
+    exclude: DataListConfig = DataListConfig()
+    pagination: PaginationConfig = PaginationConfig()
+    count: bool = Field(False)
+
+#########################################################
 # preview entities
 #########################################################
 
-@router.get("/organization/committee/", summary="Preview Committees")
-def data_preview_organization_committee(lists: str = None, include_terms: str = None, include_ids: str = None, exclude_terms: str = None, exclude_ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False):
-    clean = helpers.prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db)
-    # grab elements
+@router.post("/organization/committee/", summary="Preview Committees")
+def data_preview_organization_committee(body: DataPreviewBaseBody):
+    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
-        return query.data_preview_organization_committee(es, include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"], exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"], skip=skip, limit=limit, count=count)
+        return query.data_preview_organization_committee(es,
+            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
+            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            count=body.count
+        )
     return []
 
-@router.get("/organization/employer/", summary="Preview Employers")
-def data_preview_organization_employer(lists: str = None, include_terms: str = None, include_ids: str = None, exclude_terms: str = None, exclude_ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False):
-    clean = helpers.prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db)
-    # grab elements
+@router.post("/organization/employer/", summary="Preview Employers")
+def data_preview_organization_employer(body: DataPreviewBaseBody):
+    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
-        return query.data_preview_organization_employer(es, include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"], exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"], skip=skip, limit=limit, count=count)
+        return query.data_preview_organization_employer(es,
+            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
+            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            count=body.count
+        )
     return []
 
-@router.get("/person/candidate/", summary="Preview Candidates")
-def data_preview_person_candidate(lists: str = None, include_terms: str = None, include_ids: str = None, exclude_terms: str = None, exclude_ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False):
-    clean = helpers.prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db)
-    # grab elements
+@router.post("/person/candidate/", summary="Preview Candidates")
+def data_preview_person_candidate(body: DataPreviewBaseBody):
+    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
-        return query.data_preview_person_candidate(es, include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"], exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"], skip=skip, limit=limit, count=count)
+        return query.data_preview_person_candidate(es,
+            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
+            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            count=body.count
+        )
     return []
 
-@router.get("/person/donor/", summary="Preview Donors")
-def data_preview_person_donor(lists: str = None, include_terms: str = None, include_ids: str = None, exclude_terms: str = None, exclude_ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False):
-    clean = helpers.prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db)
-    # grab elements
+@router.post("/person/donor/", summary="Preview Donors")
+def data_preview_person_donor(body: DataPreviewBaseBody):
+    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
-        return query.data_preview_person_donor(es, include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"], exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"], skip=skip, limit=limit, count=count)
+        return query.data_preview_person_donor(es,
+            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
+            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            count=body.count
+        )
     return []
 
-@router.get("/job/", summary="Preview Jobs")
-def data_preview_job(lists: str = None, include_terms: str = None, include_ids: str = None, exclude_terms: str = None, exclude_ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False):
-    clean = helpers.prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db)
-    # grab elements
+@router.post("/job/", summary="Preview Jobs")
+def data_preview_job(body: DataPreviewBaseBody):
+    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
-        return query.data_preview_job(es, include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"], exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"], skip=skip, limit=limit, count=count)
+        return query.data_preview_job(es,
+            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
+            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            count=body.count
+        )
     return []
 
-@router.get("/topic/", summary="Preview Topics")
-def data_preview_topic(lists: str = None, include_terms: str = None, include_ids: str = None, exclude_terms: str = None, exclude_ids: str = None, skip: int = Query(0, ge=0), limit: int = Query(30, ge=0, le=1000), count: bool = False):
-    clean = helpers.prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db)
-    # grab elements
+@router.post("/topic/", summary="Preview Topics")
+def data_preview_topic(body: DataPreviewBaseBody):
+    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
     elements = []
     for term in clean["include"]["terms"] or []:
         for exclude in clean["exclude"]["terms"] or []:
