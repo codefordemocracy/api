@@ -548,7 +548,8 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                         "recipient_cmte_id": hit["_source"]["row"]["target"]["committee"]["cmte_id"],
                         "recipient_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
                         "date": hit["_source"]["processed"]["date"][:10],
-                        "transaction_amt": hit["_source"]["row"]["transaction_amt"]
+                        "transaction_amt": hit["_source"]["row"]["transaction_amt"],
+                        "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + hit["_source"]["row"]["image_num"]
                     }
                     if "committee" in hit["_source"]["row"]["source"]:
                         row["contributor_cmte_id"] = hit["_source"]["row"]["source"]["committee"]["cmte_id"]
@@ -565,7 +566,8 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                         "refunding_cmte_id": hit["_source"]["row"]["target"]["committee"]["cmte_id"],
                         "refunding_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
                         "date": hit["_source"]["processed"]["date"][:10],
-                        "transaction_amt": hit["_source"]["row"]["transaction_amt"]
+                        "transaction_amt": hit["_source"]["row"]["transaction_amt"],
+                        "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + hit["_source"]["row"]["image_num"]
                     }
                 elements.append(row)
             return elements
