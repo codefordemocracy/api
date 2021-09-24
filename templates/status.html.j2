@@ -1,0 +1,169 @@
+{% extends "index.html.j2" %}
+{% block title %}Status{% endblock %}
+{% block content %}
+
+<div id="app" class="flex items-stretch justify-center p-5" v-cloak>
+
+  <div class="grid grid-cols-1 gap-5 w-full">
+
+    <div class="border border-secondary p-7">
+      <h3 class="text-3xl font-medium mb-3">Ads</h3>
+      <template v-if="!_.isEmpty(ads)">
+        <h5 class="text-xl mt-5 mb-3">Facebook Data</h5>
+        <p><strong>Count:</strong> [[ads.count.toLocaleString()]]</p>
+        <p><strong>Last Indexed:</strong> [[moment(ads.last_indexed).local()]]</p>
+        <p><strong>Coverage:</strong></p>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(ads.coverage)"></plot>
+      </template>
+      <p v-else>Loading<span class="blink">...</span></p>
+    </div>
+
+    <div class="border border-secondary p-7">
+      <h3 class="text-3xl font-medium mb-3">Contributions</h3>
+      <template v-if="!_.isEmpty(contributions)">
+        <p><strong>Total Count:</strong> [[contributions.count.toLocaleString()]]</p>
+        <template v-for="source in ['Bulk', 'API']">
+          <h5 class="text-xl mt-5 mb-3">FEC [[source]] Data</h5>
+          <p><strong>Count:</strong> [[contributions[_.lowerCase(source)].count.toLocaleString()]]</p>
+          <p><strong>Last Indexed:</strong> [[moment(contributions[_.lowerCase(source)].last_indexed).local()]]</p>
+          <p><strong>Coverage:</strong></p>
+          <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(contributions[_.lowerCase(source)].coverage)"></plot>
+        </template>
+      </template>
+      <p v-else>Loading<span class="blink">...</span></p>
+    </div>
+
+    <div class="border border-secondary p-7">
+      <h3 class="text-3xl font-medium mb-3">Lobbying</h3>
+      <template v-if="!_.isEmpty(lobbying)">
+        <template v-for="source in ['Senate', 'House']">
+          <template v-for="group in ['Disclosures', 'Contributions']">
+            <h5 class="text-xl mt-5 mb-3">[[source]] [[group]] Data</h5>
+            <p><strong>Count:</strong> [[lobbying[_.lowerCase(source)][_.lowerCase(group)].count.toLocaleString()]]</p>
+            <p><strong>Last Indexed:</strong> [[moment(lobbying[_.lowerCase(source)][_.lowerCase(group)].last_indexed).local()]]</p>
+            <p><strong>Coverage:</strong></p>
+            <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(lobbying[_.lowerCase(source)][_.lowerCase(group)].coverage)"></plot>
+          </template>
+        </template>
+      </template>
+      <p v-else>Loading<span class="blink">...</span></p>
+    </div>
+
+    <div class="border border-secondary p-7">
+      <h3 class="text-3xl font-medium mb-3">IRS</h3>
+      <template v-if="!_.isEmpty(irs)">
+        <h5 class="text-xl mt-5 mb-3">990 Data</h5>
+        <p><strong>Count:</strong> [[irs.count.toLocaleString()]]</p>
+        <p><strong>Last Indexed:</strong> [[moment(irs.last_indexed).local()]]</p>
+        <p><strong>Coverage:</strong></p>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(irs.coverage)"></plot>
+      </template>
+      <p v-else>Loading<span class="blink">...</span></p>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+{% block scripts %}
+
+  <script src="//cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+  <script src="//unpkg.com/axios@0.21.1"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <script src="//cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="//assets.codefordemocracy.org/js/components/plot.js"></script>
+
+  <script>
+
+  new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    components: {
+      'plot': plot
+    },
+    data: {
+      ads: {},
+      contributions: {},
+      lobbying: {},
+      irs: {}
+    },
+    methods: {
+      histogram(buckets) {
+        return {
+          data: [
+            {
+              x: _.map(buckets, 'key_as_string'),
+              y: _.map(buckets, 'doc_count'),
+              type: "bar",
+              marker: {
+                color: '#e5e5e5'
+              }
+            }
+          ],
+          layout: {
+            height: 175,
+            xaxis: {
+              linecolor: '#e5e5e5',
+              showgrid: false,
+              showticklabels: false,
+              fixedrange: true,
+              range: ['1998-01-01', moment().endOf('year').format('YYYY-MM-DD')]
+            },
+            yaxis: {
+              zeroline: false,
+              showgrid: false,
+              showticklabels: false,
+              fixedrange: true
+            },
+            margin: {
+              l: 23,
+              r: 23,
+              t: 20,
+              b: 27
+            }
+          },
+          config: {
+            displayModeBar: false,
+            responsive: true
+          },
+        }
+      }
+    },
+    created() {
+      var self = this
+      axios.get('/api/status/ads/')
+      .then(function(response) {
+        self.ads = response.data
+      })
+      .catch(function(error) {
+        console.error(error)
+      })
+      axios.get('/api/status/contributions/')
+      .then(function(response) {
+        self.contributions = response.data
+      })
+      .catch(function(error) {
+        console.error(error)
+      })
+      axios.get('/api/status/lobbying/')
+      .then(function(response) {
+        self.lobbying = response.data
+      })
+      .catch(function(error) {
+        console.error(error)
+      })
+      axios.get('/api/status/990/')
+      .then(function(response) {
+        self.irs = response.data
+      })
+      .catch(function(error) {
+        console.error(error)
+      })
+    }
+  })
+
+  </script>
+
+{% endblock %}

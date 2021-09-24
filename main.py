@@ -3,7 +3,7 @@ from fastapi.security import HTTPBasic
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import ORJSONResponse
 
-from endpoints import find, search, traverse, uncover, browse, preview, calculate, analyze
+from endpoints import check, find, search, traverse, uncover, browse, preview, calculate, analyze
 
 #########################################################
 # initialize app
@@ -27,6 +27,7 @@ app = FastAPI(
 # configure routes
 #########################################################
 
+app.include_router(check.router)
 app.include_router(find.router)
 app.include_router(search.router)
 app.include_router(traverse.router)
@@ -37,11 +38,35 @@ app.include_router(calculate.router)
 app.include_router(analyze.router)
 
 #########################################################
-# serve homepage
+# serve pages
 #########################################################
 
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/", include_in_schema=False)
-def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def route_home(request: Request):
+    return templates.TemplateResponse("home.html.j2", {"request": request})
+
+@app.get("/view/status/", include_in_schema=False)
+def route_view_status(request: Request):
+    return templates.TemplateResponse("status.html.j2", {"request": request})
+
+#########################################################
+# serve data to front end
+#########################################################
+
+@app.get("/api/status/ads/", include_in_schema=False)
+def route_api_status_ads(request: Request):
+    return check.status_check_data_ads()
+
+@app.get("/api/status/contributions/", include_in_schema=False)
+def route_api_status_contributions(request: Request):
+    return check.status_check_data_contributions()
+
+@app.get("/api/status/lobbying/", include_in_schema=False)
+def route_api_status_lobbying(request: Request):
+    return check.status_check_data_lobbying()
+
+@app.get("/api/status/990/", include_in_schema=False)
+def route_api_status_990(request: Request):
+    return check.status_check_data_990()

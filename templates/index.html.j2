@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 
-    <title>API | Code for Democracy</title>
+    <title>{% block title %}{% endblock %} | Code for Democracy</title>
     <link rel="stylesheet" href="//assets.codefordemocracy.org/css/cfd.css" />
     <link rel="icon" type="image/png" href="//assets.codefordemocracy.org/img/favicon.png" />
 
@@ -21,13 +21,9 @@
   </head>
   <body>
 
-    <div class="flex h-screen pb-5 px-5">
-      <div class="max-w-xs m-auto form-full form-md">
-        <a href="https://codefordemocracy.org" target="_blank" class="block mb-7"><img src="//assets.codefordemocracy.org/img/logo.png" /></a>
-        <a class="btn btn-primary" href="https://docs.codefordemocracy.org/data/api/">Read Documentation</a>
-        <a class="btn btn-gray" href="/view/endpoints">View Endpoints</a>
-      </div>
-    </div>
+    {% block content %}{% endblock %}
+
+    {% block scripts %}{% endblock %}
 
   </body>
 </html>
