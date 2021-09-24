@@ -35,22 +35,22 @@ class DataCalculateBaseBody(BaseModel):
     histogram: bool = Field(False)
 
 class DataCalculateRecipeAdBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="D3WE|BuW8|N7Jk|P2HG|8HcR")
+    template: str = Field(..., regex="D3WE|BuW8|P2HG|N7Jk|8HcR")
     orderby: str = Field(None, regex="amount")
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipeContributionBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="ReqQ|NcFz|m4YC|7v4P|T5xv|Bs5W|6peF|F2mS|IQL2|P3JF|VqHR")
+    template: str = Field(..., regex="ReqQ|VqHR|DXhw|IQL2|WK3K|NcFz|m4YC|Bs5W|KR64|7v4P|6peF|F7Xn|T5xv|F2mS|gXjA")
     orderby: str = Field(None, regex="amount|date")
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipeLobbyingBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="kMER|wLvp|MJdb|WGb3|PjyR|MK93|3Nrt|V5Gh|Q23x")
+    template: str = Field(..., regex="wLvp|kMER|MJdb|PjyR|WGb3|MK93|V5Gh|3Nrt|Q23x")
     orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipe990Body(DataCalculateBaseBody):
-    template: str = Field(..., regex="K23r|GCv2|P34n")
+    template: str = Field(..., regex="GCv2|P34n|K23r")
     orderby: str = Field(None, regex="amount")
     orderdir: str = Field("desc", regex="asc|desc")
 

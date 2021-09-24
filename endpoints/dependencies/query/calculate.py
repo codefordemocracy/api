@@ -46,7 +46,7 @@ def data_calculate_recipe_ad(template, es, include_terms, include_ids, exclude_t
                                 }
                             }
                         })
-                    elif template in ["BuW8", "N7Jk", "P2HG"]:
+                    elif template in ["BuW8", "P2HG", "N7Jk"]:
                         subquery["bool"]["should"].append({
                             "match_phrase": {
                                 "obj.ad_creative_body": {
@@ -121,7 +121,7 @@ def data_calculate_recipe_ad(template, es, include_terms, include_ids, exclude_t
                                 }
                             }
                         })
-                    elif template in ["BuW8", "N7Jk", "P2HG"]:
+                    elif template in ["BuW8", "P2HG", "N7Jk"]:
                         subquery["bool"]["must_not"].append({
                             "match_phrase": {
                                 "obj.ad_creative_body": {
@@ -249,16 +249,20 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
             }
         }
     }
+    # add filters for type of contributor
+    if template == "VqHR":
+        q["query"]["bool"]["must"].append({
+            "match": {
+                "row.source.classification": "committee"
+            }
+        })
+    elif template == "dFMy":
+        q["query"]["bool"]["must"].append({
+            "match": {
+                "row.source.classification": "individual"
+            }
+        })
     if len(include_terms) > 0 or len(include_ids) > 0:
-        # Contributions
-        if template in ["P3JF"]:
-            q["query"]["bool"]["must"].append({
-                "range": {
-                    "row.transaction_amt": {
-                        "lt": 0
-                    }
-                }
-            })
         # List A
         subquery = {
             "bool": {
@@ -269,7 +273,7 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
         if len(include_terms) > 0:
             if include_terms[0] is not None:
                 for term in include_terms[0]:
-                    if template in ["ReqQ", "IQL2", "P3JF"]:
+                    if template in ["ReqQ", "IQL2"]:
                         subquery["bool"]["should"].append({
                             "match": {
                                 "row.source.committee.cmte_nm": term
@@ -290,13 +294,13 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                                 "row.source.donor.employer": term
                             }
                         })
-                    elif template in ["7v4P", "T5xv", "6peF", "F2mS"]:
+                    elif template in ["7v4P", "6peF", "F2mS", "T5xv"]:
                         subquery["bool"]["should"].append({
                             "match": {
                                 "row.source.donor.occupation": term
                             }
                         })
-                    elif template in ["VqHR"]:
+                    elif template in ["VqHR", "dFMy"]:
                         subquery["bool"]["should"].append({
                             "match": {
                                 "row.target.committee.cmte_nm": term
@@ -305,13 +309,13 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
         if len(include_ids) > 0:
             if include_ids[0] is not None:
                 for id in include_ids[0]:
-                    if template in ["ReqQ", "IQL2", "P3JF"]:
+                    if template in ["ReqQ", "IQL2"]:
                         subquery["bool"]["should"].append({
                             "match": {
                                 "row.source.committee.cmte_id": id
                             }
                         })
-                    elif template in ["VqHR"]:
+                    elif template in ["VqHR", "dFMy"]:
                         subquery["bool"]["should"].append({
                             "match": {
                                 "row.target.committee.cmte_id": id
@@ -334,7 +338,7 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                                 "row.source.donor.employer": term
                             }
                         })
-                    elif template in ["Bs5W", "6peF", "IQL2"]:
+                    elif template in ["IQL2", "Bs5W", "6peF"]:
                         subquery["bool"]["should"].append({
                             "match": {
                                 "row.target.committee.cmte_nm": term
@@ -349,7 +353,7 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                                 "row.source.committee.cmte_id": id
                             }
                         })
-                    elif template in ["Bs5W", "6peF", "IQL2"]:
+                    elif template in ["IQL2", "Bs5W", "6peF"]:
                         subquery["bool"]["should"].append({
                             "match": {
                                 "row.target.committee.cmte_id": id
@@ -392,7 +396,7 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
         if len(exclude_terms) > 0:
             if exclude_terms[0] is not None:
                 for term in exclude_terms[0]:
-                    if template in ["ReqQ", "IQL2", "P3JF"]:
+                    if template in ["ReqQ", "IQL2"]:
                         subquery["bool"]["must_not"].append({
                             "match": {
                                 "row.source.committee.cmte_nm": term
@@ -413,13 +417,13 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                                 "row.source.donor.employer": term
                             }
                         })
-                    elif template in ["7v4P", "T5xv", "6peF", "F2mS"]:
+                    elif template in ["7v4P", "6peF", "F2mS", "T5xv"]:
                         subquery["bool"]["must_not"].append({
                             "match": {
                                 "row.source.donor.occupation": term
                             }
                         })
-                    elif template in ["VqHR"]:
+                    elif template in ["VqHR", "dFMy"]:
                         subquery["bool"]["must_not"].append({
                             "match": {
                                 "row.target.committee.cmte_nm": term
@@ -428,13 +432,13 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
         if len(exclude_ids) > 0:
             if exclude_ids[0] is not None:
                 for id in exclude_ids[0]:
-                    if template in ["ReqQ", "IQL2", "P3JF"]:
+                    if template in ["ReqQ", "IQL2"]:
                         subquery["bool"]["must_not"].append({
                             "match": {
                                 "row.source.committee.cmte_id": id
                             }
                         })
-                    elif template in ["VqHR"]:
+                    elif template in ["VqHR", "dFMy"]:
                         subquery["bool"]["must_not"].append({
                             "match": {
                                 "row.target.committee.cmte_id": id
@@ -456,7 +460,7 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                                 "row.source.donor.employer": term
                             }
                         })
-                    elif template in ["Bs5W", "6peF", "IQL2"]:
+                    elif template in ["IQL2", "Bs5W", "6peF"]:
                         subquery["bool"]["must_not"].append({
                             "match": {
                                 "row.target.committee.cmte_nm": term
@@ -471,7 +475,7 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                                 "row.source.committee.cmte_id": id
                             }
                         })
-                    elif template in ["Bs5W", "6peF", "IQL2"]:
+                    elif template in ["IQL2", "Bs5W", "6peF"]:
                         subquery["bool"]["must_not"].append({
                             "match": {
                                 "row.target.committee.cmte_id": id
@@ -543,36 +547,23 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
         try:
             elements = []
             for hit in response["hits"]["hits"]:
-                if template in ["VqHR", "ReqQ", "NcFz", "m4YC", "7v4P", "T5xv", "Bs5W", "6peF", "F2mS", "IQL2"]:
-                    row = {
-                        "recipient_cmte_id": hit["_source"]["row"]["target"]["committee"]["cmte_id"],
-                        "recipient_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
-                        "date": hit["_source"]["processed"]["date"][:10],
-                        "transaction_amt": hit["_source"]["row"]["transaction_amt"],
-                        "transaction_tp": hit["_source"]["row"]["transaction_tp"],
-                        "reported_by": "contributor" if hit["_source"]["row"]["transaction_tp"].startswith("2") or hit["_source"]["row"]["transaction_tp"].startswith("4") and hit["_source"]["row"]["transaction_tp"] != "24I" and hit["_source"]["row"]["transaction_tp"] != "24T" else "recipient",
-                        "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + hit["_source"]["row"]["image_num"]
-                    }
-                    if "committee" in hit["_source"]["row"]["source"]:
-                        row["contributor_cmte_id"] = hit["_source"]["row"]["source"]["committee"]["cmte_id"]
-                        row["contributor_cmte_nm"] = hit["_source"]["row"]["source"]["committee"]["cmte_nm"]
-                    elif "donor" in hit["_source"]["row"]["source"]:
-                        row["donor_name"] = hit["_source"]["processed"]["source"]["donor"]["name"]
-                        row["donor_zip_code"] = hit["_source"]["row"]["source"]["donor"]["zip_code"]
-                        row["donor_employer"] = hit["_source"]["row"]["source"]["donor"]["employer"]
-                        row["donor_occupation"] = hit["_source"]["row"]["source"]["donor"]["occupation"]
-                elif template in ["P3JF"]:
-                    row = {
-                        "contributor_cmte_id": hit["_source"]["row"]["source"]["committee"]["cmte_id"],
-                        "contributor_cmte_nm": hit["_source"]["row"]["source"]["committee"]["cmte_nm"],
-                        "refunding_cmte_id": hit["_source"]["row"]["target"]["committee"]["cmte_id"],
-                        "refunding_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
-                        "date": hit["_source"]["processed"]["date"][:10],
-                        "transaction_amt": hit["_source"]["row"]["transaction_amt"],
-                        "transaction_tp": hit["_source"]["row"]["transaction_tp"],
-                        "reported_by": "contributor" if hit["_source"]["row"]["transaction_tp"].startswith("2") or hit["_source"]["row"]["transaction_tp"].startswith("4") and hit["_source"]["row"]["transaction_tp"] != "24I" and hit["_source"]["row"]["transaction_tp"] != "24T" else "recipient",
-                        "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + hit["_source"]["row"]["image_num"]
-                    }
+                row = {
+                    "recipient_cmte_id": hit["_source"]["row"]["target"]["committee"]["cmte_id"],
+                    "recipient_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
+                    "date": hit["_source"]["processed"]["date"][:10],
+                    "transaction_amt": hit["_source"]["row"]["transaction_amt"],
+                    "transaction_tp": hit["_source"]["row"]["transaction_tp"],
+                    "reported_by": "contributor" if hit["_source"]["row"]["transaction_tp"].startswith("2") or hit["_source"]["row"]["transaction_tp"].startswith("4") and hit["_source"]["row"]["transaction_tp"] != "24I" and hit["_source"]["row"]["transaction_tp"] != "24T" else "recipient",
+                    "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + hit["_source"]["row"]["image_num"]
+                }
+                if "committee" in hit["_source"]["row"]["source"]:
+                    row["contributor_cmte_id"] = hit["_source"]["row"]["source"]["committee"]["cmte_id"]
+                    row["contributor_cmte_nm"] = hit["_source"]["row"]["source"]["committee"]["cmte_nm"]
+                elif "donor" in hit["_source"]["row"]["source"]:
+                    row["donor_name"] = hit["_source"]["processed"]["source"]["donor"]["name"]
+                    row["donor_zip_code"] = hit["_source"]["row"]["source"]["donor"]["zip_code"]
+                    row["donor_employer"] = hit["_source"]["row"]["source"]["donor"]["employer"]
+                    row["donor_occupation"] = hit["_source"]["row"]["source"]["donor"]["occupation"]
                 elements.append(row)
             return elements
         except:
@@ -769,7 +760,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include_terms, in
         }
         if include_ids[0] is not None:
             for id in include_ids[0]:
-                if template in ["WGb3", "PjyR", "MK93"]:
+                if template in ["PjyR", "WGb3", "MK93"]:
                     subquery["bool"]["should"].append({
                         "match": {
                             "processed.registrant.senate_id": id
@@ -784,7 +775,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include_terms, in
         }
         if exclude_ids[0] is not None:
             for id in exclude_ids[0]:
-                if template in ["WGb3", "PjyR", "MK93"]:
+                if template in ["PjyR", "WGb3", "MK93"]:
                     subquery["bool"]["must_not"].append({
                         "match": {
                             "processed.registrant.senate_id": id
@@ -828,7 +819,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include_terms, in
             elements = []
             for hit in response["hits"]["hits"]:
                 contributions = hit["_source"]["processed"].get("contributions")
-                if template in ["3Nrt", "V5Gh", "Q23x"]:
+                if template in ["V5Gh", "3Nrt", "Q23x"]:
                     contributions = [c for c in contributions if c["contribution_type"] == "Honorary Expenses"]
                 for contribution in contributions:
                     contribution["date_contribution"] = contribution.pop("date")[:10]
@@ -872,7 +863,7 @@ def data_calculate_recipe_990(template, es, include_terms, include_ids, exclude_
         if len(include_terms) > 0:
             if include_terms[0] is not None:
                 for term in include_terms[0]:
-                    if template in ["K23r", "GCv2", "P34n"]:
+                    if template in ["GCv2", "P34n", "K23r"]:
                         subquery["bool"]["should"].append({
                             "multi_match": {
                                 "query": term,
@@ -903,7 +894,7 @@ def data_calculate_recipe_990(template, es, include_terms, include_ids, exclude_
         if len(exclude_terms) > 0:
             if exclude_terms[0] is not None:
                 for term in exclude_terms[0]:
-                    if template in ["K23r", "GCv2", "P34n"]:
+                    if template in ["GCv2", "P34n", "K23r"]:
                         subquery["bool"]["must_not"].append({
                             "multi_match": {
                                 "query": term,
