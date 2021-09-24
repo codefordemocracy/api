@@ -3,7 +3,6 @@ from pydantic import BaseModel, Field
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver, es
-from .dependencies import helpers
 from .dependencies.cypher import search as cypher
 from .dependencies.query import browse as query
 from .dependencies.models import PaginationConfig, DatesConfig
