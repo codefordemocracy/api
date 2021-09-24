@@ -98,7 +98,7 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        if template in ["kMER", "wLvp", "MJdb"]:
+        if body.template in ["kMER", "wLvp", "MJdb"]:
             return query.data_calculate_recipe_lobbying_disclosures(body.template, es,
                 include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
                 exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
@@ -109,14 +109,14 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
                 histogram=body.histogram,
                 concise=False
             )
-        elif template in ["WGb3", "PjyR", "MK93", "3Nrt", "V5Gh", "Q23x"]:
-            if template in ["WGb3", "3Nrt"]:
+        elif body.template in ["WGb3", "PjyR", "MK93", "3Nrt", "V5Gh", "Q23x"]:
+            if body.template in ["WGb3", "3Nrt"]:
                 template2 = "kMER"
-            elif template in ["PjyR", "V5Gh"]:
+            elif body.template in ["PjyR", "V5Gh"]:
                 template2 = "wLvp"
-            elif template in ["MK93", "Q23x"]:
+            elif body.template in ["MK93", "Q23x"]:
                 template2 = "MJdb"
-            disclosures = query.data_calculate_recipe_lobbying_disclosures(body.template2, es,
+            disclosures = query.data_calculate_recipe_lobbying_disclosures(template2, es,
                 include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
                 exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
                 skip=body.pagination.skip, limit=body.pagination.limit,
