@@ -549,6 +549,8 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                         "recipient_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
                         "date": hit["_source"]["processed"]["date"][:10],
                         "transaction_amt": hit["_source"]["row"]["transaction_amt"],
+                        "transaction_tp": hit["_source"]["row"]["transaction_tp"],
+                        "reported_by": "contributor" if hit["_source"]["row"]["transaction_tp"].startswith("2") or hit["_source"]["row"]["transaction_tp"].startswith("4") and hit["_source"]["row"]["transaction_tp"] != "24I" and hit["_source"]["row"]["transaction_tp"] != "24T" else "recipient",
                         "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + hit["_source"]["row"]["image_num"]
                     }
                     if "committee" in hit["_source"]["row"]["source"]:
@@ -567,6 +569,8 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
                         "refunding_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
                         "date": hit["_source"]["processed"]["date"][:10],
                         "transaction_amt": hit["_source"]["row"]["transaction_amt"],
+                        "transaction_tp": hit["_source"]["row"]["transaction_tp"],
+                        "reported_by": "contributor" if hit["_source"]["row"]["transaction_tp"].startswith("2") or hit["_source"]["row"]["transaction_tp"].startswith("4") and hit["_source"]["row"]["transaction_tp"] != "24I" and hit["_source"]["row"]["transaction_tp"] != "24T" else "recipient",
                         "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + hit["_source"]["row"]["image_num"]
                     }
                 elements.append(row)
