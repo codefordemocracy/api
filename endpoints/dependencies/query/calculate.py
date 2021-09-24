@@ -1,4 +1,5 @@
 from ..helpers import clean_committees_names
+from .preview import data_preview_organization_committee
 
 def data_calculate_recipe_ad(template, es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     q = {
@@ -63,7 +64,7 @@ def data_calculate_recipe_ad(template, es, include_terms, include_ids, exclude_t
         if len(include_ids) > 0:
             if include_ids[0] is not None:
                 if template in ["D3WE", "BuW8"]:
-                    committees = data_preview_organization_committee(es, None, include_ids[0], 0, 10000, False)
+                    committees = data_preview_organization_committee(es, None, include_ids[0], None, None, 0, 10000, False)
                     for committee in committees:
                         name = clean_committees_names(committee["cmte_nm"])
                         if template in ["D3WE"]:
@@ -138,7 +139,7 @@ def data_calculate_recipe_ad(template, es, include_terms, include_ids, exclude_t
         if len(exclude_ids) > 0:
             if exclude_ids[0] is not None:
                 if template in ["D3WE", "BuW8"]:
-                    committees = data_preview_organization_committee(es, None, exclude_ids[0], 0, 10000, False)
+                    committees = data_preview_organization_committee(es, None, exclude_ids[0], None, None, 0, 10000, False)
                     for committee in committees:
                         name = clean_committees_names(committee["cmte_nm"])
                         if template in ["D3WE"]:
@@ -875,7 +876,7 @@ def data_calculate_recipe_990(template, es, include_terms, include_ids, exclude_
         if len(include_ids) > 0:
             if include_ids[0] is not None:
                 if template in ["D3WE", "BuW8"]:
-                    committees = data_preview_organization_committee(es, None, include_ids[0], 0, 10000, False)
+                    committees = data_preview_organization_committee(es, None, include_ids[0], None, None, 0, 10000, False)
                     for committee in committees:
                         name = clean_committees_names(committee["cmte_nm"])
                         if template in ["GCv2"]:
@@ -906,7 +907,7 @@ def data_calculate_recipe_990(template, es, include_terms, include_ids, exclude_
         if len(exclude_ids) > 0:
             if exclude_ids[0] is not None:
                 if template in ["D3WE", "BuW8"]:
-                    committees = data_preview_organization_committee(es, None, exclude_ids[0], 0, 10000, False)
+                    committees = data_preview_organization_committee(es, None, exclude_ids[0], None, None, 0, 10000, False)
                     for committee in committees:
                         name = clean_committees_names(committee["cmte_nm"])
                         if template in ["GCv2"]:
