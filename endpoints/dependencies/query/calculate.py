@@ -1,4 +1,4 @@
-from ..helpers import clean_committees_names
+from ..helpers import clean_committees_names, determine_histogram_interval
 from .preview import data_preview_organization_committee
 from .builder.functions import make_query, set_terms_ids
 
@@ -115,7 +115,7 @@ def data_calculate_recipe_article(template, es, include_terms, include_ids, excl
             "dates": {
                 "date_histogram": {
                     "field": "extracted.date",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }
@@ -329,7 +329,7 @@ def data_calculate_recipe_ad(template, es, include_terms, include_ids, exclude_t
             "dates": {
                 "date_histogram": {
                     "field": "obj.ad_creation_time",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }
@@ -723,7 +723,7 @@ def data_calculate_recipe_contribution(template, es, include_terms, include_ids,
             "dates": {
                 "date_histogram": {
                     "field": "processed.date",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }
@@ -883,7 +883,7 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include_terms, incl
             "dates": {
                 "date_histogram": {
                     "field": "processed.date_submitted",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }
@@ -994,7 +994,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include_terms, in
             "dates": {
                 "date_histogram": {
                     "field": "processed.date_submitted",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }
@@ -1127,7 +1127,7 @@ def data_calculate_recipe_990(template, es, include_terms, include_ids, exclude_
             "dates": {
                 "date_histogram": {
                     "field": "row.sub_date",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }

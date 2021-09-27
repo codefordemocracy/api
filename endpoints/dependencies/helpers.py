@@ -92,6 +92,15 @@ def prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids,
         }
     }
 
+def determine_histogram_interval(mindate, maxdate):
+    delta = maxdate-mindate
+    if delta.days <= 180:
+        return "day"
+    elif delta.days <= 1095:
+        return "week"
+    else:
+        return "month"
+
 def clean_committees_names(name):
     name = name.replace("COMMITTEE", "")
     name = name.replace("POLITICAL", "")

@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+from ..helpers import determine_histogram_interval
+
 def documents_browse_news_articles_source(es, domains, text, histogram, skip, limit, mindate, maxdate):
     q = {
         "from": skip,
@@ -36,7 +38,7 @@ def documents_browse_news_articles_source(es, domains, text, histogram, skip, li
             "dates": {
                 "date_histogram": {
                     "field": "extracted.date",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }
@@ -89,7 +91,7 @@ def documents_browse_twitter_tweets_user(es, user_ids, text, histogram, skip, li
             "dates": {
                 "date_histogram": {
                     "field": "obj.tweet.created_at",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }
@@ -173,7 +175,7 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
             "facebook": {
                 "date_histogram": {
                     "field": "obj.ad_creation_time",
-                    "calendar_interval": "day",
+                    "calendar_interval": determine_histogram_interval(mindate, maxdate),
                     "time_zone": "America/New_York"
                 }
             }
