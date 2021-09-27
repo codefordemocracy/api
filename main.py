@@ -55,6 +55,10 @@ def route_view_status(request: Request):
 # serve data to front end
 #########################################################
 
+@app.get("/api/status/articles/", include_in_schema=False)
+def route_api_status_articles(request: Request):
+    return check.status_check_data_articles()
+
 @app.get("/api/status/ads/", include_in_schema=False)
 def route_api_status_ads(request: Request):
     return check.status_check_data_ads()

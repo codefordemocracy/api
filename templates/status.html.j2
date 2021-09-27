@@ -7,6 +7,17 @@
   <div class="grid grid-cols-1 gap-5 w-full">
 
     <div class="border border-secondary p-7">
+      <h3 class="text-3xl font-medium mb-3">News Articles</h3>
+      <template v-if="!_.isEmpty(articles)">
+        <p><strong>Count:</strong> [[articles.count.toLocaleString()]]</p>
+        <p><strong>Last Indexed:</strong> [[moment(articles.last_indexed).local()]]</p>
+        <p><strong>Coverage:</strong></p>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(articles.coverage)"></plot>
+      </template>
+      <p v-else>Loading<span class="blink">...</span></p>
+    </div>
+
+    <div class="border border-secondary p-7">
       <h3 class="text-3xl font-medium mb-3">Ads</h3>
       <template v-if="!_.isEmpty(ads)">
         <h5 class="text-xl mt-5 mb-3">Facebook Data</h5>
@@ -84,6 +95,7 @@
       'plot': plot
     },
     data: {
+      articles: {},
       ads: {},
       contributions: {},
       lobbying: {},
@@ -108,14 +120,12 @@
               linecolor: '#e5e5e5',
               showgrid: false,
               showticklabels: false,
-              fixedrange: true,
               range: ['1998-01-01', moment().endOf('year').format('YYYY-MM-DD')]
             },
             yaxis: {
               zeroline: false,
               showgrid: false,
-              showticklabels: false,
-              fixedrange: true
+              showticklabels: false
             },
             margin: {
               l: 23,
@@ -133,6 +143,13 @@
     },
     created() {
       var self = this
+      axios.get('/api/status/articles/')
+      .then(function(response) {
+        self.articles = response.data
+      })
+      .catch(function(error) {
+        console.error(error)
+      })
       axios.get('/api/status/ads/')
       .then(function(response) {
         self.ads = response.data

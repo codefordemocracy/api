@@ -1,6 +1,42 @@
 import datetime
 import pytz
 
+def status_check_data_articles(es):
+    count = es.count(index="news_articles")
+    coverage = es.search(index="news_articles",
+        body={
+            "size": 0,
+            "aggs": {
+                "dates": {
+                    "date_histogram": {
+                        "field": "extracted.date",
+                        "calendar_interval": "quarter",
+                        "time_zone": "America/New_York"
+                    }
+                }
+            }
+        },
+        filter_path=["aggregations"]
+    )
+    last_indexed = es.search(index="news_articles",
+        body={
+            "size": 0,
+            "aggs": {
+                "last_indexed": {
+                    "max": {
+                        "field": "context.last_indexed"
+                    }
+                }
+            }
+        },
+        filter_path=["aggregations"]
+    )
+    return {
+        "count": count["count"],
+        "coverage": coverage["aggregations"]["dates"]["buckets"],
+        "last_indexed": pytz.utc.localize(datetime.datetime.fromtimestamp(last_indexed["aggregations"]["last_indexed"]["value"]/1000)).astimezone(tz=pytz.timezone('US/Eastern'))
+    }
+
 def status_check_data_ads(es):
     count = es.count(index="facebook_ads")
     coverage = es.search(index="facebook_ads",

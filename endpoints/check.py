@@ -20,6 +20,10 @@ router = APIRouter(
 # check status of data
 #########################################################
 
+@router.get("/data/articles/", summary="Check Status of Articles Data")
+def status_check_data_articles():
+    return query.status_check_data_articles(es)
+
 @router.get("/data/ads/", summary="Check Status of Ads Data")
 def status_check_data_ads():
     return query.status_check_data_ads(es)
