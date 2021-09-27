@@ -34,13 +34,18 @@ class DataCalculateBaseBody(BaseModel):
     count: bool = Field(False)
     histogram: bool = Field(False)
 
+class DataCalculateRecipeArticleBody(DataCalculateBaseBody):
+    template: str = Field(..., regex="PMYZ|WdMv|RasK|GSmB")
+    orderby: str = Field(None, regex="date")
+    orderdir: str = Field("desc", regex="asc|desc")
+
 class DataCalculateRecipeAdBody(DataCalculateBaseBody):
     template: str = Field(..., regex="D3WE|BuW8|P2HG|N7Jk|8HcR")
     orderby: str = Field(None, regex="amount")
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipeContributionBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="ReqQ|VqHR|DXhw|IQL2|WK3K|NcFz|m4YC|Bs5W|KR64|7v4P|6peF|F7Xn|T5xv|F2mS|gXjA")
+    template: str = Field(..., regex="ReqQ|VqHR|DXhw|dFMy|KWYZ|IQL2|WK3K|NcFz|m4YC|Bs5W|KR64|7v4P|6peF|F7Xn|T5xv|F2mS|gXjA")
     orderby: str = Field(None, regex="amount|date")
     orderdir: str = Field("desc", regex="asc|desc")
 
@@ -57,6 +62,23 @@ class DataCalculateRecipe990Body(DataCalculateBaseBody):
 #########################################################
 # calculate recipes
 #########################################################
+
+@router.post("/recipe/article/", summary="Calculate Recipe for Articles")
+def data_calculate_recipe_article(body: DataCalculateRecipeArticleBody):
+    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
+    if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
+        mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        return query.data_calculate_recipe_article(body.template, es,
+            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
+            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            mindate=mindate, maxdate=maxdate,
+            orderby=body.orderby, orderdir=body.orderdir,
+            count=body.count,
+            histogram=body.histogram
+        )
+    return []
 
 @router.post("/recipe/ad/", summary="Calculate Recipe for Ads")
 def data_calculate_recipe_ad(body: DataCalculateRecipeAdBody):
