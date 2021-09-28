@@ -1,184 +1,148 @@
+from .builder.functions import make_query, add_must_clause, add_not_clause, add_filter_clause, make_should_subquery, add_should_clause
+from .builder.responses import get_response
+
 def data_preview_organization_committee(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
-    q = {
-        "query": {
-            "bool": {
-                "should": [],
-                "minimum_should_match": 1,
-                "must_not": []
-            }
-        }
-    }
+    q = make_query()
     if include_terms is not None:
+        subquery = make_should_subquery()
         for term in include_terms:
-            q["query"]["bool"]["should"].append({
+            subquery = add_should_clause(subquery, {
                 "match": {
                     "row.cmte_nm": term
                 }
             })
+        q = add_must_clause(q, subquery)
     if include_ids is not None:
+        subquery = make_should_subquery()
         for id in include_ids:
-            q["query"]["bool"]["should"].append({
-                "match": {
-                    "row.cmte_id": id
+            subquery = add_should_clause(subquery, {
+                "term": {
+                    "row.cmte_id": id.lower()
                 }
             })
+        q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
-            q["query"]["bool"]["must_not"].append({
+            q = add_not_clause(q, {
                 "match": {
                     "row.cmte_nm": term
                 }
             })
     if exclude_ids is not None:
         for id in exclude_ids:
-            q["query"]["bool"]["must_not"].append({
-                "match": {
-                    "row.cmte_id": id
+            q = add_not_clause(q, {
+                "term": {
+                    "row.cmte_id": id.lower()
                 }
             })
-    if count is True:
-        response = es.count(index="federal_fec_committees", body=q)
-        try:
-            return [{"count": response["count"]}]
-        except:
-            return []
-    else:
-        q["from"] = skip
-        q["size"] = limit
-        response = es.search(index="federal_fec_committees", body=q, filter_path=["hits.hits._source.row.cmte_id", "hits.hits._source.row.cmte_nm"])
-        try:
-            elements = []
-            for hit in response["hits"]["hits"]:
-                elements.append({
-                    "cmte_id": hit["_source"]["row"]["cmte_id"],
-                    "cmte_nm": hit["_source"]["row"]["cmte_nm"]
-                })
-            return elements
-        except:
-            return []
+    response = get_response(es, "federal_fec_committees", q, skip, limit, count, False,
+        filter_path=["hits.hits._source.row.cmte_id", "hits.hits._source.row.cmte_nm"]
+    )
+    if count is not True:
+        elements = []
+        for source in response:
+            elements.append({
+                "cmte_id": source["row"]["cmte_id"],
+                "cmte_nm": source["row"]["cmte_nm"]
+            })
+        return elements
+    return response
 
 def data_preview_organization_employer(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
-    q = {
-        "query": {
-            "bool": {
-                "should": [],
-                "minimum_should_match": 1,
-                "must_not": []
-            }
-        },
-        "collapse": {
-            "field": "row.source.donor.employer.keyword"
-        }
+    q = make_query()
+    q["collapse"] = {
+        "field": "row.source.donor.employer.keyword"
     }
     if include_terms is not None:
+        subquery = make_should_subquery()
         for term in include_terms:
-            q["query"]["bool"]["should"].append({
+            subquery = add_should_clause(subquery, {
                 "match": {
                     "row.source.donor.employer": term
                 }
             })
+        q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
-            q["query"]["bool"]["must_not"].append({
+            q = add_not_clause(q, {
                 "match": {
                     "row.source.donor.employer": term
                 }
             })
-    if count is True:
-        response = es.count(index="federal_fec_contributions", body=q)
-        try:
-            return [{"count": response["count"]}]
-        except:
-            return []
-    else:
-        q["from"] = skip
-        q["size"] = limit
-        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.row.source.donor.employer"])
-        try:
-            elements = []
-            for hit in response["hits"]["hits"]:
-                elements.append({
-                    "name": hit["_source"]["row"]["source"]["donor"]["employer"]
-                })
-            return elements
-        except:
-            return []
+    response = get_response(es, "federal_fec_contributions", q, skip, limit, count, False,
+        filter_path=["hits.hits._source.row.source.donor.employer"]
+    )
+    if count is not True:
+        elements = []
+        for source in response:
+            elements.append({
+                "name": source["row"]["source"]["donor"]["employer"]
+            })
+        return elements
+    return response
 
 def data_preview_person_candidate(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
-    q = {
-        "query": {
-            "bool": {
-                "should": [],
-                "minimum_should_match": 1,
-                "must_not": []
-            }
-        }
-    }
+    q = make_query()
     if include_terms is not None:
+        subquery = make_should_subquery()
         for term in include_terms:
-            q["query"]["bool"]["should"].append({
-                "match": {
-                    "row.cand_name": term
+            subquery = add_should_clause(subquery, {
+                "match_phrase": {
+                    "processed.row.cand_name": {
+                        "query": term,
+                        "slop": 5
+                    }
                 }
             })
+        q = add_must_clause(q, subquery)
     if include_ids is not None:
+        subquery = make_should_subquery()
         for id in include_ids:
-            q["query"]["bool"]["should"].append({
-                "match": {
-                    "row.cand_id": id
+            subquery = add_should_clause(subquery, {
+                "term": {
+                    "row.cand_id": id.lower()
                 }
             })
+        q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
-            q["query"]["bool"]["must_not"].append({
-                "match": {
-                    "row.cand_name": term
+            q = add_not_clause(q, {
+                "match_phrase": {
+                    "processed.row.cand_name": {
+                        "query": term,
+                        "slop": 5
+                    }
                 }
             })
     if exclude_ids is not None:
         for id in exclude_ids:
-            q["query"]["bool"]["must_not"].append({
-                "match": {
-                    "row.cand_id": id
+            q = add_not_clause(q, {
+                "term": {
+                    "row.cand_id": id.lower()
                 }
             })
-    if count is True:
-        response = es.count(index="federal_fec_candidates", body=q)
-        try:
-            return [{"count": response["count"]}]
-        except:
-            return []
-    else:
-        q["from"] = skip
-        q["size"] = limit
-        response = es.search(index="federal_fec_candidates", body=q, filter_path=["hits.hits._source.row.cand_id", "hits.hits._source.row.cand_name"])
-        try:
-            elements = []
-            for hit in response["hits"]["hits"]:
-                elements.append({
-                    "cand_id": hit["_source"]["row"]["cand_id"],
-                    "cand_name": hit["_source"]["row"]["cand_name"]
-                })
-            return elements
-        except:
-            return []
+    response = get_response(es, "federal_fec_candidates", q, skip, limit, count, False,
+        filter_path=["hits.hits._source.row.cand_id", "hits.hits._source.row.cand_name"]
+    )
+    if count is not True:
+        elements = []
+        for source in response:
+            elements.append({
+                "cand_id": source["row"]["cand_id"],
+                "cand_name": source["row"]["cand_name"]
+            })
+        return elements
+    return response
 
 def data_preview_person_donor(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
-    q = {
-        "query": {
-            "bool": {
-                "should": [],
-                "minimum_should_match": 1,
-                "must_not": []
-            }
-        },
-        "collapse": {
-            "field": "processed.source.donor.name.keyword"
-        }
+    q = make_query()
+    q["collapse"] = {
+        "field": "processed.source.donor.name.keyword"
     }
     if include_terms is not None:
+        subquery = make_should_subquery()
         for term in include_terms:
-            q["query"]["bool"]["should"].append({
+            subquery = add_should_clause(subquery, {
                 "match_phrase": {
                     "processed.source.donor.name": {
                         "query": term,
@@ -186,9 +150,10 @@ def data_preview_person_donor(es, include_terms, include_ids, exclude_terms, exc
                     }
                 }
             })
+        q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
-            q["query"]["bool"]["must_not"].append({
+            q = add_not_clause(q, {
                 "match_phrase": {
                     "processed.source.donor.name": {
                         "query": term,
@@ -196,69 +161,47 @@ def data_preview_person_donor(es, include_terms, include_ids, exclude_terms, exc
                     }
                 }
             })
-    if count is True:
-        response = es.count(index="federal_fec_contributions", body=q)
-        try:
-            return [{"count": response["count"]}]
-        except:
-            return []
-    else:
-        q["from"] = skip
-        q["size"] = limit
-        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.processed.source.donor.name"])
-        try:
-            elements = []
-            for hit in response["hits"]["hits"]:
-                elements.append({
-                    "name": hit["_source"]["processed"]["source"]["donor"]["name"]
-                })
-            return elements
-        except:
-            return []
+    response = get_response(es, "federal_fec_contributions", q, skip, limit, count, False,
+        filter_path=["hits.hits._source.processed.source.donor.name"]
+    )
+    if count is not True:
+        elements = []
+        for source in response:
+            elements.append({
+                "name": source["processed"]["source"]["donor"]["name"]
+            })
+        return elements
+    return response
 
 def data_preview_job(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
-    q = {
-        "query": {
-            "bool": {
-                "should": [],
-                "minimum_should_match": 1,
-                "must_not": []
-            }
-        },
-        "collapse": {
-            "field": "row.source.donor.occupation.keyword"
-        }
+    q = make_query()
+    q["collapse"] = {
+        "field": "row.source.donor.occupation.keyword"
     }
     if include_terms is not None:
+        subquery = make_should_subquery()
         for term in include_terms:
-            q["query"]["bool"]["should"].append({
+            subquery = add_should_clause(subquery, {
                 "match": {
                     "row.source.donor.occupation": term
                 }
             })
+        q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
-            q["query"]["bool"]["must_not"].append({
+            q = add_not_clause(q, {
                 "match": {
                     "row.source.donor.occupation": term
                 }
             })
-    if count is True:
-        response = es.count(index="federal_fec_contributions", body=q)
-        try:
-            return [{"count": response["count"]}]
-        except:
-            return []
-    else:
-        q["from"] = skip
-        q["size"] = limit
-        response = es.search(index="federal_fec_contributions", body=q, filter_path=["hits.hits._source.row.source.donor.occupation"])
-        try:
-            elements = []
-            for hit in response["hits"]["hits"]:
-                elements.append({
-                    "term": hit["_source"]["row"]["source"]["donor"]["occupation"]
-                })
-            return elements
-        except:
-            return []
+    response = get_response(es, "federal_fec_contributions", q, skip, limit, count, False,
+        filter_path=["hits.hits._source.row.source.donor.occupation"]
+    )
+    if count is not True:
+        elements = []
+        for source in response:
+            elements.append({
+                "term": source["row"]["source"]["donor"]["occupation"]
+            })
+        return elements
+    return response

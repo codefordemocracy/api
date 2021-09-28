@@ -27,8 +27,6 @@ router = APIRouter(
 
 class DataCalculateBaseBody(BaseModel):
     lists: List[str] = Field(None)
-    include: DataListConfig = DataListConfig()
-    exclude: DataListConfig = DataListConfig()
     pagination: PaginationConfig = PaginationConfig()
     dates: DatesConfig = DatesConfig()
     count: bool = Field(False)
@@ -65,13 +63,12 @@ class DataCalculateRecipe990Body(DataCalculateBaseBody):
 
 @router.post("/recipe/article/", summary="Calculate Recipe for Articles")
 def data_calculate_recipe_article(body: DataCalculateRecipeArticleBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
+    clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_article(body.template, es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
             mindate=mindate, maxdate=maxdate,
             orderby=body.orderby, orderdir=body.orderdir,
@@ -82,13 +79,12 @@ def data_calculate_recipe_article(body: DataCalculateRecipeArticleBody):
 
 @router.post("/recipe/ad/", summary="Calculate Recipe for Ads")
 def data_calculate_recipe_ad(body: DataCalculateRecipeAdBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
+    clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_ad(body.template, es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
             mindate=mindate, maxdate=maxdate,
             orderby=body.orderby, orderdir=body.orderdir,
@@ -99,13 +95,12 @@ def data_calculate_recipe_ad(body: DataCalculateRecipeAdBody):
 
 @router.post("/recipe/contribution/", summary="Calculate Recipe for Contributions")
 def data_calculate_recipe_contribution(body: DataCalculateRecipeContributionBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
+    clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_contribution(body.template, es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
             mindate=mindate, maxdate=maxdate,
             orderby=body.orderby, orderdir=body.orderdir,
@@ -116,14 +111,13 @@ def data_calculate_recipe_contribution(body: DataCalculateRecipeContributionBody
 
 @router.post("/recipe/lobbying/", summary="Calculate Recipe for Lobbying Activity")
 def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
+    clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         if body.template in ["kMER", "wLvp", "MJdb"]:
             return query.data_calculate_recipe_lobbying_disclosures(body.template, es,
-                include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-                exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+                include = clean["include"], exclude = clean["exclude"],
                 skip=body.pagination.skip, limit=body.pagination.limit,
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
@@ -139,8 +133,7 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
             elif body.template in ["MK93", "Q23x"]:
                 template2 = "MJdb"
             disclosures = query.data_calculate_recipe_lobbying_disclosures(template2, es,
-                include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-                exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+                include = clean["include"], exclude = clean["exclude"],
                 skip=body.pagination.skip, limit=body.pagination.limit,
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
@@ -150,8 +143,7 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
             )
             clean["include"]["ids"][0] = [d["registrant_senate_id"] for d in disclosures]
             return query.data_calculate_recipe_lobbying_contributions(body.template, es,
-                include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-                exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+                include = clean["include"], exclude = clean["exclude"],
                 skip=body.pagination.skip, limit=body.pagination.limit,
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
@@ -162,13 +154,12 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
 
 @router.post("/recipe/990/", summary="Calculate Recipe for IRS 990s")
 def data_calculate_recipe_990(body: DataCalculateRecipe990Body):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
+    clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_990(body.template, es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
             mindate=mindate, maxdate=maxdate,
             orderby=body.orderby, orderdir=body.orderdir,

@@ -38,68 +38,45 @@ def format_graph(graph):
         })))
     return elements
 
-def prepare_lists(lists, include_terms, include_ids, exclude_terms, exclude_ids, db):
-    if include_terms is None:
-        include_terms = []
-    if include_ids is None:
-        include_ids = []
-    if exclude_terms is None:
-        exclude_terms = []
-    if exclude_ids is None:
-        exclude_ids = []
-    # grab list definition from firestore
+def prepare_lists(lists, db):
+    include = dict()
+    exclude = dict()
+    # set default list values
+    for k in ["terms", "ids"]:
+        include[k] = []
+    for k in ["terms", "ids"]:
+        exclude[k] = []
+    # get list definitions
     for list in lists or []:
         doc = db.collection('lists').document(list).get().to_dict()
-        include = doc.get("include", {})
-        list_include_terms = include.get("terms")
-        list_include_ids = include.get("ids")
+        # process included entities
+        list_include = doc.get("include", {})
+        list_include_terms = list_include.get("terms")
+        list_include_ids = list_include.get("ids")
         if list_include_terms is not None and len(list_include_terms) > 0:
-            include_terms.append(list_include_terms)
+            include["terms"].append(list_include_terms)
         else:
-            include_terms.append(None)
+            include["terms"].append([])
         if list_include_ids is not None and len(list_include_ids) > 0:
-            include_ids.append(list_include_ids)
+            include["ids"].append(list_include_ids)
         else:
-            include_ids.append(None)
-        exclude = doc.get("exclude", {})
-        list_exclude_terms = exclude.get("terms")
-        list_exclude_ids = exclude.get("ids")
+            include["ids"].append([])
+        # process excluded entities
+        list_exclude = doc.get("exclude", {})
+        list_exclude_terms = list_exclude.get("terms")
+        list_exclude_ids = list_exclude.get("ids")
         if list_exclude_terms is not None and len(list_exclude_terms) > 0:
-            exclude_terms.append(list_exclude_terms)
+            exclude["terms"].append(list_exclude_terms)
         else:
-            exclude_terms.append(None)
+            exclude["terms"].append([])
         if list_exclude_ids is not None and len(list_exclude_ids) > 0:
-            exclude_ids.append(list_exclude_ids)
+            exclude["ids"].append(list_exclude_ids)
         else:
-            exclude_ids.append(None)
-    # set empty values to none
-    if include_terms is not None and len(include_terms) == 0:
-        include_terms = None
-    if include_ids is not None and len(include_ids) == 0:
-        include_ids = None
-    if exclude_terms is not None and len(exclude_terms) == 0:
-        exclude_terms = None
-    if exclude_ids is not None and len(exclude_ids) == 0:
-        exclude_ids = None
+            exclude["ids"].append([])
     return {
-        "include": {
-            "terms": include_terms,
-            "ids": include_ids
-        },
-        "exclude": {
-            "terms": exclude_terms,
-            "ids": exclude_ids
-        }
+        "include": include,
+        "exclude": exclude
     }
-
-def determine_histogram_interval(mindate, maxdate):
-    delta = maxdate-mindate
-    if delta.days <= 180:
-        return "day"
-    elif delta.days <= 1095:
-        return "week"
-    else:
-        return "month"
 
 def clean_committees_names(name):
     name = name.replace("COMMITTEE", "")
@@ -113,11 +90,15 @@ def clean_committees_names(name):
     name = name.replace("INC", "")
     name = name.replace("PAC", "")
     name = name.replace("FEDERAL", "")
+    name = name.replace("OF", "")
+    name = name.replace("THE", "")
+    name = name.replace("FOR", "")
     name = name.split("- ")[0]
     name = name.split("(")[0]
     name = name.split(",")[0]
     name = name.replace(".", "")
     name = name.replace(" '", "")
+    name = name.replace("  ", " ")
     name = name.replace("  ", " ")
     return name
 

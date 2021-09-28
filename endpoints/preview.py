@@ -4,7 +4,6 @@ from typing import List
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver, es, db
-from .dependencies import helpers
 from .dependencies.query import preview as query
 from .dependencies.models import PaginationConfig, DataListConfig
 
@@ -23,7 +22,6 @@ router = APIRouter(
 #########################################################
 
 class DataPreviewBaseBody(BaseModel):
-    lists: List[str] = Field(None)
     include: DataListConfig = DataListConfig()
     exclude: DataListConfig = DataListConfig()
     pagination: PaginationConfig = PaginationConfig()
@@ -35,11 +33,10 @@ class DataPreviewBaseBody(BaseModel):
 
 @router.post("/organization/committee/", summary="Preview Committees")
 def data_preview_organization_committee(body: DataPreviewBaseBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
-    if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
+    if body.include.terms is not None or body.include.ids is not None:
         return query.data_preview_organization_committee(es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include_terms=body.include.terms, include_ids=body.include.ids,
+            exclude_terms=body.exclude.terms, exclude_ids=body.exclude.ids,
             skip=body.pagination.skip, limit=body.pagination.limit,
             count=body.count
         )
@@ -47,11 +44,10 @@ def data_preview_organization_committee(body: DataPreviewBaseBody):
 
 @router.post("/organization/employer/", summary="Preview Employers")
 def data_preview_organization_employer(body: DataPreviewBaseBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
-    if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
+    if body.include.terms is not None or body.include.ids is not None:
         return query.data_preview_organization_employer(es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include_terms=body.include.terms, include_ids=body.include.ids,
+            exclude_terms=body.exclude.terms, exclude_ids=body.exclude.ids,
             skip=body.pagination.skip, limit=body.pagination.limit,
             count=body.count
         )
@@ -59,11 +55,10 @@ def data_preview_organization_employer(body: DataPreviewBaseBody):
 
 @router.post("/person/candidate/", summary="Preview Candidates")
 def data_preview_person_candidate(body: DataPreviewBaseBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
-    if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
+    if body.include.terms is not None or body.include.ids is not None:
         return query.data_preview_person_candidate(es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include_terms=body.include.terms, include_ids=body.include.ids,
+            exclude_terms=body.exclude.terms, exclude_ids=body.exclude.ids,
             skip=body.pagination.skip, limit=body.pagination.limit,
             count=body.count
         )
@@ -71,11 +66,10 @@ def data_preview_person_candidate(body: DataPreviewBaseBody):
 
 @router.post("/person/donor/", summary="Preview Donors")
 def data_preview_person_donor(body: DataPreviewBaseBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
-    if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
+    if body.include.terms is not None or body.include.ids is not None:
         return query.data_preview_person_donor(es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include_terms=body.include.terms, include_ids=body.include.ids,
+            exclude_terms=body.exclude.terms, exclude_ids=body.exclude.ids,
             skip=body.pagination.skip, limit=body.pagination.limit,
             count=body.count
         )
@@ -83,11 +77,10 @@ def data_preview_person_donor(body: DataPreviewBaseBody):
 
 @router.post("/job/", summary="Preview Jobs")
 def data_preview_job(body: DataPreviewBaseBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
-    if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
+    if body.include.terms is not None or body.include.ids is not None:
         return query.data_preview_job(es,
-            include_terms=clean["include"]["terms"], include_ids=clean["include"]["ids"],
-            exclude_terms=clean["exclude"]["terms"], exclude_ids=clean["exclude"]["ids"],
+            include_terms=body.include.terms, include_ids=body.include.ids,
+            exclude_terms=body.exclude.terms, exclude_ids=body.exclude.ids,
             skip=body.pagination.skip, limit=body.pagination.limit,
             count=body.count
         )
@@ -95,18 +88,17 @@ def data_preview_job(body: DataPreviewBaseBody):
 
 @router.post("/topic/", summary="Preview Topics")
 def data_preview_topic(body: DataPreviewBaseBody):
-    clean = helpers.prepare_lists(body.lists, body.include.terms, body.include.ids, body.exclude.terms, body.exclude.ids, db)
     elements = []
-    for term in clean["include"]["terms"] or []:
-        for exclude in clean["exclude"]["terms"] or []:
+    for term in body.include.terms or []:
+        for exclude in body.exclude.terms or []:
             if term in exclude or exclude in term:
                 continue
         elements.append({
             "term": term,
             "id": None
         })
-    for id in clean["include"]["ids"] or []:
-        for exclude in clean["exclude"]["ids"] or []:
+    for id in body.include.ids or []:
+        for exclude in body.exclude.ids or []:
             if id in exclude:
                 continue
         elements.append({
