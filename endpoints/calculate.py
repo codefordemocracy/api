@@ -46,7 +46,7 @@ class DataCalculateRecipeArticleBody(DataCalculateBaseBody):
 
 class DataCalculateRecipeAdBody(DataCalculateBaseBody):
     template: str = Field(..., regex="D3WE|BuW8|P2HG|N7Jk|8HcR")
-    orderby: str = Field(None, regex="amount")
+    orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipeContributionBody(DataCalculateBaseBody):
@@ -62,7 +62,7 @@ class DataCalculateRecipeLobbyingBody(DataCalculateBaseBody):
 
 class DataCalculateRecipe990Body(DataCalculateBaseBody):
     template: str = Field(..., regex="GCv2|P34n|K23r")
-    orderby: str = Field(None, regex="amount")
+    orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
 #########################################################
