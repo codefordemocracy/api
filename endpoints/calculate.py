@@ -25,6 +25,13 @@ router = APIRouter(
 # define models
 #########################################################
 
+class DataCalculateFiltersAmountConfig(BaseModel):
+    min: float = Field(None)
+    max: float = Field(None)
+
+class DataCalculateFiltersConfig(BaseModel):
+    amount: DataCalculateFiltersAmountConfig = DataCalculateFiltersAmountConfig()
+
 class DataCalculateBaseBody(BaseModel):
     lists: List[str] = Field(None)
     pagination: PaginationConfig = PaginationConfig()
@@ -44,6 +51,7 @@ class DataCalculateRecipeAdBody(DataCalculateBaseBody):
 
 class DataCalculateRecipeContributionBody(DataCalculateBaseBody):
     template: str = Field(..., regex="ReqQ|VqHR|DXhw|dFMy|KWYZ|IQL2|WK3K|NcFz|m4YC|Bs5W|KR64|7v4P|6peF|F7Xn|T5xv|F2mS|gXjA")
+    filters: DataCalculateFiltersConfig = DataCalculateFiltersConfig()
     orderby: str = Field(None, regex="amount|date")
     orderdir: str = Field("desc", regex="asc|desc")
 
@@ -103,6 +111,7 @@ def data_calculate_recipe_contribution(body: DataCalculateRecipeContributionBody
             include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
             mindate=mindate, maxdate=maxdate,
+            filters=body.filters.dict(),
             orderby=body.orderby, orderdir=body.orderdir,
             count=body.count,
             histogram=body.histogram

@@ -124,7 +124,7 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
         return elements
     return response
 
-def data_calculate_recipe_contribution(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_contribution(template, es, include, exclude, skip, limit, mindate, maxdate, filters, orderby, orderdir, count, histogram):
     # preprocess some recipes
     if template in ["DXhw", "WK3K", "KR64", "F7Xn", "gXjA"]:
         # get committee ids for candidates
@@ -293,6 +293,18 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             }]
         },
     ], include=include, exclude=exclude)
+    # add filters
+    if filters["amount"]["min"] is not None or filters["amount"]["max"] is not None:
+        range = dict()
+        if filters["amount"]["min"] is not None:
+            range["gte"] = filters["amount"]["min"]
+        if filters["amount"]["max"] is not None:
+            range["lte"] = filters["amount"]["max"]
+        q = add_filter_clause(q, {
+            "range": {
+                "row.transaction_amt": range
+            }
+        })
     # set sort
     if orderby == "date":
         q["sort"] = {
