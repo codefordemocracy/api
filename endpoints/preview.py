@@ -105,6 +105,6 @@ def data_preview_topic(body: DataPreviewBaseBody):
             "term": None,
             "id": id
         })
-    if count is True:
+    if body.count is True:
         return [{"count": len(elements)}]
     return elements
