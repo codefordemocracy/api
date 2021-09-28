@@ -130,7 +130,7 @@ def graph_traverse_associations_candidate_committee(body: GraphTraverseAssociati
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_associations_candidate_committee,
             ids=body.nodes.ids, ids2=body.nodes.ids2,
-            cmte_pty_affiliation=body.committees.cmte_pty_affiliation, cmte_dsgn=body.committees.cmte_dsgn, cmte_tp=body.committees.cmte_tp,
+            cmte_pty_affiliation=body.committees.cmte_pty_affiliation, cmte_dsgn=body.committees.cmte_dsgn, cmte_tp=body.committees.cmte_tp, org_tp=body.committees.org_tp,
             intermediaries=body.intermediaries.type,
                 sup_opp=body.intermediaries.expenditures.sup_opp, purpose=body.intermediaries.expenditures.purpose, amndt_ind=body.intermediaries.expenditures.amndt_ind, gt=body.intermediaries.expenditures.gt, lte=body.intermediaries.expenditures.lte,
             skip=body.pagination.skip, limit=body.pagination.limit,
@@ -164,7 +164,7 @@ def graph_traverse_associations_committee_committee(body: GraphTraverseAssociati
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_associations_committee_committee,
             ids=body.nodes.ids, ids2=body.nodes.ids2,
-            cmte_pty_affiliation=body.committees.cmte_pty_affiliation, cmte_dsgn=body.committees.cmte_dsgn, cmte_tp=body.committees.cmte_tp,
+            cmte_pty_affiliation=body.committees.cmte_pty_affiliation, cmte_dsgn=body.committees.cmte_dsgn, cmte_tp=body.committees.cmte_tp, org_tp=body.committees.org_tp,
             intermediaries=body.intermediaries.type,
                 direction=body.intermediaries.contributions.direction, transaction_tp=body.intermediaries.contributions.transaction_tp, transaction_pgi=body.intermediaries.contributions.transaction_pgi, rpt_tp=body.intermediaries.contributions.rpt_tp, contribution_amndt_ind=body.intermediaries.contributions.amndt_ind, contribution_gt=body.intermediaries.contributions.gt, contribution_lte=body.intermediaries.contributions.lte,
                 sup_opp=body.intermediaries.expenditures.sup_opp, purpose=body.intermediaries.expenditures.purpose, expenditure_amndt_ind=body.intermediaries.expenditures.amndt_ind, expenditure_gt=body.intermediaries.expenditures.gt, expenditure_lte=body.intermediaries.expenditures.lte,
@@ -198,7 +198,7 @@ def graph_traverse_associations_donor_committee(body: GraphTraverseAssociationsN
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_associations_donor_committee,
             ids=body.nodes.ids, ids2=body.nodes.ids2,
-            cmte_pty_affiliation=body.committees.cmte_pty_affiliation, cmte_dsgn=body.committees.cmte_dsgn, cmte_tp=body.committees.cmte_tp,
+            cmte_pty_affiliation=body.committees.cmte_pty_affiliation, cmte_dsgn=body.committees.cmte_dsgn, cmte_tp=body.committees.cmte_tp, org_tp=body.committees.org_tp,
             skip=body.pagination.skip, limit=body.pagination.limit,
             min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
         ))
@@ -210,7 +210,7 @@ def graph_traverse_associations_payee_committee(body: GraphTraverseAssociationsN
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_associations_payee_committee,
             ids=body.nodes.ids, ids2=body.nodes.ids2,
-            cmte_pty_affiliation=body.committees.cmte_pty_affiliation, cmte_dsgn=body.committees.cmte_dsgn, cmte_tp=body.committees.cmte_tp,
+            cmte_pty_affiliation=body.committees.cmte_pty_affiliation, cmte_dsgn=body.committees.cmte_dsgn, cmte_tp=body.committees.cmte_tp, org_tp=body.committees.org_tp,
             skip=body.pagination.skip, limit=body.pagination.limit,
             min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
         ))

@@ -69,7 +69,7 @@ def graph_search_committees(body: GraphSearchCommitteesBody):
         body.name = "\""+body.name+"\""
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_search_committees,
-            cmte_nm=body.name, cmte_pty_affiliation=body.attributes.cmte_pty_affiliation, cmte_dsgn=body.attributes.cmte_dsgn, cmte_tp=body.attributes.cmte_tp,
+            cmte_nm=body.name, cmte_pty_affiliation=body.attributes.cmte_pty_affiliation, cmte_dsgn=body.attributes.cmte_dsgn, cmte_tp=body.attributes.cmte_tp, org_tp=body.attributes.org_tp,
             context=body.context,
             skip=body.pagination.skip, limit=body.pagination.limit,
             min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,

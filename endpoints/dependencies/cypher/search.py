@@ -38,7 +38,7 @@ def graph_search_candidates(tx, cand_name, cand_pty_affiliation, cand_office, ca
     else:
         return response.graph()
 
-def graph_search_committees(tx, cmte_nm, cmte_pty_affiliation, cmte_dsgn, cmte_tp, context, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, concise=False):
+def graph_search_committees(tx, cmte_nm, cmte_pty_affiliation, cmte_dsgn, cmte_tp, org_tp, context, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day, concise=False):
     c = []
     if cmte_nm is not None:
         c.append("CALL db.index.fulltext.queryNodes('committee_name', $cmte_nm)")
@@ -58,6 +58,8 @@ def graph_search_committees(tx, cmte_nm, cmte_pty_affiliation, cmte_dsgn, cmte_t
         c.append("AND a.cmte_dsgn = toUpper($cmte_dsgn)")
     if cmte_tp is not None:
         c.append("AND a.cmte_tp = toUpper($cmte_tp)")
+    if org_tp is not None:
+        c.append("AND a.org_tp = toUpper($org_tp)")
     if context is True:
         c.append("AND b.date >= date({year: $min_year, month: $min_month, day: $min_day})")
         c.append("AND b.date <= date({year: $max_year, month: $max_month, day: $max_day})")
@@ -67,7 +69,7 @@ def graph_search_committees(tx, cmte_nm, cmte_pty_affiliation, cmte_dsgn, cmte_t
         c.append("RETURN p")
     c.append("SKIP $skip")
     c.append("LIMIT $limit")
-    response = tx.run(" ".join(c), cmte_nm=cmte_nm, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
+    response = tx.run(" ".join(c), cmte_nm=cmte_nm, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, org_tp=org_tp, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day)
     if concise is True:
         return response.data()
     else:

@@ -26,6 +26,7 @@ class GraphCommitteeAttributesConfig(BaseModel):
     cmte_pty_affiliation: str = Field(None, min_length=3, max_length=3)
     cmte_dsgn: str = Field(None, min_length=1, max_length=1)
     cmte_tp: str = Field(None, min_length=1, max_length=1)
+    org_tp: str = Field(None, min_length=1, max_length=1)
 
 class GraphDonorAttributesConfig(BaseModel):
     employer: str = Field(None)

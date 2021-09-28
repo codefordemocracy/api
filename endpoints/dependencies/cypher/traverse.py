@@ -13,7 +13,7 @@ def graph_traverse_neighbors(tx, ids, labels, skip, limit):
     c.append("LIMIT $limit")
     return tx.run(" ".join(c), ids=ids, skip=skip, limit=limit).graph()
 
-def graph_traverse_associations_candidate_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, intermediaries, sup_opp, purpose, amndt_ind, gt, lte, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+def graph_traverse_associations_candidate_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, org_tp, intermediaries, sup_opp, purpose, amndt_ind, gt, lte, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
     c = []
     if intermediaries == "linkage":
         c.append("MATCH (a:Candidate)<-[:ASSOCIATED_WITH]-(b:Committee)")
@@ -60,10 +60,12 @@ def graph_traverse_associations_candidate_committee(tx, ids, ids2, cmte_pty_affi
         c.append("AND b.cmte_dsgn = toUpper($cmte_dsgn)")
     if cmte_tp is not None:
         c.append("AND b.cmte_tp = toUpper($cmte_tp)")
+    if org_tp is not None:
+        c.append("AND b.org_tp = toUpper($org_tp)")
     c.append("RETURN DISTINCT b")
     c.append("SKIP $skip")
     c.append("LIMIT $limit")
-    return tx.run(" ".join(c), ids=ids, ids2=ids2, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, sup_opp=sup_opp, purpose=purpose, amndt_ind=amndt_ind, gt=gt, lte=lte, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
+    return tx.run(" ".join(c), ids=ids, ids2=ids2, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, org_tp=org_tp, sup_opp=sup_opp, purpose=purpose, amndt_ind=amndt_ind, gt=gt, lte=lte, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
 
 def graph_traverse_associations_candidate_tweeter(tx, ids, ids2, skip, limit):
     c = []
@@ -135,7 +137,7 @@ def graph_traverse_associations_committee_candidate(tx, ids, ids2, cand_pty_affi
     c.append("LIMIT $limit")
     return tx.run(" ".join(c), ids=ids, ids2=ids2, cand_pty_affiliation=cand_pty_affiliation, cand_office=cand_office, cand_office_st=cand_office_st, cand_office_district=cand_office_district, cand_election_yr=cand_election_yr, cand_ici=cand_ici, sup_opp=sup_opp, purpose=purpose, amndt_ind=amndt_ind, gt=gt, lte=lte, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
 
-def graph_traverse_associations_committee_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, intermediaries, direction, transaction_tp, transaction_pgi, rpt_tp, contribution_amndt_ind, contribution_gt, contribution_lte, sup_opp, purpose, expenditure_amndt_ind, expenditure_gt, expenditure_lte, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+def graph_traverse_associations_committee_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, org_tp, intermediaries, direction, transaction_tp, transaction_pgi, rpt_tp, contribution_amndt_ind, contribution_gt, contribution_lte, sup_opp, purpose, expenditure_amndt_ind, expenditure_gt, expenditure_lte, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
     c = []
     if intermediaries == "contribution":
         if direction == "receipts":
@@ -232,10 +234,12 @@ def graph_traverse_associations_committee_committee(tx, ids, ids2, cmte_pty_affi
         c.append("AND b.cmte_dsgn = toUpper($cmte_dsgn)")
     if cmte_tp is not None:
         c.append("AND b.cmte_tp = toUpper($cmte_tp)")
+    if org_tp is not None:
+        c.append("AND b.org_tp = toUpper($org_tp)")
     c.append("RETURN DISTINCT b")
     c.append("SKIP $skip")
     c.append("LIMIT $limit")
-    return tx.run(" ".join(c), ids=ids, ids2=ids2, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, transaction_tp=transaction_tp, transaction_pgi=transaction_pgi, rpt_tp=rpt_tp, contribution_amndt_ind=contribution_amndt_ind, contribution_gt=contribution_gt, contribution_lte=contribution_lte, sup_opp=sup_opp, purpose=purpose, expenditure_amndt_ind=expenditure_amndt_ind, expenditure_gt=expenditure_gt, expenditure_lte=expenditure_lte, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
+    return tx.run(" ".join(c), ids=ids, ids2=ids2, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, org_tp=org_tp, transaction_tp=transaction_tp, transaction_pgi=transaction_pgi, rpt_tp=rpt_tp, contribution_amndt_ind=contribution_amndt_ind, contribution_gt=contribution_gt, contribution_lte=contribution_lte, sup_opp=sup_opp, purpose=purpose, expenditure_amndt_ind=expenditure_amndt_ind, expenditure_gt=expenditure_gt, expenditure_lte=expenditure_lte, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
 
 def graph_traverse_associations_committee_donor(tx, ids, ids2, employer, occupation, state, zip_code, entity_tp, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
     c = []
@@ -283,7 +287,7 @@ def graph_traverse_associations_committee_payee(tx, ids, ids2, skip, limit, min_
     c.append("LIMIT $limit")
     return tx.run(" ".join(c), ids=ids, ids2=ids2, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
 
-def graph_traverse_associations_donor_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+def graph_traverse_associations_donor_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, org_tp, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
     c = []
     c.append("MATCH (a:Donor)-[:CONTRIBUTED_TO]->(c:Contribution)-[:CONTRIBUTED_TO]->(b:Committee)")
     c.append("MATCH (c)-[:HAPPENED_ON]->(d:Day)")
@@ -302,12 +306,14 @@ def graph_traverse_associations_donor_committee(tx, ids, ids2, cmte_pty_affiliat
         c.append("AND b.cmte_dsgn = toUpper($cmte_dsgn)")
     if cmte_tp is not None:
         c.append("AND b.cmte_tp = toUpper($cmte_tp)")
+    if org_tp is not None:
+        c.append("AND b.org_tp = toUpper($org_tp)")
     c.append("RETURN DISTINCT b")
     c.append("SKIP $skip")
     c.append("LIMIT $limit")
-    return tx.run(" ".join(c), ids=ids, ids2=ids2, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
+    return tx.run(" ".join(c), ids=ids, ids2=ids2, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, org_tp=org_tp, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
 
-def graph_traverse_associations_payee_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
+def graph_traverse_associations_payee_committee(tx, ids, ids2, cmte_pty_affiliation, cmte_dsgn, cmte_tp, org_tp, skip, limit, min_year, max_year, min_month, max_month, min_day, max_day):
     c = []
     c.append("MATCH (a:Payee)<-[:PAID]-(c:Expenditure)<-[:SPENT]-(b:Committee)")
     c.append("MATCH (c)-[:HAPPENED_ON]->(d:Day)")
@@ -326,10 +332,12 @@ def graph_traverse_associations_payee_committee(tx, ids, ids2, cmte_pty_affiliat
         c.append("AND b.cmte_dsgn = toUpper($cmte_dsgn)")
     if cmte_tp is not None:
         c.append("AND b.cmte_tp = toUpper($cmte_tp)")
+    if org_tp is not None:
+        c.append("AND b.org_tp = toUpper($org_tp)")
     c.append("RETURN DISTINCT b")
     c.append("SKIP $skip")
     c.append("LIMIT $limit")
-    return tx.run(" ".join(c), ids=ids, ids2=ids2, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
+    return tx.run(" ".join(c), ids=ids, ids2=ids2, cmte_pty_affiliation=cmte_pty_affiliation, cmte_dsgn=cmte_dsgn, cmte_tp=cmte_tp, org_tp=org_tp, skip=skip, limit=limit, min_year=min_year, max_year=max_year, min_month=min_month, max_month=max_month, min_day=min_day, max_day=max_day).graph()
 
 def graph_traverse_associations_tweeter_candidate(tx, ids, ids2, cand_pty_affiliation, cand_office, cand_office_st, cand_office_district, cand_election_yr, cand_ici, skip, limit):
     c = []
