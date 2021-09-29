@@ -6,11 +6,11 @@ from .builder.responses import get_response
 def data_calculate_recipe_article(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     # preprocess some recipes
     if template in ["PMYZ"]:
-        committees = data_preview_organization_committee(es, None, include["ids"][0], None, None, 0, 10000, False)
+        committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
         for committee in committees:
             include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
         if len(exclude["ids"][0]) > 0:
-            committees = data_preview_organization_committee(es, None, exclude["ids"][0], None, None, 0, 10000, False)
+            committees = data_preview_organization_committee(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
             for committee in committees:
                 exclude["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
     # build query
@@ -60,11 +60,11 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
 def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     # preprocess some recipes
     if template in ["D3WE", "BuW8"]:
-        committees = data_preview_organization_committee(es, None, include["ids"][0], None, None, 0, 10000, False)
+        committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
         for committee in committees:
             include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
         if len(exclude["ids"][0]) > 0:
-            committees = data_preview_organization_committee(es, None, exclude["ids"][0], None, None, 0, 10000, False)
+            committees = data_preview_organization_committee(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
             for committee in committees:
                 exclude["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
     # build query
@@ -140,7 +140,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "ids": [{
                     "action": "term",
                     "field": "row.cand_id"
-                }]
+                }],
+                "filters": ["candidate"]
             }, {
                 "position": 1,
                 "templates": ["WK3K", "KR64", "F7Xn"],
@@ -152,7 +153,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "ids": [{
                     "action": "term",
                     "field": "row.cand_id"
-                }]
+                }],
+                "filters": ["candidate"]
             }, {
                 "position": 2,
                 "templates": ["gXjA"],
@@ -164,7 +166,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "ids": [{
                     "action": "term",
                     "field": "row.cand_id"
-                }]
+                }],
+                "filters": ["candidate"]
             }
         ]
         q = set_query_clauses(make_query(), template, list_settings=list_settings, include=include, exclude=None)
@@ -228,7 +231,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "ids": [{
                 "action": "term",
                 "field": "row.source.committee.cmte_id"
-            }]
+            }],
+            "filters": ["source.committee"]
         }, {
             "position": 0,
             "templates": ["NcFz"],
@@ -236,7 +240,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "action": "match_phrase",
                 "field": "processed.source.donor.name",
                 "slop": 2
-            }]
+            }],
+            "filters": ["donor"]
         }, {
             "position": 0,
             "templates": ["m4YC", "Bs5W"],
@@ -261,7 +266,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "ids": [{
                 "action": "term",
                 "field": "row.target.committee.cmte_id"
-            }]
+            }],
+            "filters": ["target.committee"]
         }, {
             "position": 1,
             "templates": ["T5xv", "F2mS"],
@@ -279,7 +285,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "ids": [{
                 "action": "term",
                 "field": "row.target.committee.cmte_id"
-            }]
+            }],
+            "filters": ["target.committee"]
         }, {
             "position": 2,
             "templates": ["F2mS"],
@@ -290,7 +297,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "ids": [{
                 "action": "term",
                 "field": "row.target.committee.cmte_id"
-            }]
+            }],
+            "filters": ["target.committee"]
         },
     ], include=include, exclude=exclude)
     # add filters
@@ -471,18 +479,18 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
                 contribution["registrant_house_id"] = source["processed"]["registrant"].get("house_id")
                 contribution["registrant_senate_id"] = source["processed"]["registrant"].get("senate_id")
                 contribution["url"] = source["processed"].get("url")
-                elements.append(contribution)               
+                elements.append(contribution)
         return elements
     return response
 
 def data_calculate_recipe_990(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     # preprocess some recipes
     if template in ["GCv2"]:
-        committees = data_preview_organization_committee(es, None, include["ids"][0], None, None, 0, 10000, False)
+        committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
         for committee in committees:
             include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
         if len(exclude["ids"][0]) > 0:
-            committees = data_preview_organization_committee(es, None, exclude["ids"][0], None, None, 0, 10000, False)
+            committees = data_preview_organization_committee(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
             for committee in committees:
                 exclude["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
     # build query

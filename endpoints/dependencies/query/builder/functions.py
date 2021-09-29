@@ -1,3 +1,5 @@
+from ...helpers import map_keys
+
 # main query body
 
 def make_query():
@@ -107,6 +109,23 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                             clause = {
                                 criteria["action"]: {
                                     criteria["field"]: query
+                                }
+                            }
+                            q = add_not_clause(q, clause)
+            if "filters" in setting:
+                for criteria in setting["filters"]:
+                    for key, value in include["filters"][setting["position"]].items() or []:
+                        clause = {
+                            "term": {
+                                map_keys(criteria, key, value): value.lower()
+                            }
+                        }
+                        q = add_filter_clause(q, clause)
+                    if exclude is not None:
+                        for key, value in exclude["filters"][setting["position"]].items() or []:
+                            clause = {
+                                "term": {
+                                    map_keys(criteria, key, value): value.lower()
                                 }
                             }
                             q = add_not_clause(q, clause)

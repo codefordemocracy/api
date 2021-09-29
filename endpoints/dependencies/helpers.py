@@ -42,9 +42,9 @@ def prepare_lists(lists, db):
     include = dict()
     exclude = dict()
     # set default list values
-    for k in ["terms", "ids"]:
+    for k in ["terms", "ids", "filters"]:
         include[k] = []
-    for k in ["terms", "ids"]:
+    for k in ["terms", "ids", "filters"]:
         exclude[k] = []
     # get list definitions
     for list in lists or []:
@@ -53,6 +53,7 @@ def prepare_lists(lists, db):
         list_include = doc.get("include", {})
         list_include_terms = list_include.get("terms")
         list_include_ids = list_include.get("ids")
+        list_include_filters = list_include.get("filters")
         if list_include_terms is not None and len(list_include_terms) > 0:
             include["terms"].append(list_include_terms)
         else:
@@ -61,10 +62,15 @@ def prepare_lists(lists, db):
             include["ids"].append(list_include_ids)
         else:
             include["ids"].append([])
+        if list_include_filters is not None and len(list_include_filters) > 0:
+            include["filters"].append(list_include_filters)
+        else:
+            include["filters"].append({})
         # process excluded entities
         list_exclude = doc.get("exclude", {})
         list_exclude_terms = list_exclude.get("terms")
         list_exclude_ids = list_exclude.get("ids")
+        list_exclude_filters = list_exclude.get("filters")
         if list_exclude_terms is not None and len(list_exclude_terms) > 0:
             exclude["terms"].append(list_exclude_terms)
         else:
@@ -73,10 +79,23 @@ def prepare_lists(lists, db):
             exclude["ids"].append(list_exclude_ids)
         else:
             exclude["ids"].append([])
+        if list_exclude_filters is not None and len(list_exclude_filters) > 0:
+            exclude["filters"].append(list_exclude_filters)
+        else:
+            exclude["filters"].append({})
     return {
         "include": include,
         "exclude": exclude
     }
+
+def map_keys(entity, key, value):
+    if entity in ["candidate", "committee"]:
+        return "row."+key
+    elif entity in ["source.candidate", "source.committee", "target.committee"]:
+        return "row."+entity+"."+key
+    elif entity == "donor":
+        return "processed.source.donor."+key
+    return key
 
 def clean_committees_names(name):
     name = name.replace("COMMITTEE", "")
