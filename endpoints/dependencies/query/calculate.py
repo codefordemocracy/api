@@ -425,14 +425,20 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
     q = make_query()
     q = set_query_dates(q, "processed.date_submitted", mindate, maxdate)
     q = add_filter_clause(q, {
-        "match": {
+        "term": {
             "processed.no_contributions": False
         }
     })
+    if template in ["V5Gh", "3Nrt", "Q23x"]:
+        q = add_filter_clause(q, {
+            "match": {
+                "processed.contributions.contribution_type": "honorary expenses"
+            }
+        })
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["PjyR", "WGb3", "MK93"],
+            "templates": ["PjyR", "WGb3", "MK93", "V5Gh", "3Nrt", "Q23x"],
             "ids": [{
                 "action": "term",
                 "field": "processed.registrant.senate_id"
@@ -456,7 +462,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
             contributions = source["processed"].get("contributions")
             if template in ["V5Gh", "3Nrt", "Q23x"]:
                 contributions = [c for c in contributions if c["contribution_type"] == "Honorary Expenses"]
-            for contribution in contributions:
+            for contribution in contributions or []:
                 contribution["date_contribution"] = contribution.pop("date")[:10]
                 contribution["date_submitted"] = source["processed"].get("date_submitted")[:10]
                 contribution["filing_year"] = source["processed"].get("filing_year")
@@ -465,7 +471,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
                 contribution["registrant_house_id"] = source["processed"]["registrant"].get("house_id")
                 contribution["registrant_senate_id"] = source["processed"]["registrant"].get("senate_id")
                 contribution["url"] = source["processed"].get("url")
-                elements.append(contribution)
+                elements.append(contribution)               
         return elements
     return response
 
