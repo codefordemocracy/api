@@ -6,7 +6,7 @@ from .dependencies.connections import driver
 from .dependencies import helpers
 from .dependencies.cypher import search as cypher
 from .dependencies.models import PaginationConfig, DatesConfig
-from .dependencies.models import GraphCandidateAttributesConfig, GraphCommitteeAttributesConfig, GraphDonorAttributesConfig, GraphTweeterAttributesConfig, GraphSourceAttributesConfig
+from .dependencies.models import AttributeCandidateConfig, AttributeCommitteeConfig, GraphDonorAttributesConfig, GraphTweeterAttributesConfig, GraphSourceAttributesConfig
 
 #########################################################
 # initialize route
@@ -33,17 +33,17 @@ class GraphSearchNamesDatesBody(GraphSearchDatesBody):
     name: str = Field(None)
 
 class GraphSearchCandidatesBody(GraphSearchNamesDatesBody):
-    attributes: GraphCandidateAttributesConfig = GraphCandidateAttributesConfig()
+    attributes: AttributeCandidateConfig = AttributeCandidateConfig()
 
 class GraphSearchCommitteesBody(GraphSearchNamesDatesBody):
-    attributes: GraphCommitteeAttributesConfig = GraphCommitteeAttributesConfig()
+    attributes: AttributeCommitteeConfig = AttributeCommitteeConfig()
 
 class GraphSearchDonorsBody(GraphSearchNamesDatesBody):
     attributes: GraphDonorAttributesConfig = GraphDonorAttributesConfig()
 
 class GraphSearchTweetersBody(GraphSearchNamesDatesBody):
     attributes: GraphTweeterAttributesConfig = GraphTweeterAttributesConfig()
-    candidates: GraphCandidateAttributesConfig = GraphCandidateAttributesConfig()
+    candidates: AttributeCandidateConfig = AttributeCandidateConfig()
 
 class GraphSearchSourcesBody(GraphSearchDatesBody):
     domain: str = Field(None)

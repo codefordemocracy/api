@@ -12,9 +12,9 @@ class DatesConfig(BaseModel):
     min: datetime.date = Field(datetime.datetime.strptime('2020-01-01', '%Y-%m-%d').date())
     max: datetime.date = Field(datetime.datetime.now().date())
 
-# graph models
+# attribute models
 
-class GraphCandidateAttributesConfig(BaseModel):
+class AttributeCandidateConfig(BaseModel):
     cand_pty_affiliation: str = Field(None, min_length=3, max_length=3)
     cand_office: str = Field(None, min_length=1, max_length=1)
     cand_office_st: str = Field(None, min_length=2, max_length=2)
@@ -22,18 +22,22 @@ class GraphCandidateAttributesConfig(BaseModel):
     cand_election_yr: int = Field(None, ge=1990, le=datetime.datetime.now().year)
     cand_ici: str = Field(None, min_length=1, max_length=1)
 
-class GraphCommitteeAttributesConfig(BaseModel):
+class AttributeCommitteeConfig(BaseModel):
     cmte_pty_affiliation: str = Field(None, min_length=3, max_length=3)
     cmte_dsgn: str = Field(None, min_length=1, max_length=1)
     cmte_tp: str = Field(None, min_length=1, max_length=1)
     org_tp: str = Field(None, min_length=1, max_length=1)
 
-class GraphDonorAttributesConfig(BaseModel):
-    employer: str = Field(None)
-    occupation: str = Field(None)
+class AttributeDonorConfig(BaseModel):
     state: str = Field(None, min_length=2, max_length=2)
     zip_code: int = Field(None, ge=500, le=99999)
     entity_tp: str = Field(None, min_length=3, max_length=3)
+
+# graph models
+
+class GraphDonorAttributesConfig(BaseModel):
+    employer: str = Field(None)
+    occupation: str = Field(None)
 
 class GraphTweeterAttributesConfig(BaseModel):
     username: str = Field(None)
