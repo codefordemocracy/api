@@ -143,7 +143,7 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
                 template2 = "MJdb"
             disclosures = query.data_calculate_recipe_lobbying_disclosures(template2, es,
                 include = clean["include"], exclude = clean["exclude"],
-                skip=body.pagination.skip, limit=body.pagination.limit,
+                skip=0, limit=10000,
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
                 count=False,
