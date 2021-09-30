@@ -156,11 +156,11 @@ def graph_traverse_associations_committee_committee(tx, ids, ids2, cmte_pty_affi
             c.append("AND d.transaction_pgi = toUpper($transaction_pgi)")
         if rpt_tp is not None:
             c.append("AND d.rpt_tp = toUpper($rpt_tp)")
-        if amndt_ind is not None:
+        if contribution_amndt_ind is not None:
             c.append("AND d.amndt_ind = toUpper($contribution_amndt_ind)")
-        if gt is not None:
+        if contribution_gt is not None:
             c.append("AND $contribution_gt < d.transaction_amt")
-        if lte is not None:
+        if contribution_lte is not None:
             c.append("AND d.transaction_amt <= $contribution_lte")
     else:
         c.append("MATCH (a:Committee)-[:SPENT]->(c:Expenditure)-[:IDENTIFIES]->(:Candidate)<-[IDENTIFIES]-(d:Expenditure)<-[:SPENT]-(b:Committee)")
@@ -174,13 +174,13 @@ def graph_traverse_associations_committee_committee(tx, ids, ids2, cmte_pty_affi
         if purpose is not None:
             c.append("AND c.purpose CONTAINS toUpper($purpose)")
             c.append("AND d.purpose CONTAINS toUpper($purpose)")
-        if amndt_ind is not None:
+        if expenditure_amndt_ind is not None:
             c.append("AND c.amndt_ind = toUpper($expenditure_amndt_ind)")
             c.append("AND d.amndt_ind = toUpper($expenditure_amndt_ind)")
-        if gt is not None:
+        if expenditure_gt is not None:
             c.append("AND $expenditure_gt < c.transaction_amt")
             c.append("AND $expenditure_gt < d.transaction_amt")
-        if lte is not None:
+        if expenditure_lte is not None:
             c.append("AND c.transaction_amt <= $expenditure_lte")
             c.append("AND d.transaction_amt <= $expenditure_lte")
     if ids2 is not None:
@@ -201,11 +201,11 @@ def graph_traverse_associations_committee_committee(tx, ids, ids2, cmte_pty_affi
                 c.append("AND u.transaction_pgi = toUpper($transaction_pgi)")
             if rpt_tp is not None:
                 c.append("AND u.rpt_tp = toUpper($rpt_tp)")
-            if amndt_ind is not None:
+            if contribution_amndt_ind is not None:
                 c.append("AND u.amndt_ind = toUpper($contribution_amndt_ind)")
-            if gt is not None:
+            if contribution_gt is not None:
                 c.append("AND $contribution_gt < u.transaction_amt")
-            if lte is not None:
+            if contribution_lte is not None:
                 c.append("AND u.transaction_amt <= $contribution_lte")
         else:
             c.append("MATCH (t:Committee)-[:SPENT]->(u:Expenditure)-[:IDENTIFIES]->(:Candidate)<-[IDENTIFIES]-(v:Expenditure)<-[:SPENT]-(b:Committee)")
@@ -219,13 +219,13 @@ def graph_traverse_associations_committee_committee(tx, ids, ids2, cmte_pty_affi
             if purpose is not None:
                 c.append("AND u.purpose CONTAINS toUpper($purpose)")
                 c.append("AND v.purpose CONTAINS toUpper($purpose)")
-            if amndt_ind is not None:
+            if expenditure_amndt_ind is not None:
                 c.append("AND u.amndt_ind = toUpper($expenditure_amndt_ind)")
                 c.append("AND v.amndt_ind = toUpper($expenditure_amndt_ind)")
-            if gt is not None:
+            if expenditure_gt is not None:
                 c.append("AND $expenditure_gt < u.transaction_amt")
                 c.append("AND $expenditure_gt < v.transaction_amt")
-            if lte is not None:
+            if expenditure_lte is not None:
                 c.append("AND u.transaction_amt <= $expenditure_lte")
                 c.append("AND v.transaction_amt <= $expenditure_lte")
     if cmte_pty_affiliation is not None:
@@ -523,11 +523,11 @@ def graph_traverse_intermediaries_committee_committee(tx, ids, ids2, cand_pty_af
             c.append("AND d.transaction_pgi = toUpper($transaction_pgi)")
         if rpt_tp is not None:
             c.append("AND d.rpt_tp = toUpper($rpt_tp)")
-        if amndt_ind is not None:
+        if contribution_amndt_ind is not None:
             c.append("AND d.amndt_ind = toUpper($contribution_amndt_ind)")
-        if gt is not None:
+        if contribution_gt is not None:
             c.append("AND $contribution_gt < d.transaction_amt")
-        if lte is not None:
+        if contribution_lte is not None:
             c.append("AND d.transaction_amt <= $contribution_lte")
         c.append("RETURN DISTINCT d")
     else:
@@ -543,13 +543,13 @@ def graph_traverse_intermediaries_committee_committee(tx, ids, ids2, cand_pty_af
         if purpose is not None:
             c.append("AND c.purpose CONTAINS toUpper($purpose)")
             c.append("AND d.purpose CONTAINS toUpper($purpose)")
-        if amndt_ind is not None:
+        if expenditure_amndt_ind is not None:
             c.append("AND c.amndt_ind = toUpper($expenditure_amndt_ind)")
             c.append("AND d.amndt_ind = toUpper($expenditure_amndt_ind)")
-        if gt is not None:
+        if expenditure_gt is not None:
             c.append("AND $expenditure_gt < c.transaction_amt")
             c.append("AND $expenditure_gt < d.transaction_amt")
-        if lte is not None:
+        if expenditure_lte is not None:
             c.append("AND c.transaction_amt <= $expenditure_lte")
             c.append("AND d.transaction_amt <= $expenditure_lte")
         if cand_pty_affiliation is not None:
