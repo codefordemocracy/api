@@ -114,21 +114,24 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                             q = add_not_clause(q, clause)
             if "filters" in setting:
                 for criteria in setting["filters"]:
-                    for key, value in include["filters"][setting["position"]].items() or []:
-                        clause = {
-                            "term": {
-                                map_keys(criteria, key, value): value.lower()
-                            }
-                        }
-                        q = add_filter_clause(q, clause)
-                    if exclude is not None:
-                        for key, value in exclude["filters"][setting["position"]].items() or []:
-                            clause = {
+                    for key, values in include["filters"][setting["position"]].items() or []:
+                        subquery = make_should_subquery()
+                        for value in values or []:
+                            subquery = add_should_clause(subquery, {
                                 "term": {
                                     map_keys(criteria, key, value): value.lower()
                                 }
-                            }
-                            q = add_not_clause(q, clause)
+                            })
+                        q = add_must_clause(q, subquery)
+                    if exclude is not None:
+                        for key, values in exclude["filters"][setting["position"]].items() or []:
+                            for value in values or []:
+                                clause = {
+                                    "term": {
+                                        map_keys(criteria, key, value): value.lower()
+                                    }
+                                }
+                                q = add_not_clause(q, clause)
         if len(subquery["bool"]["should"]) > 0:
             q = add_must_clause(q, subquery)
     return q

@@ -7,7 +7,7 @@ from .dependencies.connections import driver
 from .dependencies import helpers
 from .dependencies.cypher import traverse as cypher
 from .dependencies.models import PaginationConfig, DatesConfig
-from .dependencies.models import AttributeCandidateConfig, AttributeCommitteeConfig, GraphDonorAttributesConfig, GraphSourceAttributesConfig, GraphContributionAttributesConfig, GraphExpenditureAttributesConfig
+from .dependencies.models import GraphCandidateAttributesConfig, GraphCommitteeAttributesConfig, GraphDonorAttributesConfig, GraphSourceAttributesConfig, GraphContributionAttributesConfig, GraphExpenditureAttributesConfig
 
 import datetime
 
@@ -66,25 +66,25 @@ class GraphTraverseIntermediariesDatesBody(GraphTraverseIntermediariesBaseBody):
     dates: DatesConfig = DatesConfig()
 
 class GraphTraverseAssociationsCandidateCommitteeBody(GraphTraverseAssociationsDatesBody):
-    committees: AttributeCommitteeConfig = AttributeCommitteeConfig()
+    committees: GraphCommitteeAttributesConfig = GraphCommitteeAttributesConfig()
     intermediaries: GraphIntermediariesLinkagesExpendituresConfig = GraphIntermediariesLinkagesExpendituresConfig()
 
 class GraphTraverseAssociationsCommitteeCandidateBody(GraphTraverseAssociationsDatesBody):
-    candidates: AttributeCandidateConfig = AttributeCandidateConfig()
+    candidates: GraphCandidateAttributesConfig = GraphCandidateAttributesConfig()
     intermediaries: GraphIntermediariesLinkagesExpendituresConfig = GraphIntermediariesLinkagesExpendituresConfig()
 
 class GraphTraverseAssociationsCommitteeCommitteeBody(GraphTraverseAssociationsDatesBody):
-    committees: AttributeCommitteeConfig = AttributeCommitteeConfig()
+    committees: GraphCommitteeAttributesConfig = GraphCommitteeAttributesConfig()
     intermediaries: GraphIntermediariesContributionsExpendituresConfig = GraphIntermediariesContributionsExpendituresConfig()
 
 class GraphTraverseAssociationsCommitteeDonorBody(GraphTraverseAssociationsDatesBody):
     donors: GraphDonorAttributesConfig = GraphDonorAttributesConfig()
 
 class GraphTraverseAssociationsNodeCommitteeBody(GraphTraverseAssociationsDatesBody):
-    committees: AttributeCommitteeConfig = AttributeCommitteeConfig()
+    committees: GraphCommitteeAttributesConfig = GraphCommitteeAttributesConfig()
 
 class GraphTraverseAssociationsNodeCandidateBody(GraphTraverseAssociationsDatesBody):
-    candidates: AttributeCandidateConfig = AttributeCandidateConfig()
+    candidates: GraphCandidateAttributesConfig = GraphCandidateAttributesConfig()
 
 class GraphTraverseAssociationsNodeSourceBody(GraphTraverseAssociationsDatesBody):
     sources: GraphSourceAttributesConfig = GraphSourceAttributesConfig()
@@ -97,7 +97,7 @@ class GraphTraverseContributionIntermediariesBody(GraphTraverseIntermediariesDat
 
 class GraphTraverseIntermediariesCommitteeCommitteeBody(GraphTraverseIntermediariesDatesBody):
     intermediaries: GraphIntermediariesContributionsExpendituresConfig = GraphIntermediariesContributionsExpendituresConfig()
-    candidates: AttributeCandidateConfig = AttributeCandidateConfig()
+    candidates: GraphCandidateAttributesConfig = GraphCandidateAttributesConfig()
 
 class GraphTraverseIntermediariesCommitteePayeeBody(GraphTraverseIntermediariesDatesBody):
     intermediaries: GraphIntermediariesLinkagesExpendituresConfig = GraphIntermediariesLinkagesExpendituresConfig()

@@ -22,13 +22,16 @@ def data_preview_organization_committee(es, include_terms, include_ids, include_
             })
     q = add_must_clause(q, subquery)
     if include_filters is not None:
-        for key, value in include_filters.items():
-            if value is not None:
-                q = add_filter_clause(q, {
-                    "term": {
-                        map_keys("committee", key, value): value.lower()
-                    }
-                })
+        for key, values in include_filters.items():
+            subquery = make_should_subquery()
+            for value in values or []:
+                if value is not None:
+                    subquery = add_should_clause(subquery, {
+                        "term": {
+                            map_keys("committee", key, value): value.lower()
+                        }
+                    })
+            q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
             q = add_not_clause(q, {
@@ -44,13 +47,14 @@ def data_preview_organization_committee(es, include_terms, include_ids, include_
                 }
             })
     if exclude_filters is not None:
-        for key, value in exclude_filters.items():
-            if value is not None:
-                q = add_not_clause(q, {
-                    "term": {
-                        map_keys("committee", key, value): value.lower()
-                    }
-                })
+        for key, values in exclude_filters.items():
+            for value in values or []:
+                if value is not None:
+                    q = add_not_clause(q, {
+                        "term": {
+                            map_keys("committee", key, value): value.lower()
+                        }
+                    })
     response = get_response(es, "federal_fec_committees", q, skip, limit, count, False,
         filter_path=["hits.hits._source.row.cmte_id", "hits.hits._source.row.cmte_nm"]
     )
@@ -120,13 +124,16 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
             })
     q = add_must_clause(q, subquery)
     if include_filters is not None:
-        for key, value in include_filters.items():
-            if value is not None:
-                q = add_filter_clause(q, {
-                    "term": {
-                        map_keys("candidate", key, value): value.lower()
-                    }
-                })
+        for key, values in include_filters.items():
+            subquery = make_should_subquery()
+            for value in values or []:
+                if value is not None:
+                    subquery = add_should_clause(subquery, {
+                        "term": {
+                            map_keys("committee", key, value): value.lower()
+                        }
+                    })
+            q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
             q = add_not_clause(q, {
@@ -145,13 +152,14 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
                 }
             })
     if exclude_filters is not None:
-        for key, value in exclude_filters.items():
-            if value is not None:
-                q = add_not_clause(q, {
-                    "term": {
-                        map_keys("candidate", key, value): value.lower()
-                    }
-                })
+        for key, values in exclude_filters.items():
+            for value in values or []:
+                if value is not None:
+                    q = add_not_clause(q, {
+                        "term": {
+                            map_keys("candidate", key, value): value.lower()
+                        }
+                    })
     response = get_response(es, "federal_fec_candidates", q, skip, limit, count, False,
         filter_path=["hits.hits._source.row.cand_id", "hits.hits._source.row.cand_name"]
     )
@@ -183,13 +191,16 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
             })
     q = add_must_clause(q, subquery)
     if include_filters is not None:
-        for key, value in include_filters.items():
-            if value is not None:
-                q = add_filter_clause(q, {
-                    "term": {
-                        map_keys("donor", key, value): value.lower()
-                    }
-                })
+        for key, values in include_filters.items():
+            subquery = make_should_subquery()
+            for value in values or []:
+                if value is not None:
+                    subquery = add_should_clause(subquery, {
+                        "term": {
+                            map_keys("committee", key, value): value.lower()
+                        }
+                    })
+            q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
             q = add_not_clause(q, {
@@ -201,13 +212,14 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
                 }
             })
     if exclude_filters is not None:
-        for key, value in exclude_filters.items():
-            if value is not None:
-                q = add_not_clause(q, {
-                    "term": {
-                        map_keys("donor", key, value): value.lower()
-                    }
-                })
+        for key, values in exclude_filters.items():
+            for value in values or []:
+                if value is not None:
+                    q = add_not_clause(q, {
+                        "term": {
+                            map_keys("donor", key, value): value.lower()
+                        }
+                    })
     response = get_response(es, "federal_fec_contributions", q, skip, limit, count, False,
         filter_path=["hits.hits._source.processed.source.donor.name"]
     )

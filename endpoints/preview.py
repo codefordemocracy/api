@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from typing import List
+import datetime
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver, es, db
 from .dependencies.query import preview as query
 from .dependencies.models import PaginationConfig, DataListConfig
-from .dependencies.models import AttributeCandidateConfig, AttributeCommitteeConfig, AttributeDonorConfig
 
 #########################################################
 # initialize route
@@ -22,14 +22,35 @@ router = APIRouter(
 # define models
 #########################################################
 
+class DataPreviewCandidateAttributesConfig(BaseModel):
+    cand_pty_affiliation: List[str] = Field(None, min_length=3, max_length=3)
+    cand_office: List[str] = Field(None, min_length=1, max_length=1)
+    cand_office_st: List[str] = Field(None, min_length=2, max_length=2)
+    cand_office_district: List[str] = Field(None, min_length=2, max_length=2)
+    cand_election_yr: List[int] = Field(None, ge=1990, le=datetime.datetime.now().year)
+    cand_ici: List[str] = Field(None, min_length=1, max_length=1)
+
+class DataPreviewCommitteeAttributesConfig(BaseModel):
+    cmte_pty_affiliation: List[str] = Field(None, min_length=3, max_length=3)
+    cmte_dsgn: List[str] = Field(None, min_length=1, max_length=1)
+    cmte_tp: List[str] = Field(None, min_length=1, max_length=1)
+    org_tp: List[str] = Field(None, min_length=1, max_length=1)
+
+class DataPreviewDonorAttributesConfig(BaseModel):
+    employer: List[str] = Field(None)
+    occupation: List[str] = Field(None)
+    state: List[str] = Field(None, min_length=2, max_length=2)
+    zip_code: List[int] = Field(None, ge=500, le=99999)
+    entity_tp: List[str] = Field(None, min_length=3, max_length=3)
+
 class DataPreviewCommitteeListConfig(DataListConfig):
-    filters: AttributeCommitteeConfig = AttributeCommitteeConfig()
+    filters: DataPreviewCommitteeAttributesConfig = DataPreviewCommitteeAttributesConfig()
 
 class DataPreviewCandidateListConfig(DataListConfig):
-    filters: AttributeCandidateConfig = AttributeCandidateConfig()
+    filters: DataPreviewCandidateAttributesConfig = DataPreviewCandidateAttributesConfig()
 
 class DataPreviewDonorListConfig(DataListConfig):
-    filters: AttributeDonorConfig = AttributeDonorConfig()
+    filters: DataPreviewDonorAttributesConfig = DataPreviewDonorAttributesConfig()
 
 class DataPreviewBaseBody(BaseModel):
     pagination: PaginationConfig = PaginationConfig()
