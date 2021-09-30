@@ -4,8 +4,8 @@ from ..helpers import map_keys
 
 def data_preview_organization_committee(es, include_terms, include_ids, include_filters, exclude_terms, exclude_ids, exclude_filters, skip, limit, count):
     q = make_query()
+    subquery = make_should_subquery()
     if include_terms is not None:
-        subquery = make_should_subquery()
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match": {
@@ -14,14 +14,13 @@ def data_preview_organization_committee(es, include_terms, include_ids, include_
             })
         q = add_must_clause(q, subquery)
     if include_ids is not None:
-        subquery = make_should_subquery()
         for id in include_ids:
             subquery = add_should_clause(subquery, {
                 "term": {
                     "row.cmte_id": id.lower()
                 }
             })
-        q = add_must_clause(q, subquery)
+    q = add_must_clause(q, subquery)
     if include_filters is not None:
         for key, value in include_filters.items():
             if value is not None:
@@ -70,15 +69,15 @@ def data_preview_organization_employer(es, include_terms, include_ids, exclude_t
     q["collapse"] = {
         "field": "row.source.donor.employer.keyword"
     }
+    subquery = make_should_subquery()
     if include_terms is not None:
-        subquery = make_should_subquery()
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match": {
                     "row.source.donor.employer": term
                 }
             })
-        q = add_must_clause(q, subquery)
+    q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
             q = add_not_clause(q, {
@@ -100,8 +99,8 @@ def data_preview_organization_employer(es, include_terms, include_ids, exclude_t
 
 def data_preview_person_candidate(es, include_terms, include_ids, include_filters, exclude_terms, exclude_ids, exclude_filters, skip, limit, count):
     q = make_query()
+    subquery = make_should_subquery()
     if include_terms is not None:
-        subquery = make_should_subquery()
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
@@ -111,7 +110,6 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
                     }
                 }
             })
-        q = add_must_clause(q, subquery)
     if include_ids is not None:
         subquery = make_should_subquery()
         for id in include_ids:
@@ -120,7 +118,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
                     "row.cand_id": id.lower()
                 }
             })
-        q = add_must_clause(q, subquery)
+    q = add_must_clause(q, subquery)
     if include_filters is not None:
         for key, value in include_filters.items():
             if value is not None:
@@ -172,8 +170,8 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
     q["collapse"] = {
         "field": "processed.source.donor.name.keyword"
     }
+    subquery = make_should_subquery()
     if include_terms is not None:
-        subquery = make_should_subquery()
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
@@ -183,7 +181,7 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
                     }
                 }
             })
-        q = add_must_clause(q, subquery)
+    q = add_must_clause(q, subquery)
     if include_filters is not None:
         for key, value in include_filters.items():
             if value is not None:
@@ -227,15 +225,15 @@ def data_preview_job(es, include_terms, include_ids, exclude_terms, exclude_ids,
     q["collapse"] = {
         "field": "row.source.donor.occupation.keyword"
     }
+    subquery = make_should_subquery()
     if include_terms is not None:
-        subquery = make_should_subquery()
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match": {
                     "row.source.donor.occupation": term
                 }
             })
-        q = add_must_clause(q, subquery)
+    q = add_must_clause(q, subquery)
     if exclude_terms is not None:
         for term in exclude_terms:
             q = add_not_clause(q, {
