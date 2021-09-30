@@ -8,8 +8,9 @@ def documents_browse_news_articles_source(es, domains, text, histogram, skip, li
     q["size"] = limit
     if text is not None:
         q = add_must_clause(q, {
-            "match": {
-                "extracted.text": text
+            "match_phrase": {
+                "extracted.text": text,
+                "slop": 5
             }
         })
     if len(domains) > 0:
@@ -30,8 +31,9 @@ def documents_browse_twitter_tweets_user(es, user_ids, text, histogram, skip, li
     q["size"] = limit
     if text is not None:
         q = add_must_clause(q, {
-            "match": {
-                "obj.tweet.text": text
+            "match_phrase": {
+                "obj.tweet.text": text,
+                "slop": 5
             }
         })
     if len(user_ids) > 0:
@@ -55,13 +57,15 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
             "bool": {
                 "should": [
                     {
-                        "match": {
-                            "obj.ad_creative_body": text
+                        "match_phrase": {
+                            "obj.ad_creative_body": text,
+                            "slop": 5
                         }
                     },
                     {
-                        "match": {
-                            "obj.ad_creative_link_description": text
+                        "match_phrase": {
+                            "obj.ad_creative_link_description": text,
+                            "slop": 5
                         }
                     }
                 ],

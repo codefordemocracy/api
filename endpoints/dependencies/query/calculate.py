@@ -29,8 +29,9 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
             "position": 0,
             "templates": ["GSmB"],
             "terms": [{
-                "action": "match",
-                "field": "extracted.text"
+                "action": "match_phrase",
+                "field": "extracted.text",
+                "slop": 5
             }]
         }
     ], include=include, exclude=exclude)
@@ -95,8 +96,9 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
             "position": 0,
             "templates": ["8HcR"],
             "terms": [{
-                "action": "match",
-                "field": "obj.ad_creative_body"
+                "action": "match_phrase",
+                "field": "obj.ad_creative_body",
+                "slop": 5
             }]
         }
     ], include=include, exclude=exclude)
@@ -225,8 +227,9 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "position": 0,
             "templates": ["ReqQ", "IQL2"],
             "terms": [{
-                "action": "match",
-                "field": "row.source.committee.cmte_nm"
+                "action": "match_phrase",
+                "field": "row.source.committee.cmte_nm",
+                "slop": 5
             }],
             "ids": [{
                 "action": "term",
@@ -246,22 +249,25 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "position": 0,
             "templates": ["m4YC", "Bs5W"],
             "terms": [{
-                "action": "match",
-                "field": "row.source.donor.employer"
+                "action": "match_phrase",
+                "field": "row.source.donor.employer",
+                "slop": 5
             }]
         }, {
             "position": 0,
             "templates": ["7v4P", "6peF", "F2mS", "T5xv"],
             "terms": [{
-                "action": "match",
-                "field": "row.source.donor.occupation"
+                "action": "match_phrase",
+                "field": "row.source.donor.occupation",
+                "slop": 5
             }]
         }, {
             "position": 0,
             "templates": ["VqHR", "dFMy"],
             "terms": [{
-                "action": "match",
-                "field": "row.target.committee.cmte_nm"
+                "action": "match_phrase",
+                "field": "row.target.committee.cmte_nm",
+                "slop": 5
             }],
             "ids": [{
                 "action": "term",
@@ -272,15 +278,17 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "position": 1,
             "templates": ["T5xv", "F2mS"],
             "terms": [{
-                "action": "match",
-                "field": "row.source.donor.employer"
+                "action": "match_phrase",
+                "field": "row.source.donor.employer",
+                "slop": 5
             }]
         }, {
             "position": 1,
             "templates": ["IQL2", "Bs5W", "6peF"],
             "terms": [{
-                "action": "match",
-                "field": "row.target.committee.cmte_nm"
+                "action": "match_phrase",
+                "field": "row.target.committee.cmte_nm",
+                "slop": 5
             }],
             "ids": [{
                 "action": "term",
@@ -291,8 +299,9 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "position": 2,
             "templates": ["F2mS"],
             "terms": [{
-                "action": "match",
-                "field": "row.target.committee.cmte_nm"
+                "action": "match_phrase",
+                "field": "row.target.committee.cmte_nm",
+                "slop": 5
             }],
             "ids": [{
                 "action": "term",
@@ -366,25 +375,29 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
             "position": 0,
             "templates": ["kMER"],
             "terms": [{
-                "action": "match",
-                "field": "processed.client.name"
+                "action": "match_phrase",
+                "field": "processed.client.name",
+                "slop": 5
             }]
         }, {
             "position": 0,
             "templates": ["wLvp"],
             "terms": [{
-                "action": "match",
-                "field": "processed.registrant.name"
+                "action": "match_phrase",
+                "field": "processed.registrant.name",
+                "slop": 5
             }]
         }, {
             "position": 0,
             "templates": ["MJdb"],
             "terms": [{
-                "action": "match",
-                "field": "processed.activities"
+                "action": "match_phrase",
+                "field": "processed.activities",
+                "slop": 5
             }, {
-                "action": "match",
-                "field": "processed.issues.display"
+                "action": "match_phrase",
+                "field": "processed.issues.display",
+                "slop": 5
             }],
             "ids": [{
                 "action": "term",
@@ -439,8 +452,8 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
     })
     if template in ["V5Gh", "3Nrt", "Q23x"]:
         q = add_filter_clause(q, {
-            "match": {
-                "processed.contributions.contribution_type": "honorary expenses"
+            "term": {
+                "processed.contributions.contribution_type": "honorary"
             }
         })
     q = set_query_clauses(q, template, list_settings=[
