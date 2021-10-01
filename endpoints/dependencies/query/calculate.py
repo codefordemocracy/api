@@ -364,7 +364,8 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "transaction_amt": source["row"]["transaction_amt"],
                 "transaction_tp": source["row"]["transaction_tp"],
                 "reported_by": "contributor" if source["row"]["transaction_tp"].startswith("2") or source["row"]["transaction_tp"].startswith("4") and source["row"]["transaction_tp"] != "24I" and source["row"]["transaction_tp"] != "24T" else "recipient",
-                "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + source["row"]["image_num"]
+                "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + source["row"]["image_num"],
+                "sub_id": str(source["row"]["sub_id"])
             }
             if "committee" in source["row"]["source"]:
                 row["contributor_cmte_id"] = source["row"]["source"]["committee"]["cmte_id"]
