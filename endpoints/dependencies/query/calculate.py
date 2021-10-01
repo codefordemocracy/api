@@ -120,7 +120,7 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
                 "created_at": source["obj"]["ad_creation_time"][:10],
                 "page_name": source["obj"]["page_name"],
                 "funding_entity": source["obj"].get("funding_entity"),
-                "archive_url": "https://facebook.com/ads/library/?id=" + source["obj"]["id"]
+                "archive_url": "https://facebook.com/ads/library/?id=" + str(source["obj"]["id"])
             }
             elements.append(row)
         return elements
@@ -364,7 +364,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "transaction_amt": source["row"]["transaction_amt"],
                 "transaction_tp": source["row"]["transaction_tp"],
                 "reported_by": "contributor" if source["row"]["transaction_tp"].startswith("2") or source["row"]["transaction_tp"].startswith("4") and source["row"]["transaction_tp"] != "24I" and source["row"]["transaction_tp"] != "24T" else "recipient",
-                "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + source["row"]["image_num"],
+                "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + str(source["row"]["image_num"]),
                 "sub_id": str(source["row"]["sub_id"])
             }
             if "committee" in source["row"]["source"]:
@@ -563,8 +563,8 @@ def data_calculate_recipe_990(template, es, include, exclude, skip, limit, minda
                 "taxpayer_name": source["row"]["taxpayer_name"],
                 "return_type": source["row"]["return_type"],
                 "tax_period": source["row"]["tax_period"],
-                "xml_url": "https://s3.amazonaws.com/irs-form-990/" + source["row"]["object_id"] + "_public.xml",
-                "pdf_url": "https://apps.irs.gov/pub/epostcard/cor/" + source["row"]["ein"] + "_" + source["row"]["tax_period"] + "_" + source["row"]["return_type"] + "_" + source["row"]["sub_date"][:10].replace("-", "") + source["row"]["return_id"] + ".pdf"
+                "xml_url": "https://s3.amazonaws.com/irs-form-990/" + str(source["row"]["object_id"]) + "_public.xml",
+                "pdf_url": "https://apps.irs.gov/pub/epostcard/cor/" + str(source["row"]["ein"]) + "_" + str(source["row"]["tax_period"]) + "_" + str(source["row"]["return_type"]) + "_" + source["row"]["sub_date"][:10].replace("-", "") + str(source["row"]["return_id"]) + ".pdf"
             }
             elements.append(row)
         return elements
