@@ -376,7 +376,6 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 row["donor_employer"] = source["row"]["source"]["donor"]["employer"]
                 row["donor_occupation"] = source["row"]["source"]["donor"]["occupation"]
             elements.append(row)
-            elements.append(row)
         return elements
     return response
 
