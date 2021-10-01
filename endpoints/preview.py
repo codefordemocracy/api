@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from typing import List
-import datetime
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver, es, db
@@ -27,7 +26,7 @@ class DataPreviewCandidateAttributesConfig(BaseModel):
     cand_office: List[str] = Field(None, min_length=1, max_length=1)
     cand_office_st: List[str] = Field(None, min_length=2, max_length=2)
     cand_office_district: List[str] = Field(None, min_length=2, max_length=2)
-    cand_election_yr: List[int] = Field(None, ge=1990, le=datetime.datetime.now().year)
+    cand_election_yr: List[int] = Field(None, ge=1900, le=2100)
     cand_ici: List[str] = Field(None, min_length=1, max_length=1)
 
 class DataPreviewCommitteeAttributesConfig(BaseModel):

@@ -19,7 +19,7 @@ class GraphCandidateAttributesConfig(BaseModel):
     cand_office: str = Field(None, min_length=1, max_length=1)
     cand_office_st: str = Field(None, min_length=2, max_length=2)
     cand_office_district: str = Field(None, min_length=2, max_length=2)
-    cand_election_yr: int = Field(None, ge=1990, le=datetime.datetime.now().year)
+    cand_election_yr: int = Field(None, ge=1900, le=2100)
     cand_ici: str = Field(None, min_length=1, max_length=1)
 
 class GraphCommitteeAttributesConfig(BaseModel):
