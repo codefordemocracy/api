@@ -119,7 +119,7 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                         for value in values or []:
                             subquery = add_should_clause(subquery, {
                                 "term": {
-                                    map_keys(criteria, key, value): value.lower()
+                                    map_keys(criteria, key, value): value.lower() if isinstance(value, str) else value
                                 }
                             })
                         q = add_must_clause(q, subquery)
@@ -128,7 +128,7 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                             for value in values or []:
                                 clause = {
                                     "term": {
-                                        map_keys(criteria, key, value): value.lower()
+                                        map_keys(criteria, key, value): value.lower() if isinstance(value, str) else value
                                     }
                                 }
                                 q = add_not_clause(q, clause)

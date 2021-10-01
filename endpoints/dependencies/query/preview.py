@@ -29,7 +29,7 @@ def data_preview_organization_committee(es, include_terms, include_ids, include_
                 if value is not None:
                     subquery = add_should_clause(subquery, {
                         "term": {
-                            map_keys("committee", key, value): value.lower()
+                            map_keys("committee", key, value): value.lower() if isinstance(value, str) else value
                         }
                     })
             q = add_must_clause(q, subquery)
@@ -54,7 +54,7 @@ def data_preview_organization_committee(es, include_terms, include_ids, include_
                 if value is not None:
                     q = add_not_clause(q, {
                         "term": {
-                            map_keys("committee", key, value): value.lower()
+                            map_keys("committee", key, value): value.lower() if isinstance(value, str) else value
                         }
                     })
     response = get_response(es, "federal_fec_committees", q, skip, limit, count, False,
@@ -134,7 +134,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
                 if value is not None:
                     subquery = add_should_clause(subquery, {
                         "term": {
-                            map_keys("committee", key, value): value.lower()
+                            map_keys("committee", key, value): value.lower() if isinstance(value, str) else value
                         }
                     })
             q = add_must_clause(q, subquery)
@@ -161,7 +161,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
                 if value is not None:
                     q = add_not_clause(q, {
                         "term": {
-                            map_keys("candidate", key, value): value.lower()
+                            map_keys("candidate", key, value): value.lower() if isinstance(value, str) else value
                         }
                     })
     response = get_response(es, "federal_fec_candidates", q, skip, limit, count, False,
@@ -201,7 +201,7 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
                 if value is not None:
                     subquery = add_should_clause(subquery, {
                         "term": {
-                            map_keys("committee", key, value): value.lower()
+                            map_keys("committee", key, value): value.lower() if isinstance(value, str) else value
                         }
                     })
             q = add_must_clause(q, subquery)
@@ -221,7 +221,7 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
                 if value is not None:
                     q = add_not_clause(q, {
                         "term": {
-                            map_keys("donor", key, value): value.lower()
+                            map_keys("donor", key, value): value.lower() if isinstance(value, str) else value
                         }
                     })
     response = get_response(es, "federal_fec_contributions", q, skip, limit, count, False,
