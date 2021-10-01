@@ -128,7 +128,7 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
 
 def data_calculate_recipe_contribution(template, es, include, exclude, skip, limit, mindate, maxdate, filters, orderby, orderdir, count, histogram):
     # preprocess some recipes
-    if template in ["DXhw", "WK3K", "KR64", "F7Xn", "gXjA"]:
+    if template in ["DXhw", "KYWZ", "WK3K", "KR64", "F7Xn", "gXjA"]:
         # get committee ids for candidates
         list_settings = [
             {
@@ -193,10 +193,6 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                             committee_ids.append(committee["cmte_id"])
                     exclude["terms"][i["position"]] = None
                     exclude["ids"][i["position"]] = committee_ids
-        # find the equivalent committee recipe
-        for i in [("DXhw", "VqHR"), ("KWYZ", "dFMy"), ("WK3K", "IQL2"), ("KR64", "Bs5W"), ("F7Xn", "6peF"), ("gXjA", "F2mS")]:
-            if template == i[0]:
-                template = i[1]
     # build query
     q = make_query()
     q = set_query_dates(q, "processed.date", mindate, maxdate)
@@ -210,13 +206,13 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "row.target.committee.cmte_id": "c00694323" # winred
         }
     })
-    if template == "VqHR":
+    if template in ["VqHR", "DXhw"]:
         q = add_filter_clause(q, {
             "term": {
                 "row.source.classification": "committee"
             }
         })
-    elif template == "dFMy":
+    elif template in ["dFMy", "KYWZ"]:
         q = add_filter_clause(q, {
             "term": {
                 "row.source.classification": "individual"
@@ -225,7 +221,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["ReqQ", "IQL2"],
+            "templates": ["ReqQ", "IQL2", "WK3K"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "row.source.committee.cmte_nm",
@@ -247,7 +243,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "filters": ["donor"]
         }, {
             "position": 0,
-            "templates": ["m4YC", "Bs5W"],
+            "templates": ["m4YC", "Bs5W", "KR64"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "row.source.donor.employer",
@@ -255,7 +251,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             }]
         }, {
             "position": 0,
-            "templates": ["7v4P", "6peF", "F2mS", "T5xv"],
+            "templates": ["7v4P", "6peF", "F7Xn", "T5xv", "F2mS", "gXjA"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "row.source.donor.occupation",
@@ -275,8 +271,15 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             }],
             "filters": ["target.committee"]
         }, {
+            "position": 0,
+            "templates": ["DXhw", "KYWZ"],
+            "ids": [{
+                "action": "term",
+                "field": "row.target.committee.cmte_id"
+            }]
+        }, {
             "position": 1,
-            "templates": ["T5xv", "F2mS"],
+            "templates": ["T5xv", "F2mS", "gXjA"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "row.source.donor.employer",
@@ -296,6 +299,13 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             }],
             "filters": ["target.committee"]
         }, {
+            "position": 1,
+            "templates": ["WK3K", "KR64", "F7Xn"],
+            "ids": [{
+                "action": "term",
+                "field": "row.target.committee.cmte_id"
+            }]
+        }, {
             "position": 2,
             "templates": ["F2mS"],
             "terms": [{
@@ -308,7 +318,14 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "field": "row.target.committee.cmte_id"
             }],
             "filters": ["target.committee"]
-        },
+        }, {
+            "position": 2,
+            "templates": ["gXjA"],
+            "ids": [{
+                "action": "term",
+                "field": "row.target.committee.cmte_id"
+            }]
+        }
     ], include=include, exclude=exclude)
     # add filters
     if filters["amount"]["min"] is not None or filters["amount"]["max"] is not None:
