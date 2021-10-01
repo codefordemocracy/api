@@ -428,8 +428,8 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
                     "date_submitted": source["processed"].get("date_submitted")[:10],
                     "filing_year": source["processed"].get("filing_year"),
                     "filing_type": source["processed"].get("filing_type"),
-                    "client_name": source["processed"]["client"].get("name"),
-                    "registrant_name": source["processed"]["registrant"].get("name"),
+                    "client_name": source["processed"]["client"].get("name").upper() if source["processed"]["client"].get("name") is not None else None,
+                    "registrant_name": source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None,
                     "registrant_house_id": source["processed"]["registrant"].get("house_id"),
                     "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
                     "lobbyists": ", ".join([i["name"] for i in source["processed"].get("lobbyists", [])]),
@@ -486,11 +486,17 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
             for contribution in contributions or []:
                 contribution["date_contribution"] = contribution.pop("date")[:10]
                 contribution["date_submitted"] = source["processed"].get("date_submitted")[:10]
+                contribution["contribution_type"] = contribution["contribution_type"].upper()
+                contribution["contributor_name"] = contribution["contributor_name"].upper()
+                contribution["payee_name"] = contribution["payee_name"].upper()
+                contribution["recipient_name"] = contribution["recipient_name"].upper()
                 contribution["filing_year"] = source["processed"].get("filing_year")
                 contribution["filing_type"] = source["processed"].get("filing_type")
                 contribution["registrant_name"] = source["processed"]["registrant"].get("name")
                 contribution["registrant_house_id"] = source["processed"]["registrant"].get("house_id")
                 contribution["registrant_senate_id"] = source["processed"]["registrant"].get("senate_id")
+                contribution["lobbyist_name"] = source["processed"].get("lobbyist", {}).get("name").upper() if source["processed"].get("lobbyist", {}).get("name") is not None else None
+                contribution["lobbyist_id"] = source["processed"].get("lobbyist", {}).get("id")
                 contribution["url"] = source["processed"].get("url")
                 elements.append(contribution)
         return elements
