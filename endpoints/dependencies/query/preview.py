@@ -9,8 +9,10 @@ def data_preview_organization_committee(es, include_terms, include_ids, include_
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
-                    "row.cmte_nm": term,
-                    "slop": 5
+                    "row.cmte_nm": {
+                        "query": term,
+                        "slop": 5
+                    }
                 }
             })
         q = add_must_clause(q, subquery)
@@ -37,8 +39,10 @@ def data_preview_organization_committee(es, include_terms, include_ids, include_
         for term in exclude_terms:
             q = add_not_clause(q, {
                 "match_phrase": {
-                    "row.cmte_nm": term,
-                    "slop": 5
+                    "row.cmte_nm": {
+                        "query": term,
+                        "slop": 5
+                    }
                 }
             })
     if exclude_ids is not None:
@@ -80,8 +84,10 @@ def data_preview_organization_employer(es, include_terms, include_ids, exclude_t
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
-                    "row.source.donor.employer": term,
-                    "slop": 5
+                    "row.source.donor.employer":{
+                        "query": term,
+                        "slop": 5
+                    }
                 }
             })
     q = add_must_clause(q, subquery)
@@ -89,8 +95,10 @@ def data_preview_organization_employer(es, include_terms, include_ids, exclude_t
         for term in exclude_terms:
             q = add_not_clause(q, {
                 "match_phrase": {
-                    "row.source.donor.employer": term,
-                    "slop": 5
+                    "row.source.donor.employer": {
+                        "query": term,
+                        "slop": 5
+                    }
                 }
             })
     response = get_response(es, "federal_fec_contributions", q, skip, limit, count, False,
@@ -113,8 +121,10 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
                     "processed.row.cand_name": {
-                        "query": term,
-                        "slop": 5
+                        "query": {
+                            "query": term,
+                            "slop": 5
+                        }
                     }
                 }
             })
@@ -143,8 +153,10 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
             q = add_not_clause(q, {
                 "match_phrase": {
                     "processed.row.cand_name": {
-                        "query": term,
-                        "slop": 5
+                        "query": {
+                            "query": term,
+                            "slop": 5
+                        }
                     }
                 }
             })
@@ -188,8 +200,10 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
                     "processed.source.donor.name": {
-                        "query": term,
-                        "slop": 2
+                        "query": {
+                            "query": term,
+                            "slop": 2
+                        }
                     }
                 }
             })
@@ -210,8 +224,10 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
             q = add_not_clause(q, {
                 "match_phrase": {
                     "processed.source.donor.name": {
-                        "query": term,
-                        "slop": 2
+                        "query": {
+                            "query": term,
+                            "slop": 2
+                        }
                     }
                 }
             })
@@ -246,8 +262,10 @@ def data_preview_job(es, include_terms, include_ids, exclude_terms, exclude_ids,
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
-                    "row.source.donor.occupation": term,
-                    "slop": 5
+                    "row.source.donor.occupation": {
+                        "query": term,
+                        "slop": 5
+                    }
                 }
             })
     q = add_must_clause(q, subquery)
@@ -255,8 +273,10 @@ def data_preview_job(es, include_terms, include_ids, exclude_terms, exclude_ids,
         for term in exclude_terms:
             q = add_not_clause(q, {
                 "match_phrase": {
-                    "row.source.donor.occupation": term,
-                    "slop": 5
+                    "row.source.donor.occupation": {
+                        "query": term,
+                        "slop": 5
+                    }
                 }
             })
     response = get_response(es, "federal_fec_contributions", q, skip, limit, count, False,

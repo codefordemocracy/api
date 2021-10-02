@@ -9,8 +9,10 @@ def documents_browse_news_articles_source(es, domains, text, histogram, skip, li
     if text is not None:
         q = add_must_clause(q, {
             "match_phrase": {
-                "extracted.text": text,
-                "slop": 5
+                "extracted.text": {
+                    "query": text,
+                    "slop": 5
+                }
             }
         })
     if len(domains) > 0:
@@ -32,8 +34,10 @@ def documents_browse_twitter_tweets_user(es, user_ids, text, histogram, skip, li
     if text is not None:
         q = add_must_clause(q, {
             "match_phrase": {
-                "obj.tweet.text": text,
-                "slop": 5
+                "obj.tweet.text": {
+                    "query": text,
+                    "slop": 5
+                }
             }
         })
     if len(user_ids) > 0:
@@ -58,14 +62,18 @@ def documents_browse_facebook_ads(es, text, histogram, skip, limit, mindate, max
                 "should": [
                     {
                         "match_phrase": {
-                            "obj.ad_creative_body": text,
-                            "slop": 5
+                            "obj.ad_creative_body": {
+                                "query": text,
+                                "slop": 5
+                            }
                         }
                     },
                     {
                         "match_phrase": {
-                            "obj.ad_creative_link_description": text,
-                            "slop": 5
+                            "obj.ad_creative_link_description": {
+                                "query": text,
+                                "slop": 5
+                            }
                         }
                     }
                 ],
