@@ -128,12 +128,12 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
 
 def data_calculate_recipe_contribution(template, es, include, exclude, skip, limit, mindate, maxdate, filters, orderby, orderdir, count, histogram):
     # preprocess some recipes
-    if template in ["DXhw", "KYWZ", "WK3K", "KR64", "F7Xn", "gXjA"]:
+    if template in ["DXhw", "KWYZ", "WK3K", "KR64", "F7Xn", "gXjA"]:
         # get committee ids for candidates
         list_settings = [
             {
                 "position": 0,
-                "templates": ["DXhw"],
+                "templates": ["DXhw", "KWYZ"],
                 "terms": [{
                     "action": "match_phrase",
                     "field": "processed.row.cand_name",
@@ -203,7 +203,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "row.source.classification": "committee"
             }
         })
-    elif template in ["dFMy", "KYWZ"]:
+    elif template in ["dFMy", "KWYZ"]:
         q = add_filter_clause(q, {
             "term": {
                 "row.source.classification": "individual"
@@ -257,7 +257,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
             "filters": ["target.committee"]
         }, {
             "position": 0,
-            "templates": ["DXhw", "KYWZ"],
+            "templates": ["DXhw", "KWYZ"],
             "ids": ["row.target.committee.cmte_id"]
         }, {
             "position": 1,
