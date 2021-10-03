@@ -88,7 +88,7 @@ def prepare_lists(lists, db):
         "exclude": exclude
     }
 
-def map_keys(entity, key, value):
+def map_keys(entity, key):
     if entity in ["candidate", "committee"]:
         return "row."+key
     elif entity in ["source.candidate", "source.committee", "target.committee"]:

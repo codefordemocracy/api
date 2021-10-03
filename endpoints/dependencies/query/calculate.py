@@ -139,10 +139,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                     "field": "processed.row.cand_name",
                     "slop": 5
                 }],
-                "ids": [{
-                    "action": "term",
-                    "field": "row.cand_id"
-                }],
+                "ids": ["row.cand_id"],
                 "filters": ["candidate"]
             }, {
                 "position": 1,
@@ -152,10 +149,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                     "field": "processed.row.cand_name",
                     "slop": 5
                 }],
-                "ids": [{
-                    "action": "term",
-                    "field": "row.cand_id"
-                }],
+                "ids": ["row.cand_id"],
                 "filters": ["candidate"]
             }, {
                 "position": 2,
@@ -165,10 +159,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                     "field": "processed.row.cand_name",
                     "slop": 5
                 }],
-                "ids": [{
-                    "action": "term",
-                    "field": "row.cand_id"
-                }],
+                "ids": ["row.cand_id"],
                 "filters": ["candidate"]
             }
         ]
@@ -227,10 +218,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "field": "row.source.committee.cmte_nm",
                 "slop": 5
             }],
-            "ids": [{
-                "action": "term",
-                "field": "row.source.committee.cmte_id"
-            }],
+            "ids": ["row.source.committee.cmte_id"],
             "filters": ["source.committee"]
         }, {
             "position": 0,
@@ -265,18 +253,12 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "field": "row.target.committee.cmte_nm",
                 "slop": 5
             }],
-            "ids": [{
-                "action": "term",
-                "field": "row.target.committee.cmte_id"
-            }],
+            "ids": ["row.target.committee.cmte_id"],
             "filters": ["target.committee"]
         }, {
             "position": 0,
             "templates": ["DXhw", "KYWZ"],
-            "ids": [{
-                "action": "term",
-                "field": "row.target.committee.cmte_id"
-            }]
+            "ids": ["row.target.committee.cmte_id"]
         }, {
             "position": 1,
             "templates": ["T5xv", "F2mS", "gXjA"],
@@ -293,18 +275,12 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "field": "row.target.committee.cmte_nm",
                 "slop": 5
             }],
-            "ids": [{
-                "action": "term",
-                "field": "row.target.committee.cmte_id"
-            }],
+            "ids": ["row.target.committee.cmte_id"],
             "filters": ["target.committee"]
         }, {
             "position": 1,
             "templates": ["WK3K", "KR64", "F7Xn"],
-            "ids": [{
-                "action": "term",
-                "field": "row.target.committee.cmte_id"
-            }]
+            "ids": ["row.target.committee.cmte_id"]
         }, {
             "position": 2,
             "templates": ["F2mS"],
@@ -313,18 +289,12 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "field": "row.target.committee.cmte_nm",
                 "slop": 5
             }],
-            "ids": [{
-                "action": "term",
-                "field": "row.target.committee.cmte_id"
-            }],
+            "ids": ["row.target.committee.cmte_id"],
             "filters": ["target.committee"]
         }, {
             "position": 2,
             "templates": ["gXjA"],
-            "ids": [{
-                "action": "term",
-                "field": "row.target.committee.cmte_id"
-            }]
+            "ids": ["row.target.committee.cmte_id"]
         }
     ], include=include, exclude=exclude)
     # add filters
@@ -416,10 +386,7 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
                 "field": "processed.issues.display",
                 "slop": 5
             }],
-            "ids": [{
-                "action": "term",
-                "field": "processed.issues.code"
-            }]
+            "ids": ["processed.issues.code"]
         }
     ], include=include, exclude=exclude)
     # set sort
@@ -477,10 +444,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
         {
             "position": 0,
             "templates": ["PjyR", "WGb3", "MK93", "V5Gh", "3Nrt", "Q23x"],
-            "ids": [{
-                "action": "term",
-                "field": "processed.registrant.senate_id"
-            }]
+            "ids": ["processed.registrant.senate_id"]
         }
     ], include=include, exclude=exclude)
     # set sort

@@ -56,32 +56,27 @@ def set_query_clauses(q, template, list_settings, include, exclude):
         if template in setting["templates"]:
             if "terms" in setting:
                 for criteria in setting["terms"]:
-                    for term in include["terms"][setting["position"]] or []:
-                        query = term.lower() if criteria["action"] == "term" else term
-                        if "slop" in criteria:
-                            query = {
-                                "query": query,
-                                "slop": criteria["slop"]
-                            }
-                        if criteria["action"] == "multi_match":
-                            clause = {
-                                criteria["action"]: query
-                            }
-                        else:
-                            clause = {
+                    # set lowercase keywords
+                    if criteria["action"] == "term" or criteria["action"] == "terms":
+                        include["terms"][setting["position"]] = [term.lower() if isinstance(term, str) else term for term in include["terms"][setting["position"]]]
+                        exclude["terms"][setting["position"]] = [term.lower() if isinstance(term, str) else term for term in exclude["terms"][setting["position"]]]
+                    # process query for includes
+                    if criteria["action"] == "terms":
+                        if include["terms"][setting["position"]] != []:
+                            subquery = add_should_clause(subquery, {
                                 criteria["action"]: {
-                                    criteria["field"]: query
+                                    criteria["field"]: include["terms"][setting["position"]]
                                 }
-                            }
-                        subquery = add_should_clause(subquery, clause)
-                    if exclude is not None:
-                        for term in exclude["terms"][setting["position"]] or []:
-                            query = term.lower() if criteria["action"] == "term" else term
+                            })
+                    else:
+                        for term in include["terms"][setting["position"]] or []:
                             if "slop" in criteria:
                                 query = {
-                                    "query": query,
+                                    "query": term,
                                     "slop": criteria["slop"]
                                 }
+                            else:
+                                query = term
                             if criteria["action"] == "multi_match":
                                 clause = {
                                     criteria["action"]: query
@@ -92,46 +87,70 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                                         criteria["field"]: query
                                     }
                                 }
-                            q = add_not_clause(q, clause)
-            if "ids" in setting:
-                for criteria in setting["ids"]:
-                    for id in include["ids"][setting["position"]] or []:
-                        query = id.lower() if criteria["action"] == "term" else id
-                        clause = {
-                            criteria["action"]: {
-                                criteria["field"]: query
-                            }
-                        }
-                        subquery = add_should_clause(subquery, clause)
+                            subquery = add_should_clause(subquery, clause)
+                    # process query for excludes
                     if exclude is not None:
-                        for id in exclude["ids"][setting["position"]] or []:
-                            query = id.lower() if criteria["action"] == "term" else id
-                            clause = {
-                                criteria["action"]: {
-                                    criteria["field"]: query
-                                }
+                        if criteria["action"] == "terms":
+                            if exclude["terms"][setting["position"]] != []:
+                                subquery = add_should_clause(subquery, {
+                                    criteria["action"]: {
+                                        criteria["field"]: exclude["terms"][setting["position"]]
+                                    }
+                                })
+                        else:
+                            for term in exclude["terms"][setting["position"]] or []:
+                                if "slop" in criteria:
+                                    query = {
+                                        "query": term,
+                                        "slop": criteria["slop"]
+                                    }
+                                else:
+                                    query = term
+                                if criteria["action"] == "multi_match":
+                                    clause = {
+                                        criteria["action"]: query
+                                    }
+                                else:
+                                    clause = {
+                                        criteria["action"]: {
+                                            criteria["field"]: query
+                                        }
+                                    }
+                                q = add_not_clause(q, clause)
+            if "ids" in setting:
+                for field in setting["ids"]:
+                    # process query for includes
+                    if include["ids"][setting["position"]] != []:
+                        subquery = add_should_clause(subquery, {
+                            "terms": {
+                                field: [id.lower() if isinstance(id, str) else id for id in include["ids"][setting["position"]]]
                             }
-                            q = add_not_clause(q, clause)
-            if "filters" in setting:
-                for criteria in setting["filters"]:
-                    for key, values in include["filters"][setting["position"]].items() or []:
-                        subquery = make_should_subquery()
-                        for value in values or []:
-                            subquery = add_should_clause(subquery, {
-                                "term": {
-                                    map_keys(criteria, key, value): value.lower() if isinstance(value, str) else value
+                        })
+                    # process query for excludes
+                    if exclude is not None:
+                        if exclude["ids"][setting["position"]] != []:
+                            q = add_not_clause(q, {
+                                "terms": {
+                                    field: [id.lower() if isinstance(id, str) else id for id in exclude["ids"][setting["position"]]]
                                 }
                             })
-                        q = add_must_clause(q, subquery)
+            if "filters" in setting:
+                for criteria in setting["filters"]:
+                    # process query for includes
+                    for key, values in include["filters"][setting["position"]].items() or []:
+                        q = add_must_clause(q, {
+                            "terms": {
+                                map_keys(criteria, key): [value.lower() if isinstance(value, str) else value for value in values]
+                            }
+                        })
+                    # process query for excludes
                     if exclude is not None:
                         for key, values in exclude["filters"][setting["position"]].items() or []:
-                            for value in values or []:
-                                clause = {
-                                    "term": {
-                                        map_keys(criteria, key, value): value.lower() if isinstance(value, str) else value
-                                    }
+                            q = add_not_clause(q, {
+                                "terms": {
+                                    map_keys(criteria, key): [value.lower() if isinstance(value, str) else value for value in values]
                                 }
-                                q = add_not_clause(q, clause)
+                            })
         if len(subquery["bool"]["should"]) > 0:
             q = add_must_clause(q, subquery)
     return q
