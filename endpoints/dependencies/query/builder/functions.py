@@ -92,11 +92,20 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                     if exclude is not None:
                         if criteria["action"] == "terms":
                             if exclude["terms"][setting["position"]] != []:
-                                subquery = add_should_clause(subquery, {
+                                clause = {
                                     criteria["action"]: {
                                         criteria["field"]: exclude["terms"][setting["position"]]
                                     }
-                                })
+                                }
+                                if setting.get("type") == "nested":
+                                    q = add_not_clause(q, {
+                                        "nested": {
+                                            "path": setting["path"],
+                                            "query": clause
+                                        }
+                                    })
+                                else:
+                                    q = add_not_clause(q, clause)
                         else:
                             for term in exclude["terms"][setting["position"]] or []:
                                 if "slop" in criteria:
@@ -116,7 +125,15 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                                             criteria["field"]: query
                                         }
                                     }
-                                q = add_not_clause(q, clause)
+                                if setting.get("type") == "nested":
+                                    q = add_not_clause(q, {
+                                        "nested": {
+                                            "path": setting["path"],
+                                            "query": clause
+                                        }
+                                    })
+                                else:
+                                    q = add_not_clause(q, clause)
             if "ids" in setting:
                 for field in setting["ids"]:
                     # process query for includes
@@ -129,28 +146,63 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                     # process query for excludes
                     if exclude is not None:
                         if exclude["ids"][setting["position"]] != []:
-                            q = add_not_clause(q, {
+                            clause = {
                                 "terms": {
                                     field: [id.lower() if isinstance(id, str) else id for id in exclude["ids"][setting["position"]]]
                                 }
-                            })
+                            }
+                            if setting.get("type") == "nested":
+                                q = add_not_clause(q, {
+                                    "nested": {
+                                        "path": setting["path"],
+                                        "query": clause
+                                    }
+                                })
+                            else:
+                                q = add_not_clause(q, clause)
             if "filters" in setting:
                 for criteria in setting["filters"]:
                     # process query for includes
                     for key, values in include["filters"][setting["position"]].items() or []:
-                        q = add_must_clause(q, {
+                        clause = {
                             "terms": {
                                 map_keys(criteria, key): [value.lower() if isinstance(value, str) else value for value in values]
                             }
-                        })
+                        }
+                        if setting.get("type") == "nested":
+                            q = add_must_clause(q, {
+                                "nested": {
+                                    "path": setting["path"],
+                                    "query": clause
+                                }
+                            })
+                        else:
+                            q = add_must_clause(q, clause)
                     # process query for excludes
                     if exclude is not None:
                         for key, values in exclude["filters"][setting["position"]].items() or []:
-                            q = add_not_clause(q, {
+                            clause = {
                                 "terms": {
                                     map_keys(criteria, key): [value.lower() if isinstance(value, str) else value for value in values]
                                 }
-                            })
+                            }
+                            if setting.get("type") == "nested":
+                                q = add_not_clause(q, {
+                                    "nested": {
+                                        "path": setting["path"],
+                                        "query": clause
+                                    }
+                                })
+                            else:
+                                q = add_not_clause(q, clause)
         if len(subquery["bool"]["should"]) > 0:
-            q = add_must_clause(q, subquery)
+            if setting.get("type") == "nested":
+                q = add_must_clause(q, {
+                    "nested": {
+                        "path": setting["path"],
+                        "query": subquery
+                    }
+                })
+            else:
+                q = add_must_clause(q, subquery)
     return q

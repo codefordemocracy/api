@@ -1,4 +1,4 @@
-from ..helpers import clean_committees_names
+from ..helpers import clean_committees_names, flatten
 from .preview import data_preview_organization_committee
 from .builder.functions import make_query, set_query_dates, set_query_clauses, add_must_clause, add_not_clause, add_filter_clause
 from .builder.responses import get_response
@@ -360,15 +360,7 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["kMER"],
-            "terms": [{
-                "action": "match_phrase",
-                "field": "processed.client.name",
-                "slop": 5
-            }]
-        }, {
-            "position": 0,
-            "templates": ["wLvp"],
+            "templates": ["wLvp", "PLWg"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "processed.registrant.name",
@@ -376,17 +368,21 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
             }]
         }, {
             "position": 0,
-            "templates": ["MJdb"],
+            "templates": ["kMER", "QJeb"],
             "terms": [{
                 "action": "match_phrase",
-                "field": "processed.activities",
+                "field": "processed.client.name",
                 "slop": 5
-            }, {
+            }]
+        }, {
+            "position": 0,
+            "templates": ["MJdb", "nNKT"],
+            "terms": [{
                 "action": "match_phrase",
-                "field": "processed.issues.display",
+                "field": "processed.activities.specific_issues",
                 "slop": 5
             }],
-            "ids": ["processed.issues.code"]
+            "ids": ["processed.activities.issue_area_code"]
         }
     ], include=include, exclude=exclude)
     # set sort
@@ -408,20 +404,35 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
                     "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
                 })
             else:
-                elements.append({
-                    "date_submitted": source["processed"].get("date_submitted")[:10],
-                    "filing_year": source["processed"].get("filing_year"),
-                    "filing_type": source["processed"].get("filing_type"),
-                    "client_name": source["processed"]["client"].get("name").upper() if source["processed"]["client"].get("name") is not None else None,
-                    "registrant_name": source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None,
-                    "registrant_house_id": source["processed"]["registrant"].get("house_id"),
-                    "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
-                    "lobbyists": ", ".join([i["name"] for i in source["processed"].get("lobbyists", [])]),
-                    "lobbying_activities": "; ".join(source["processed"].get("activities", [])),
-                    "lobbying_issues": ", ".join([i["code"] for i in source["processed"].get("issues", [])]),
-                    "lobbying_coverage": "; ".join(source["processed"].get("coverage", [])),
-                    "url": source["processed"].get("url"),
-                })
+                if template in ["wLvp", "kMER", "MJdb"]:
+                    elements.append({
+                        "date_submitted": source["processed"].get("date_submitted")[:10],
+                        "filing_year": source["processed"].get("filing_year"),
+                        "filing_type": source["processed"].get("filing_type"),
+                        "client_name": source["processed"]["client"].get("name").upper() if source["processed"]["client"].get("name") is not None else None,
+                        "registrant_name": source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None,
+                        "registrant_house_id": source["processed"]["registrant"].get("house_id"),
+                        "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
+                        "issue_area_code": ", ".join(list(set(flatten([activity.get("issue_area_code") for activity in source["processed"].get("activities", [])])))),
+                        "url": source["processed"].get("url"),
+                    })
+                elif template in ["PLWg", "QJeb", "nNKT"]:
+                    for activity in source["processed"].get("activities") or []:
+                        elements.append({
+                            "date_submitted": source["processed"].get("date_submitted")[:10],
+                            "filing_year": source["processed"].get("filing_year"),
+                            "filing_type": source["processed"].get("filing_type"),
+                            "client_name": source["processed"]["client"].get("name").upper() if source["processed"]["client"].get("name") is not None else None,
+                            "registrant_name": source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None,
+                            "registrant_house_id": source["processed"]["registrant"].get("house_id"),
+                            "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
+                            "lobbyist_name": activity.get("lobbyist", {}).get("name").upper() if activity.get("lobbyist", {}).get("name") is not None else None,
+                            "lobbyist_id": activity.get("lobbyist", {}).get("id"),
+                            "covered_position": activity.get("covered_position"),
+                            "issue_area_code": activity.get("issue_area_code"),
+                            "specific_issues": activity.get("specific_issues"),
+                            "url": source["processed"].get("url"),
+                        })
         return elements
     return response
 
@@ -465,6 +476,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
             if template in ["V5Gh", "3Nrt", "Q23x"]:
                 contributions = [c for c in contributions if c["contribution_type"] == "Honorary Expenses"]
             for contribution in contributions or []:
+                contribution.pop("lobbyist")
                 contribution["date_contribution"] = contribution.pop("date")[:10]
                 contribution["date_submitted"] = source["processed"].get("date_submitted")[:10]
                 contribution["contribution_type"] = contribution["contribution_type"].upper()
@@ -473,7 +485,7 @@ def data_calculate_recipe_lobbying_contributions(template, es, include, exclude,
                 contribution["recipient_name"] = contribution["recipient_name"].upper()
                 contribution["filing_year"] = source["processed"].get("filing_year")
                 contribution["filing_type"] = source["processed"].get("filing_type")
-                contribution["registrant_name"] = source["processed"]["registrant"].get("name")
+                contribution["registrant_name"] = source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None
                 contribution["registrant_house_id"] = source["processed"]["registrant"].get("house_id")
                 contribution["registrant_senate_id"] = source["processed"]["registrant"].get("senate_id")
                 contribution["lobbyist_name"] = source["processed"].get("lobbyist", {}).get("name").upper() if source["processed"].get("lobbyist", {}).get("name") is not None else None

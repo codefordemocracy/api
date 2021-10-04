@@ -158,3 +158,13 @@ def calc_share(numerator, denominator):
         "denominator": denominator,
         "share": numerator/denominator
     }
+
+def flatten(values):
+    new_list = []
+    for v in values:
+        if isinstance(v, list):
+            for i in v:
+                new_list.append(i)
+        else:
+            new_list.append(v)
+    return new_list
