@@ -185,7 +185,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
         return elements
     return response
 
-def data_preview_person_donor(es, include_terms, include_ids, include_filters, exclude_terms, exclude_ids, exclude_filters, skip, limit, count):
+def data_preview_person_donor_fec(es, include_terms, include_ids, include_filters, exclude_terms, exclude_ids, exclude_filters, skip, limit, count):
     q = make_query()
     q["collapse"] = {
         "field": "processed.source.donor.name.keyword"
@@ -240,6 +240,45 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
         for source in response:
             elements.append({
                 "name": source["processed"]["source"]["donor"]["name"]
+            })
+        return elements
+    return response
+
+def data_preview_person_donor_lobbying(es, include_terms, include_ids, include_filters, exclude_terms, exclude_ids, exclude_filters, skip, limit, count):
+    q = make_query()
+    q["collapse"] = {
+        "field": "child.lobbyist.name.keyword"
+    }
+    subquery = make_should_subquery()
+    if include_terms is not None:
+        for term in include_terms:
+            subquery = add_should_clause(subquery, {
+                "match_phrase": {
+                    "child.lobbyist.name": {
+                        "query": term,
+                        "slop": 2
+                    }
+                }
+            })
+    q = add_must_clause(q, subquery)
+    if exclude_terms is not None:
+        for term in exclude_terms:
+            q = add_not_clause(q, {
+                "match_phrase": {
+                    "child.lobbyist.name": {
+                        "query": term,
+                        "slop": 2
+                    }
+                }
+            })
+    response = get_response(es, "federal_senate_lobbying_contributions_nested,federal_house_lobbying_contributions_nested", q, skip, limit, count, False,
+        filter_path=["hits.hits._source.child.lobbyist.name"]
+    )
+    if count is not True:
+        elements = []
+        for source in response:
+            elements.append({
+                "name": source["child"]["lobbyist"]["name"]
             })
         return elements
     return response

@@ -504,7 +504,7 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
     # build query
     q = make_query()
     q = set_query_dates(q, "child.date", mindate, maxdate)
-    if template in ["V5Gh", "3Nrt", "Q23x", "JCXA", "7EyP"]:
+    if template in ["V5Gh", "3Nrt", "Q23x", "Hsqk", "JCXA", "7EyP"]:
         q = add_filter_clause(q, {
             "term": {
                 "child.contribution_type": "honorary"
@@ -515,6 +515,14 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
             "position": 0,
             "templates": ["PjyR", "WGb3", "MK93", "rXwv", "i5xq", "V5Gh", "3Nrt", "Q23x", "JCXA", "7EyP"],
             "ids": ["parent.registrant.senate_id"]
+        }, {
+            "position": 0,
+            "templates": ["A3ue", "Hsqk"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "child.lobbyist.name",
+                "slop": 2
+            }]
         }, {
             "position": 1,
             "templates": ["rXwv", "i5xq", "JCXA", "7EyP"],

@@ -111,12 +111,20 @@ def data_preview_person_candidate(body: DataPreviewCandidateBody):
 @router.post("/person/donor/", summary="Preview Donors")
 def data_preview_person_donor(body: DataPreviewDonorBody):
     if body.include.terms is not None or body.include.ids is not None or body.include.filters is not None:
-        return query.data_preview_person_donor(es,
+        results = query.data_preview_person_donor_fec(es,
             include_terms=body.include.terms, include_ids=body.include.ids, include_filters=body.include.filters.dict(),
             exclude_terms=body.exclude.terms, exclude_ids=body.exclude.ids, exclude_filters=body.exclude.filters.dict(),
             skip=body.pagination.skip, limit=body.pagination.limit,
             count=body.count
         )
+        if len(results) == 0:
+            results = query.data_preview_person_donor_lobbying(es,
+                include_terms=body.include.terms, include_ids=body.include.ids, include_filters=body.include.filters.dict(),
+                exclude_terms=body.exclude.terms, exclude_ids=body.exclude.ids, exclude_filters=body.exclude.filters.dict(),
+                skip=body.pagination.skip, limit=body.pagination.limit,
+                count=body.count
+            )
+        return results
     return []
 
 @router.post("/job/", summary="Preview Jobs")

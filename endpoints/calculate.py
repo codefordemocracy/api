@@ -56,7 +56,7 @@ class DataCalculateRecipeContributionBody(DataCalculateBaseBody):
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipeLobbyingBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="wLvp|kMER|MJdb|PLWg|QJeb|nNKT|PjyR|WGb3|MK93|rXwv|i5xq|V5Gh|3Nrt|Q23x|JCXA|7EyP")
+    template: str = Field(..., regex="wLvp|kMER|MJdb|PLWg|QJeb|nNKT|PjyR|WGb3|MK93|A3ue|rXwv|i5xq|V5Gh|3Nrt|Q23x|Hsqk|JCXA|7EyP")
     orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
@@ -135,6 +135,15 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
             )
         elif body.template in ["PLWg", "QJeb", "nNKT"]:
             return query.data_calculate_recipe_lobbying_disclosures_nested(body.template, es,
+                include = clean["include"], exclude = clean["exclude"],
+                skip=body.pagination.skip, limit=body.pagination.limit,
+                mindate=mindate, maxdate=maxdate,
+                orderby=body.orderby, orderdir=body.orderdir,
+                count=body.count,
+                histogram=body.histogram
+            )
+        elif body.template in ["A3ue", "Hsqk"]:
+            return query.data_calculate_recipe_lobbying_contributions_nested(body.template, es,
                 include = clean["include"], exclude = clean["exclude"],
                 skip=body.pagination.skip, limit=body.pagination.limit,
                 mindate=mindate, maxdate=maxdate,
