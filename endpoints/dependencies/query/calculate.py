@@ -349,18 +349,18 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
         return elements
     return response
 
-def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, concise=False):
+def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, collapse=None):
     # build query
     q = make_query()
     q = set_query_dates(q, "processed.date_submitted", mindate, maxdate)
-    if count is False and concise is True:
+    if count is False and collapse is not None:
         q["collapse"] = {
-            "field": "processed.registrant.senate_id.keyword"
+            "field": collapse
         }
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["wLvp", "PLWg"],
+            "templates": ["wLvp"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "processed.registrant.name",
@@ -368,7 +368,7 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
             }]
         }, {
             "position": 0,
-            "templates": ["kMER", "QJeb"],
+            "templates": ["kMER"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "processed.client.name",
@@ -376,7 +376,7 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
             }]
         }, {
             "position": 0,
-            "templates": ["MJdb", "nNKT"],
+            "templates": ["MJdb"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "processed.activities.specific_issues",
@@ -399,99 +399,162 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
     if count is not True and histogram is not True:
         elements = []
         for source in response:
-            if concise is True:
+            if collapse is not None:
                 elements.append({
                     "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
                 })
             else:
-                if template in ["wLvp", "kMER", "MJdb"]:
-                    elements.append({
-                        "date_submitted": source["processed"].get("date_submitted")[:10],
-                        "filing_year": source["processed"].get("filing_year"),
-                        "filing_type": source["processed"].get("filing_type"),
-                        "client_name": source["processed"]["client"].get("name").upper() if source["processed"]["client"].get("name") is not None else None,
-                        "registrant_name": source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None,
-                        "registrant_house_id": source["processed"]["registrant"].get("house_id"),
-                        "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
-                        "issue_area_code": ", ".join(list(set(flatten([activity.get("issue_area_code") for activity in source["processed"].get("activities", [])])))),
-                        "url": source["processed"].get("url"),
-                    })
-                elif template in ["PLWg", "QJeb", "nNKT"]:
-                    for activity in source["processed"].get("activities") or []:
-                        elements.append({
-                            "date_submitted": source["processed"].get("date_submitted")[:10],
-                            "filing_year": source["processed"].get("filing_year"),
-                            "filing_type": source["processed"].get("filing_type"),
-                            "client_name": source["processed"]["client"].get("name").upper() if source["processed"]["client"].get("name") is not None else None,
-                            "registrant_name": source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None,
-                            "registrant_house_id": source["processed"]["registrant"].get("house_id"),
-                            "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
-                            "lobbyist_name": activity.get("lobbyist", {}).get("name").upper() if activity.get("lobbyist", {}).get("name") is not None else None,
-                            "lobbyist_id": activity.get("lobbyist", {}).get("id"),
-                            "covered_position": activity.get("covered_position"),
-                            "issue_area_code": activity.get("issue_area_code"),
-                            "specific_issues": activity.get("specific_issues"),
-                            "url": source["processed"].get("url"),
-                        })
+                elements.append({
+                    "date_submitted": source["processed"].get("date_submitted")[:10],
+                    "filing_year": source["processed"].get("filing_year"),
+                    "filing_type": source["processed"].get("filing_type"),
+                    "client_name": source["processed"]["client"].get("name").upper() if source["processed"]["client"].get("name") is not None else None,
+                    "registrant_name": source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None,
+                    "registrant_house_id": source["processed"]["registrant"].get("house_id"),
+                    "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
+                    "issue_area_code": ", ".join(list(set(flatten([activity.get("issue_area_code") for activity in source["processed"].get("activities", [])])))),
+                    "url": source["processed"].get("url"),
+                })
         return elements
     return response
 
-def data_calculate_recipe_lobbying_contributions(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_lobbying_disclosures_nested(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, collapse=None):
     # build query
     q = make_query()
-    q = set_query_dates(q, "processed.date_submitted", mindate, maxdate)
-    q = add_filter_clause(q, {
-        "term": {
-            "processed.no_contributions": False
+    q = set_query_dates(q, "parent.date_submitted", mindate, maxdate)
+    if count is False and collapse is not None:
+        q["collapse"] = {
+            "field": collapse
         }
-    })
-    if template in ["V5Gh", "3Nrt", "Q23x"]:
-        q = add_filter_clause(q, {
-            "term": {
-                "processed.contributions.contribution_type": "honorary"
-            }
-        })
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["PjyR", "WGb3", "MK93", "V5Gh", "3Nrt", "Q23x"],
-            "ids": ["processed.registrant.senate_id"]
+            "templates": ["PLWg"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "parent.registrant.name",
+                "slop": 5
+            }]
+        }, {
+            "position": 0,
+            "templates": ["QJeb"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "parent.client.name",
+                "slop": 5
+            }]
+        }, {
+            "position": 0,
+            "templates": ["nNKT"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "child.specific_issues",
+                "slop": 5
+            }],
+            "ids": ["child.issue_area_code"]
         }
     ], include=include, exclude=exclude)
     # set sort
     if orderby == "date":
         q["sort"] = {
-            "processed.date_submitted": {"order": orderdir},
+            "parent.date_submitted": {"order": orderdir},
         }
     # get response
-    response = get_response(es, "federal_senate_lobbying_contributions,federal_house_lobbying_contributions", q, skip, limit, count, histogram,
-        date_field="processed.date_submitted", mindate=mindate, maxdate=maxdate,
-        filter_path=["hits.hits._source.processed"]
+    response = get_response(es, "federal_senate_lobbying_disclosures_nested,federal_house_lobbying_disclosures_nested", q, skip, limit, count, histogram,
+        date_field="parent.date_submitted", mindate=mindate, maxdate=maxdate,
+        filter_path=["hits.hits._source"]
     )
     # process rows
     if count is not True and histogram is not True:
         elements = []
         for source in response:
-            contributions = source["processed"].get("contributions")
-            if template in ["V5Gh", "3Nrt", "Q23x"]:
-                contributions = [c for c in contributions if c["contribution_type"] == "Honorary Expenses"]
-            for contribution in contributions or []:
-                contribution.pop("lobbyist")
-                contribution["date_contribution"] = contribution.pop("date")[:10]
-                contribution["date_submitted"] = source["processed"].get("date_submitted")[:10]
-                contribution["contribution_type"] = contribution["contribution_type"].upper()
-                contribution["contributor_name"] = contribution["contributor_name"].upper()
-                contribution["payee_name"] = contribution["payee_name"].upper()
-                contribution["recipient_name"] = contribution["recipient_name"].upper()
-                contribution["filing_year"] = source["processed"].get("filing_year")
-                contribution["filing_type"] = source["processed"].get("filing_type")
-                contribution["registrant_name"] = source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None
-                contribution["registrant_house_id"] = source["processed"]["registrant"].get("house_id")
-                contribution["registrant_senate_id"] = source["processed"]["registrant"].get("senate_id")
-                contribution["lobbyist_name"] = source["processed"].get("lobbyist", {}).get("name").upper() if source["processed"].get("lobbyist", {}).get("name") is not None else None
-                contribution["lobbyist_id"] = source["processed"].get("lobbyist", {}).get("id")
-                contribution["url"] = source["processed"].get("url")
-                elements.append(contribution)
+            if collapse is not None:
+                if collapse == "parent.registrant.senate_id.keyword":
+                    elements.append({
+                        "registrant_senate_id": source["parent"]["registrant"].get("senate_id"),
+                    })
+                elif collapse == "child.lobbyist.name.keyword":
+                    elements.append({
+                        "lobbyist_name": source["child"].get("lobbyist", {}).get("name").upper() if source["child"].get("lobbyist", {}).get("name") is not None else None,
+                    })
+                elif collapse == "child.lobbyist.id":
+                    elements.append({
+                        "lobbyist_id": source["child"].get("lobbyist", {}).get("id"),
+                    })
+            else:
+                elements.append({
+                    "date_submitted": source["parent"].get("date_submitted")[:10],
+                    "filing_year": source["parent"].get("filing_year"),
+                    "filing_type": source["parent"].get("filing_type"),
+                    "client_name": source["parent"]["client"].get("name").upper() if source["parent"]["client"].get("name") is not None else None,
+                    "registrant_name": source["parent"]["registrant"].get("name").upper() if source["parent"]["registrant"].get("name") is not None else None,
+                    "registrant_house_id": source["parent"]["registrant"].get("house_id"),
+                    "registrant_senate_id": source["parent"]["registrant"].get("senate_id"),
+                    "lobbyist_name": source["child"].get("lobbyist", {}).get("name").upper() if source["child"].get("lobbyist", {}).get("name") is not None else None,
+                    "lobbyist_id": source["child"].get("lobbyist", {}).get("id"),
+                    "covered_position": source["child"].get("covered_position"),
+                    "issue_area_code": source["child"].get("issue_area_code"),
+                    "specific_issues": source["child"].get("specific_issues"),
+                    "url": source["parent"].get("url"),
+                })
+        return elements
+    return response
+
+def data_calculate_recipe_lobbying_contributions_nested(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+    # build query
+    q = make_query()
+    q = set_query_dates(q, "child.date", mindate, maxdate)
+    if template in ["V5Gh", "3Nrt", "Q23x", "JCXA", "7EyP"]:
+        q = add_filter_clause(q, {
+            "term": {
+                "child.contribution_type": "honorary"
+            }
+        })
+    q = set_query_clauses(q, template, list_settings=[
+        {
+            "position": 0,
+            "templates": ["PjyR", "WGb3", "MK93", "rXwv", "i5xq", "V5Gh", "3Nrt", "Q23x", "JCXA", "7EyP"],
+            "ids": ["parent.registrant.senate_id"]
+        }, {
+            "position": 1,
+            "templates": ["rXwv", "i5xq", "JCXA", "7EyP"],
+            "terms": [{
+                "action": "terms",
+                "field": "child.lobbyist.name"
+            }],
+            "ids": ["child.lobbyist.id"]
+        }
+    ], include=include, exclude=exclude)
+    # set sort
+    if orderby == "date":
+        q["sort"] = {
+            "child.date": {"order": orderdir},
+        }
+    # get response
+    response = get_response(es, "federal_senate_lobbying_contributions_nested,federal_house_lobbying_contributions_nested", q, skip, limit, count, histogram,
+        date_field="child.date", mindate=mindate, maxdate=maxdate,
+        filter_path=["hits.hits._source"]
+    )
+    # process rows
+    if count is not True and histogram is not True:
+        elements = []
+        for source in response:
+            elements.append({
+                "date_contribution": source["child"].get("date")[:10],
+                "date_submitted": source["parent"].get("date_submitted")[:10],
+                "contribution_type": source["child"]["contribution_type"].upper(),
+                "contributor_name": source["child"]["contributor_name"].upper(),
+                "payee_name": source["child"]["payee_name"].upper(),
+                "recipient_name": source["child"]["recipient_name"].upper(),
+                "filing_year": source["parent"].get("filing_year"),
+                "filing_type": source["parent"].get("filing_type"),
+                "registrant_name": source["parent"]["registrant"].get("name").upper() if source["parent"]["registrant"].get("name") is not None else None,
+                "registrant_house_id": source["parent"]["registrant"].get("house_id"),
+                "registrant_senate_id": source["parent"]["registrant"].get("senate_id"),
+                "lobbyist_name": source["parent"].get("lobbyist", {}).get("name").upper() if source["parent"].get("lobbyist", {}).get("name") is not None else None,
+                "lobbyist_id": source["parent"].get("parent", {}).get("id"),
+                "url": source["parent"].get("url"),
+            })
         return elements
     return response
 

@@ -56,7 +56,7 @@ class DataCalculateRecipeContributionBody(DataCalculateBaseBody):
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipeLobbyingBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="wLvp|kMER|MJdb|PLWg|QJeb|nNKT|PjyR|WGb3|MK93|V5Gh|3Nrt|Q23x")
+    template: str = Field(..., regex="wLvp|kMER|MJdb|PLWg|QJeb|nNKT|PjyR|WGb3|MK93|rXwv|i5xq|V5Gh|3Nrt|Q23x|JCXA|7EyP")
     orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
@@ -124,15 +124,23 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        if body.template in ["wLvp", "kMER", "MJdb", "PLWg", "QJeb", "nNKT"]:
+        if body.template in ["wLvp", "kMER", "MJdb"]:
             return query.data_calculate_recipe_lobbying_disclosures(body.template, es,
                 include = clean["include"], exclude = clean["exclude"],
                 skip=body.pagination.skip, limit=body.pagination.limit,
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
                 count=body.count,
-                histogram=body.histogram,
-                concise=False
+                histogram=body.histogram
+            )
+        elif body.template in ["PLWg", "QJeb", "nNKT"]:
+            return query.data_calculate_recipe_lobbying_disclosures_nested(body.template, es,
+                include = clean["include"], exclude = clean["exclude"],
+                skip=body.pagination.skip, limit=body.pagination.limit,
+                mindate=mindate, maxdate=maxdate,
+                orderby=body.orderby, orderdir=body.orderdir,
+                count=body.count,
+                histogram=body.histogram
             )
         elif body.template in ["PjyR", "WGb3", "MK93", "V5Gh", "3Nrt", "Q23x"]:
             if body.template in ["PjyR", "V5Gh"]:
@@ -148,10 +156,61 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
                 orderby=body.orderby, orderdir=body.orderdir,
                 count=False,
                 histogram=False,
-                concise=True
+                collapse="processed.registrant.senate_id.keyword"
             )
             clean["include"]["ids"][0] = [d["registrant_senate_id"] for d in disclosures]
-            return query.data_calculate_recipe_lobbying_contributions(body.template, es,
+            return query.data_calculate_recipe_lobbying_contributions_nested(body.template, es,
+                include = clean["include"], exclude = clean["exclude"],
+                skip=body.pagination.skip, limit=body.pagination.limit,
+                mindate=mindate, maxdate=maxdate,
+                orderby=body.orderby, orderdir=body.orderdir,
+                count=body.count,
+                histogram=body.histogram
+            )
+        elif body.template in ["rXwv", "i5xq", "JCXA", "7EyP"]:
+            if body.template in ["rXwv", "JCXA"]:
+                template2 = "QJeb"
+            elif body.template in ["i5xq", "7EyP"]:
+                template2 = "nNKT"
+            disclosures = query.data_calculate_recipe_lobbying_disclosures(template2, es,
+                include = clean["include"], exclude = clean["exclude"],
+                skip=0, limit=10000,
+                mindate=mindate, maxdate=maxdate,
+                orderby=body.orderby, orderdir=body.orderdir,
+                count=False,
+                histogram=False,
+                collapse="processed.registrant.senate_id.keyword"
+            )
+            lobbyist_names = query.data_calculate_recipe_lobbying_disclosures_nested(template2, es,
+                include = clean["include"], exclude = clean["exclude"],
+                skip=0, limit=10000,
+                mindate=mindate, maxdate=maxdate,
+                orderby=body.orderby, orderdir=body.orderdir,
+                count=False,
+                histogram=False,
+                collapse="child.lobbyist.name.keyword"
+            )
+            lobbyist_ids = query.data_calculate_recipe_lobbying_disclosures_nested(template2, es,
+                include = clean["include"], exclude = clean["exclude"],
+                skip=0, limit=10000,
+                mindate=mindate, maxdate=maxdate,
+                orderby=body.orderby, orderdir=body.orderdir,
+                count=False,
+                histogram=False,
+                collapse="child.lobbyist.id"
+            )
+            clean["include"]["terms"] = [[], []]
+            clean["include"]["ids"] = [[], []]
+            clean["exclude"]["terms"] = [[], []]
+            clean["exclude"]["ids"] = [[], []]
+            clean["include"]["ids"][0] = [d["registrant_senate_id"] for d in disclosures]
+            clean["include"]["terms"][1] = [d["lobbyist_name"] for d in lobbyist_names]
+            clean["include"]["ids"][1] = [d["lobbyist_id"] for d in lobbyist_ids]
+            clean["include"]["ids"][0] = list(set(clean["include"]["ids"][0]))
+            clean["include"]["terms"][1] = list(set(clean["include"]["terms"][1]))
+            clean["include"]["ids"][1] = list(set(clean["include"]["ids"][1]))
+            clean["include"]["terms"][1] = [term.replace(".", "").replace("-", " ") for term in clean["include"]["terms"][1]]
+            return query.data_calculate_recipe_lobbying_contributions_nested(body.template, es,
                 include = clean["include"], exclude = clean["exclude"],
                 skip=body.pagination.skip, limit=body.pagination.limit,
                 mindate=mindate, maxdate=maxdate,
