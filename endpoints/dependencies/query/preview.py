@@ -84,7 +84,7 @@ def data_preview_organization_employer(es, include_terms, include_ids, exclude_t
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
-                    "row.source.donor.employer":{
+                    "row.source.donor.employer": {
                         "query": term,
                         "slop": 5
                     }
@@ -121,10 +121,8 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
                     "processed.row.cand_name": {
-                        "query": {
-                            "query": term,
-                            "slop": 5
-                        }
+                        "query": term,
+                        "slop": 5
                     }
                 }
             })
@@ -144,7 +142,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
                 if value is not None:
                     subquery = add_should_clause(subquery, {
                         "term": {
-                            map_keys("committee", key): value.lower() if isinstance(value, str) else value
+                            map_keys("candidate", key): value.lower() if isinstance(value, str) else value
                         }
                     })
             q = add_must_clause(q, subquery)
@@ -153,10 +151,8 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
             q = add_not_clause(q, {
                 "match_phrase": {
                     "processed.row.cand_name": {
-                        "query": {
-                            "query": term,
-                            "slop": 5
-                        }
+                        "query": term,
+                        "slop": 5
                     }
                 }
             })
@@ -200,10 +196,8 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
                     "processed.source.donor.name": {
-                        "query": {
-                            "query": term,
-                            "slop": 2
-                        }
+                        "query": term,
+                        "slop": 2
                     }
                 }
             })
@@ -215,7 +209,7 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
                 if value is not None:
                     subquery = add_should_clause(subquery, {
                         "term": {
-                            map_keys("committee", key): value.lower() if isinstance(value, str) else value
+                            map_keys("donor", key): value.lower() if isinstance(value, str) else value
                         }
                     })
             q = add_must_clause(q, subquery)
@@ -224,10 +218,8 @@ def data_preview_person_donor(es, include_terms, include_ids, include_filters, e
             q = add_not_clause(q, {
                 "match_phrase": {
                     "processed.source.donor.name": {
-                        "query": {
-                            "query": term,
-                            "slop": 2
-                        }
+                        "query": term,
+                        "slop": 2
                     }
                 }
             })
