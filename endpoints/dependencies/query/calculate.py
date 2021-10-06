@@ -479,7 +479,7 @@ def data_calculate_recipe_lobbying_disclosures_nested(template, es, include, exc
                     })
                 elif collapse == "child.lobbyist.name.keyword":
                     elements.append({
-                        "lobbyist_name": hit["_source"]["child"].get("lobbyist", {}).get("name").upper() if hit["_source"]["child"].get("lobbyist", {}).get("name") is not None else None,
+                        "lobbyist_name": hit["_source"]["child"].get("lobbyist", {}).get("name"),
                     })
                 elif collapse == "child.lobbyist.id":
                     elements.append({
@@ -494,7 +494,7 @@ def data_calculate_recipe_lobbying_disclosures_nested(template, es, include, exc
                     "registrant_name": hit["_source"]["parent"]["registrant"].get("name").upper() if hit["_source"]["parent"]["registrant"].get("name") is not None else None,
                     "registrant_house_id": hit["_source"]["parent"]["registrant"].get("house_id"),
                     "registrant_senate_id": hit["_source"]["parent"]["registrant"].get("senate_id"),
-                    "lobbyist_name": hit["_source"]["child"].get("lobbyist", {}).get("name").upper() if hit["_source"]["child"].get("lobbyist", {}).get("name") is not None else None,
+                    "lobbyist_name": hit["_source"]["child"].get("lobbyist", {}).get("name"),
                     "lobbyist_id": hit["_source"]["child"].get("lobbyist", {}).get("id"),
                     "covered_position": hit["_source"]["child"].get("covered_position"),
                     "issue_area_code": hit["_source"]["child"].get("issue_area_code"),
@@ -563,7 +563,7 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
                 "registrant_name": hit["_source"]["parent"]["registrant"].get("name").upper() if hit["_source"]["parent"]["registrant"].get("name") is not None else None,
                 "registrant_house_id": hit["_source"]["parent"]["registrant"].get("house_id"),
                 "registrant_senate_id": hit["_source"]["parent"]["registrant"].get("senate_id"),
-                "lobbyist_name": hit["_source"]["parent"].get("lobbyist", {}).get("name").upper() if hit["_source"]["parent"].get("lobbyist", {}).get("name") is not None else None,
+                "lobbyist_name": hit["_source"]["parent"].get("lobbyist", {}).get("name"),
                 "lobbyist_id": hit["_source"]["parent"].get("parent", {}).get("id"),
                 "url": hit["_source"]["parent"].get("url"),
             })
