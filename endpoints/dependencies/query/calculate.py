@@ -121,8 +121,8 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
         for hit in response:
             row = {
                 "created_at": hit["_source"]["obj"]["ad_creation_time"][:10],
-                "page_name": hit["_source"]["obj"]["page_name"],
-                "funding_entity": hit["_source"]["obj"].get("funding_entity"),
+                "page_name": hit["_source"]["obj"]["page_name"].upper(),
+                "funding_entity": hit["_source"]["obj"].get("funding_entity").upper() if hit["_source"]["obj"].get("funding_entity") is not None else None,
                 "archive_url": "https://facebook.com/ads/library/?id=" + str(hit["_source"]["obj"]["id"]),
                 "values_matched": flatten(list(hit["highlight"].values()))
             }
