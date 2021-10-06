@@ -78,25 +78,14 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
             "position": 0,
             "templates": ["D3WE"],
             "terms": [{
-                "action": "match_phrase",
-                "field": "obj.page_name",
-                "slop": 5
-            }, {
-                "action": "match_phrase",
-                "field": "obj.funding_entity",
+                "action": "multi_match",
+                "type": "phrase",
+                "fields": ["obj.page_name", "obj.funding_entity"],
                 "slop": 5
             }]
         }, {
             "position": 0,
-            "templates": ["BuW8", "P2HG", "N7Jk"],
-            "terms": [{
-                "action": "match_phrase",
-                "field": "obj.ad_creative_body",
-                "slop": 5
-            }]
-        }, {
-            "position": 0,
-            "templates": ["8HcR"],
+            "templates": ["BuW8", "P2HG", "N7Jk", "8HcR"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "obj.ad_creative_body",
@@ -591,10 +580,10 @@ def data_calculate_recipe_990(template, es, include, exclude, skip, limit, minda
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["GCv2"],
+            "templates": ["GCv2", "P34n", "K23r"],
             "terms": [{
                 "action": "multi_match",
-                "field": "query",
+                "type": "phrase",
                 "slop": 5
             }]
         }

@@ -81,6 +81,10 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                                 clause = {
                                     criteria["action"]: query
                                 }
+                                if "type" in criteria:
+                                    clause[criteria["action"]]["type"] = criteria["type"]
+                                if "fields" in criteria:
+                                    clause[criteria["action"]]["fields"] = criteria["fields"]
                             else:
                                 clause = {
                                     criteria["action"]: {
@@ -119,6 +123,10 @@ def set_query_clauses(q, template, list_settings, include, exclude):
                                     clause = {
                                         criteria["action"]: query
                                     }
+                                    if "type" in criteria:
+                                        clause[criteria["action"]]["type"] = criteria["type"]
+                                    if "fields" in criteria:
+                                        clause[criteria["action"]]["fields"] = criteria["fields"]
                                 else:
                                     clause = {
                                         criteria["action"]: {
