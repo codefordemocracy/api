@@ -552,6 +552,7 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
         elements = []
         for hit in response:
             elements.append({
+                "amount": hit["_source"]["child"].get("amount"),
                 "date_contribution": hit["_source"]["child"].get("date")[:10],
                 "date_submitted": hit["_source"]["parent"].get("date_submitted")[:10],
                 "contribution_type": hit["_source"]["child"]["contribution_type"].upper(),
