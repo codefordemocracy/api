@@ -7,7 +7,7 @@ def determine_histogram_interval(mindate, maxdate):
     else:
         return "month"
 
-def get_response(es, index, q, skip, limit, count, histogram, date_field=None, mindate=None, maxdate=None, filter_path=None):
+def get_response(es, index, q, skip, limit, count, histogram, date_field=None, mindate=None, maxdate=None, filter_path=None, highlight=False):
     if count is True:
         response = es.count(index=index, body=q)
         try:
@@ -32,12 +32,20 @@ def get_response(es, index, q, skip, limit, count, histogram, date_field=None, m
     else:
         q["from"] = skip
         q["size"] = limit
+        if highlight is True:
+            q["highlight"] = {
+                "pre_tags" : [""],
+                "post_tags" : [""],
+                "fragment_size": 70,
+                "fields": {
+                    "*": {}
+                }
+            }
+            if filter_path is not None:
+                filter_path.append("hits.hits.highlight")
         response = es.search(index=index, body=q, filter_path=filter_path)
         try:
-            elements = []
-            for hit in response["hits"]["hits"]:
-                elements.append(hit["_source"])
-            return elements
+            return response["hits"]["hits"]
         except:
             return []
     return []

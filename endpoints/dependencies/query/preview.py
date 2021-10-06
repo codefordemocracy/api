@@ -66,10 +66,10 @@ def data_preview_organization_committee(es, include_terms, include_ids, include_
     )
     if count is not True:
         elements = []
-        for source in response:
+        for hit in response:
             elements.append({
-                "cmte_id": source["row"]["cmte_id"],
-                "cmte_nm": source["row"]["cmte_nm"]
+                "cmte_id": hit["_source"]["row"]["cmte_id"],
+                "cmte_nm": hit["_source"]["row"]["cmte_nm"]
             })
         return elements
     return response
@@ -106,9 +106,9 @@ def data_preview_organization_employer(es, include_terms, include_ids, exclude_t
     )
     if count is not True:
         elements = []
-        for source in response:
+        for hit in response:
             elements.append({
-                "name": source["row"]["source"]["donor"]["employer"]
+                "name": hit["_source"]["row"]["source"]["donor"]["employer"]
             })
         return elements
     return response
@@ -177,10 +177,10 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
     )
     if count is not True:
         elements = []
-        for source in response:
+        for hit in response:
             elements.append({
-                "cand_id": source["row"]["cand_id"],
-                "cand_name": source["row"]["cand_name"]
+                "cand_id": hit["_source"]["row"]["cand_id"],
+                "cand_name": hit["_source"]["row"]["cand_name"]
             })
         return elements
     return response
@@ -237,9 +237,9 @@ def data_preview_person_donor_fec(es, include_terms, include_ids, include_filter
     )
     if count is not True:
         elements = []
-        for source in response:
+        for hit in response:
             elements.append({
-                "name": source["processed"]["source"]["donor"]["name"]
+                "name": hit["_source"]["processed"]["source"]["donor"]["name"]
             })
         return elements
     return response
@@ -276,9 +276,9 @@ def data_preview_person_donor_lobbying(es, include_terms, include_ids, include_f
     )
     if count is not True:
         elements = []
-        for source in response:
+        for hit in response:
             elements.append({
-                "name": source["child"]["lobbyist"]["name"]
+                "name": hit["_source"]["child"]["lobbyist"]["name"]
             })
         return elements
     return response
@@ -315,9 +315,9 @@ def data_preview_job(es, include_terms, include_ids, exclude_terms, exclude_ids,
     )
     if count is not True:
         elements = []
-        for source in response:
+        for hit in response:
             elements.append({
-                "term": source["row"]["source"]["donor"]["occupation"]
+                "term": hit["_source"]["row"]["source"]["donor"]["occupation"]
             })
         return elements
     return response

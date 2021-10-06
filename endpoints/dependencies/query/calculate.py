@@ -43,16 +43,18 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
     # get response
     response = get_response(es, "news_articles", q, skip, limit, count, histogram,
         date_field="extracted.date", mindate=mindate, maxdate=maxdate,
-        filter_path=["hits.hits._source.extracted.title", "hits.hits._source.extracted.date", "hits.hits._source.extracted.url"]
+        filter_path=["hits.hits._source.extracted.title", "hits.hits._source.extracted.date", "hits.hits._source.extracted.url"],
+        highlight=True
     )
     # process rows
     if count is not True and histogram is not True:
         elements = []
-        for source in response:
+        for hit in response:
             row = {
-                "date": source["extracted"]["date"][:10],
-                "title": source["extracted"]["title"],
-                "url": source["extracted"]["url"]
+                "date": hit["_source"]["extracted"]["date"][:10],
+                "title": hit["_source"]["extracted"]["title"],
+                "url": hit["_source"]["extracted"]["url"],
+                "values_matched": flatten(list(hit["highlight"].values()))
             }
             elements.append(row)
         return elements
@@ -110,17 +112,19 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
     # get response
     response = get_response(es, "facebook_ads", q, skip, limit, count, histogram,
         date_field="obj.ad_creation_time", mindate=mindate, maxdate=maxdate,
-        filter_path=["hits.hits._source.obj.ad_creation_time", "hits.hits._source.obj.page_name", "hits.hits._source.obj.funding_entity", "hits.hits._source.obj.id"]
+        filter_path=["hits.hits._source.obj.ad_creation_time", "hits.hits._source.obj.page_name", "hits.hits._source.obj.funding_entity", "hits.hits._source.obj.id"],
+        highlight=True
     )
     # process rows
     if count is not True and histogram is not True:
         elements = []
-        for source in response:
+        for hit in response:
             row = {
-                "created_at": source["obj"]["ad_creation_time"][:10],
-                "page_name": source["obj"]["page_name"],
-                "funding_entity": source["obj"].get("funding_entity"),
-                "archive_url": "https://facebook.com/ads/library/?id=" + str(source["obj"]["id"])
+                "created_at": hit["_source"]["obj"]["ad_creation_time"][:10],
+                "page_name": hit["_source"]["obj"]["page_name"],
+                "funding_entity": hit["_source"]["obj"].get("funding_entity"),
+                "archive_url": "https://facebook.com/ads/library/?id=" + str(hit["_source"]["obj"]["id"]),
+                "values_matched": flatten(list(hit["highlight"].values()))
             }
             elements.append(row)
         return elements
@@ -326,25 +330,25 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
     # process rows
     if count is not True and histogram is not True:
         elements = []
-        for source in response:
+        for hit in response:
             row = {
-                "recipient_cmte_id": source["row"]["target"]["committee"]["cmte_id"],
-                "recipient_cmte_nm": source["row"]["target"]["committee"]["cmte_nm"],
-                "date": source["processed"]["date"][:10],
-                "transaction_amt": source["row"]["transaction_amt"],
-                "transaction_tp": source["row"]["transaction_tp"],
-                "reported_by": "contributor" if source["row"]["transaction_tp"].startswith("2") or source["row"]["transaction_tp"].startswith("4") and source["row"]["transaction_tp"] != "24I" and source["row"]["transaction_tp"] != "24T" else "recipient",
-                "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + str(source["row"]["image_num"]),
-                "sub_id": str(source["row"]["sub_id"])
+                "recipient_cmte_id": hit["_source"]["row"]["target"]["committee"]["cmte_id"],
+                "recipient_cmte_nm": hit["_source"]["row"]["target"]["committee"]["cmte_nm"],
+                "date": hit["_source"]["processed"]["date"][:10],
+                "transaction_amt": hit["_source"]["row"]["transaction_amt"],
+                "transaction_tp": hit["_source"]["row"]["transaction_tp"],
+                "reported_by": "contributor" if hit["_source"]["row"]["transaction_tp"].startswith("2") or hit["_source"]["row"]["transaction_tp"].startswith("4") and hit["_source"]["row"]["transaction_tp"] != "24I" and hit["_source"]["row"]["transaction_tp"] != "24T" else "recipient",
+                "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + str(hit["_source"]["row"]["image_num"]),
+                "sub_id": str(hit["_source"]["row"]["sub_id"])
             }
-            if "committee" in source["row"]["source"]:
-                row["contributor_cmte_id"] = source["row"]["source"]["committee"]["cmte_id"]
-                row["contributor_cmte_nm"] = source["row"]["source"]["committee"]["cmte_nm"]
-            elif "donor" in source["row"]["source"]:
-                row["donor_name"] = source["processed"]["source"]["donor"]["name"]
-                row["donor_zip_code"] = source["row"]["source"]["donor"]["zip_code"]
-                row["donor_employer"] = source["row"]["source"]["donor"]["employer"]
-                row["donor_occupation"] = source["row"]["source"]["donor"]["occupation"]
+            if "committee" in hit["_source"]["row"]["source"]:
+                row["contributor_cmte_id"] = hit["_source"]["row"]["source"]["committee"]["cmte_id"]
+                row["contributor_cmte_nm"] = hit["_source"]["row"]["source"]["committee"]["cmte_nm"]
+            elif "donor" in hit["_source"]["row"]["source"]:
+                row["donor_name"] = hit["_source"]["processed"]["source"]["donor"]["name"]
+                row["donor_zip_code"] = hit["_source"]["row"]["source"]["donor"]["zip_code"]
+                row["donor_employer"] = hit["_source"]["row"]["source"]["donor"]["employer"]
+                row["donor_occupation"] = hit["_source"]["row"]["source"]["donor"]["occupation"]
             elements.append(row)
         return elements
     return response
@@ -398,22 +402,22 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
     # process rows
     if count is not True and histogram is not True:
         elements = []
-        for source in response:
+        for hit in response:
             if collapse is not None:
                 elements.append({
-                    "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
+                    "registrant_senate_id": hit["_source"]["processed"]["registrant"].get("senate_id"),
                 })
             else:
                 elements.append({
-                    "date_submitted": source["processed"].get("date_submitted")[:10],
-                    "filing_year": source["processed"].get("filing_year"),
-                    "filing_type": source["processed"].get("filing_type"),
-                    "client_name": source["processed"]["client"].get("name").upper() if source["processed"]["client"].get("name") is not None else None,
-                    "registrant_name": source["processed"]["registrant"].get("name").upper() if source["processed"]["registrant"].get("name") is not None else None,
-                    "registrant_house_id": source["processed"]["registrant"].get("house_id"),
-                    "registrant_senate_id": source["processed"]["registrant"].get("senate_id"),
-                    "issue_area_code": ", ".join(list(set(flatten([activity.get("issue_area_code") for activity in source["processed"].get("activities", [])])))),
-                    "url": source["processed"].get("url"),
+                    "date_submitted": hit["_source"]["processed"].get("date_submitted")[:10],
+                    "filing_year": hit["_source"]["processed"].get("filing_year"),
+                    "filing_type": hit["_source"]["processed"].get("filing_type"),
+                    "client_name": hit["_source"]["processed"]["client"].get("name").upper() if hit["_source"]["processed"]["client"].get("name") is not None else None,
+                    "registrant_name": hit["_source"]["processed"]["registrant"].get("name").upper() if hit["_source"]["processed"]["registrant"].get("name") is not None else None,
+                    "registrant_house_id": hit["_source"]["processed"]["registrant"].get("house_id"),
+                    "registrant_senate_id": hit["_source"]["processed"]["registrant"].get("senate_id"),
+                    "issue_area_code": ", ".join(list(set(flatten([activity.get("issue_area_code") for activity in hit["_source"]["processed"].get("activities", [])])))),
+                    "url": hit["_source"]["processed"].get("url"),
                 })
         return elements
     return response
@@ -467,35 +471,35 @@ def data_calculate_recipe_lobbying_disclosures_nested(template, es, include, exc
     # process rows
     if count is not True and histogram is not True:
         elements = []
-        for source in response:
+        for hit in response:
             if collapse is not None:
                 if collapse == "parent.registrant.senate_id.keyword":
                     elements.append({
-                        "registrant_senate_id": source["parent"]["registrant"].get("senate_id"),
+                        "registrant_senate_id": hit["_source"]["parent"]["registrant"].get("senate_id"),
                     })
                 elif collapse == "child.lobbyist.name.keyword":
                     elements.append({
-                        "lobbyist_name": source["child"].get("lobbyist", {}).get("name").upper() if source["child"].get("lobbyist", {}).get("name") is not None else None,
+                        "lobbyist_name": hit["_source"]["child"].get("lobbyist", {}).get("name").upper() if hit["_source"]["child"].get("lobbyist", {}).get("name") is not None else None,
                     })
                 elif collapse == "child.lobbyist.id":
                     elements.append({
-                        "lobbyist_id": source["child"].get("lobbyist", {}).get("id"),
+                        "lobbyist_id": hit["_source"]["child"].get("lobbyist", {}).get("id"),
                     })
             else:
                 elements.append({
-                    "date_submitted": source["parent"].get("date_submitted")[:10],
-                    "filing_year": source["parent"].get("filing_year"),
-                    "filing_type": source["parent"].get("filing_type"),
-                    "client_name": source["parent"]["client"].get("name").upper() if source["parent"]["client"].get("name") is not None else None,
-                    "registrant_name": source["parent"]["registrant"].get("name").upper() if source["parent"]["registrant"].get("name") is not None else None,
-                    "registrant_house_id": source["parent"]["registrant"].get("house_id"),
-                    "registrant_senate_id": source["parent"]["registrant"].get("senate_id"),
-                    "lobbyist_name": source["child"].get("lobbyist", {}).get("name").upper() if source["child"].get("lobbyist", {}).get("name") is not None else None,
-                    "lobbyist_id": source["child"].get("lobbyist", {}).get("id"),
-                    "covered_position": source["child"].get("covered_position"),
-                    "issue_area_code": source["child"].get("issue_area_code"),
-                    "specific_issues": source["child"].get("specific_issues"),
-                    "url": source["parent"].get("url"),
+                    "date_submitted": hit["_source"]["parent"].get("date_submitted")[:10],
+                    "filing_year": hit["_source"]["parent"].get("filing_year"),
+                    "filing_type": hit["_source"]["parent"].get("filing_type"),
+                    "client_name": hit["_source"]["parent"]["client"].get("name").upper() if hit["_source"]["parent"]["client"].get("name") is not None else None,
+                    "registrant_name": hit["_source"]["parent"]["registrant"].get("name").upper() if hit["_source"]["parent"]["registrant"].get("name") is not None else None,
+                    "registrant_house_id": hit["_source"]["parent"]["registrant"].get("house_id"),
+                    "registrant_senate_id": hit["_source"]["parent"]["registrant"].get("senate_id"),
+                    "lobbyist_name": hit["_source"]["child"].get("lobbyist", {}).get("name").upper() if hit["_source"]["child"].get("lobbyist", {}).get("name") is not None else None,
+                    "lobbyist_id": hit["_source"]["child"].get("lobbyist", {}).get("id"),
+                    "covered_position": hit["_source"]["child"].get("covered_position"),
+                    "issue_area_code": hit["_source"]["child"].get("issue_area_code"),
+                    "specific_issues": hit["_source"]["child"].get("specific_issues"),
+                    "url": hit["_source"]["parent"].get("url"),
                 })
         return elements
     return response
@@ -546,22 +550,22 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
     # process rows
     if count is not True and histogram is not True:
         elements = []
-        for source in response:
+        for hit in response:
             elements.append({
-                "date_contribution": source["child"].get("date")[:10],
-                "date_submitted": source["parent"].get("date_submitted")[:10],
-                "contribution_type": source["child"]["contribution_type"].upper(),
-                "contributor_name": source["child"]["contributor_name"].upper(),
-                "payee_name": source["child"]["payee_name"].upper(),
-                "recipient_name": source["child"]["recipient_name"].upper(),
-                "filing_year": source["parent"].get("filing_year"),
-                "filing_type": source["parent"].get("filing_type"),
-                "registrant_name": source["parent"]["registrant"].get("name").upper() if source["parent"]["registrant"].get("name") is not None else None,
-                "registrant_house_id": source["parent"]["registrant"].get("house_id"),
-                "registrant_senate_id": source["parent"]["registrant"].get("senate_id"),
-                "lobbyist_name": source["parent"].get("lobbyist", {}).get("name").upper() if source["parent"].get("lobbyist", {}).get("name") is not None else None,
-                "lobbyist_id": source["parent"].get("parent", {}).get("id"),
-                "url": source["parent"].get("url"),
+                "date_contribution": hit["_source"]["child"].get("date")[:10],
+                "date_submitted": hit["_source"]["parent"].get("date_submitted")[:10],
+                "contribution_type": hit["_source"]["child"]["contribution_type"].upper(),
+                "contributor_name": hit["_source"]["child"]["contributor_name"].upper(),
+                "payee_name": hit["_source"]["child"]["payee_name"].upper(),
+                "recipient_name": hit["_source"]["child"]["recipient_name"].upper(),
+                "filing_year": hit["_source"]["parent"].get("filing_year"),
+                "filing_type": hit["_source"]["parent"].get("filing_type"),
+                "registrant_name": hit["_source"]["parent"]["registrant"].get("name").upper() if hit["_source"]["parent"]["registrant"].get("name") is not None else None,
+                "registrant_house_id": hit["_source"]["parent"]["registrant"].get("house_id"),
+                "registrant_senate_id": hit["_source"]["parent"]["registrant"].get("senate_id"),
+                "lobbyist_name": hit["_source"]["parent"].get("lobbyist", {}).get("name").upper() if hit["_source"]["parent"].get("lobbyist", {}).get("name") is not None else None,
+                "lobbyist_id": hit["_source"]["parent"].get("parent", {}).get("id"),
+                "url": hit["_source"]["parent"].get("url"),
             })
         return elements
     return response
@@ -603,15 +607,15 @@ def data_calculate_recipe_990(template, es, include, exclude, skip, limit, minda
     # process rows
     if count is not True and histogram is not True:
         elements = []
-        for source in response:
+        for hit in response:
             row = {
-                "submission_date": source["row"]["sub_date"][:10],
-                "ein": source["row"]["ein"],
-                "taxpayer_name": source["row"]["taxpayer_name"],
-                "return_type": source["row"]["return_type"],
-                "tax_period": source["row"]["tax_period"],
-                "xml_url": "https://s3.amazonaws.com/irs-form-990/" + str(source["row"]["object_id"]) + "_public.xml",
-                "pdf_url": "https://apps.irs.gov/pub/epostcard/cor/" + str(source["row"]["ein"]) + "_" + str(source["row"]["tax_period"]) + "_" + str(source["row"]["return_type"]) + "_" + source["row"]["sub_date"][:10].replace("-", "") + str(source["row"]["return_id"]) + ".pdf"
+                "submission_date": hit["_source"]["row"]["sub_date"][:10],
+                "ein": hit["_source"]["row"]["ein"],
+                "taxpayer_name": hit["_source"]["row"]["taxpayer_name"],
+                "return_type": hit["_source"]["row"]["return_type"],
+                "tax_period": hit["_source"]["row"]["tax_period"],
+                "xml_url": "https://s3.amazonaws.com/irs-form-990/" + str(hit["_source"]["row"]["object_id"]) + "_public.xml",
+                "pdf_url": "https://apps.irs.gov/pub/epostcard/cor/" + str(hit["_source"]["row"]["ein"]) + "_" + str(hit["_source"]["row"]["tax_period"]) + "_" + str(hit["_source"]["row"]["return_type"]) + "_" + hit["_source"]["row"]["sub_date"][:10].replace("-", "") + str(hit["_source"]["row"]["return_id"]) + ".pdf"
             }
             elements.append(row)
         return elements
