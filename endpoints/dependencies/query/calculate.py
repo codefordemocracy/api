@@ -542,6 +542,10 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
         q["sort"] = {
             "child.date": {"order": orderdir},
         }
+    elif orderby == "amount":
+        q["sort"] = {
+            "child.amount": {"order": orderdir},
+        }
     # get response
     response = get_response(es, "federal_senate_lobbying_contributions_nested,federal_house_lobbying_contributions_nested", q, skip, limit, count, histogram,
         date_field="child.date", mindate=mindate, maxdate=maxdate,
