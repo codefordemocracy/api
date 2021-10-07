@@ -173,14 +173,14 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
                         }
                     })
     response = get_response(es, "federal_fec_candidates", q, skip, limit, count, False,
-        filter_path=["hits.hits._source.row.cand_id", "hits.hits._source.row.cand_name"]
+        filter_path=["hits.hits._source.row.cand_id", "hits.hits._source.row.cand_name", "hits.hits._source.processed.row.cand_name"]
     )
     if count is not True:
         elements = []
         for hit in response:
             elements.append({
                 "cand_id": hit["_source"]["row"]["cand_id"],
-                "cand_name": hit["_source"]["row"]["cand_name"]
+                "cand_name": hit["_source"].get("processed", {}).get("row", {}).get("cand_name") if hit["_source"].get("processed", {}).get("row", {}).get("cand_name") is not None else hit["_source"]["row"]["cand_id"]
             })
         return elements
     return response

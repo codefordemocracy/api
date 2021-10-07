@@ -40,12 +40,12 @@ class DataCalculateBaseBody(BaseModel):
     histogram: bool = Field(False)
 
 class DataCalculateRecipeArticleBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="PMYZ|WdMv|RasK|GSmB")
+    template: str = Field(..., regex="PMYZ|WdMv|RasK|EBli|GSmB")
     orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipeAdBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="D3WE|BuW8|P2HG|N7Jk|8HcR")
+    template: str = Field(..., regex="D3WE|BuW8|P2HG|N7Jk|Jphg|8HcR")
     orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
@@ -61,7 +61,7 @@ class DataCalculateRecipeLobbyingBody(DataCalculateBaseBody):
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipe990Body(DataCalculateBaseBody):
-    template: str = Field(..., regex="GCv2|P34n|K23r")
+    template: str = Field(..., regex="GCv2|P34n|K23r|mFF7")
     orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
