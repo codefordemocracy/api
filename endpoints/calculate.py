@@ -74,7 +74,7 @@ def data_calculate_recipe_article(body: DataCalculateRecipeArticleBody):
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 23, 59, 59, 999999, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_article(body.template, es,
             include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
@@ -90,7 +90,7 @@ def data_calculate_recipe_ad(body: DataCalculateRecipeAdBody):
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 23, 59, 59, 999999, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_ad(body.template, es,
             include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
@@ -106,7 +106,7 @@ def data_calculate_recipe_contribution(body: DataCalculateRecipeContributionBody
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 23, 59, 59, 999999, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_contribution(body.template, es,
             include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
@@ -123,7 +123,7 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 23, 59, 59, 999999, pytz.timezone('US/Eastern'))
         if body.template in ["wLvp", "kMER", "MJdb"]:
             return query.data_calculate_recipe_lobbying_disclosures(body.template, es,
                 include = clean["include"], exclude = clean["exclude"],
@@ -234,7 +234,7 @@ def data_calculate_recipe_990(body: DataCalculateRecipe990Body):
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 23, 59, 59, 999999, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_990(body.template, es,
             include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
