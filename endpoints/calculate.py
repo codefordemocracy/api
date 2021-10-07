@@ -61,7 +61,7 @@ class DataCalculateRecipeLobbyingBody(DataCalculateBaseBody):
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipe990Body(DataCalculateBaseBody):
-    template: str = Field(..., regex="GCv2|P34n|K23r|mFF7")
+    template: str = Field(..., regex="GCv2|P34n|K23r|mFF7|9q84")
     orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 

@@ -621,7 +621,7 @@ def data_calculate_recipe_990(template, es, include, exclude, skip, limit, minda
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["GCv2", "P34n", "K23r", "mFF7"],
+            "templates": ["GCv2", "P34n", "K23r", "mFF7", "9q84"],
             "terms": [{
                 "action": "multi_match",
                 "type": "phrase",
