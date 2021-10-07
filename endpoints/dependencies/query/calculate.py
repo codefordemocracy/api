@@ -621,10 +621,56 @@ def data_calculate_recipe_990(template, es, include, exclude, skip, limit, minda
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["GCv2", "P34n", "K23r", "mFF7", "9q84"],
+            "templates": ["GCv2", "P34n"],
             "terms": [{
                 "action": "multi_match",
                 "type": "phrase",
+                "fields": [
+                    "row.taxpayer_name",
+                    "obj.ReturnHeader990x.schedule_parts.returnheader990x_part_i.BsnssNm_BsnssNmLn1Txt",
+                    "obj.ReturnHeader990x.schedule_parts.returnheader990x_part_i.PrprrFrmNm_BsnssNmLn1Txt",
+                    "obj.IRS990ScheduleI.groups.SkdIRcpntTbl.RcpntBsnssNm_BsnssNmLn1Txt",
+                    "obj.IRS990ScheduleR.groups.SkdRIdDsrgrddEntts.DsrgrddEnttyNm_BsnssNmLn1Txt",
+                    "obj.IRS990ScheduleR.groups.SkdRIdRltdTxExmptOrg.DsrgrddEnttyNm_BsnssNmLn1Txt",
+                    "obj.IRS990ScheduleR.groups.SkdRIdRltdOrgTxblPrtnrshp.RltdOrgnztnNm_BsnssNmLn1Txt",
+                    "obj.IRS990ScheduleR.groups.SkdRIdRltdOrgTxblCrpTr.RltdOrgnztnNm_BsnssNmLn1Txt",
+                    "obj.IRS990ScheduleR.groups.SkdRTrnsctnsRltdOrg.BsnssNmLn1Txt",
+                    "obj.IRS990PF.groups.PFCmpnstnOfHghstPdCntrct.CmpnstnOfHghstPdCntrct_BsnssNmLn1",
+                    "obj.IRS990PF.groups.PFGrntOrCntrbtnPdDrYr.RcpntBsnssNm_BsnssNmLn1Txt",
+                ],
+                "slop": 5
+            }]
+        }, {
+            "position": 0,
+            "templates": ["K23r", "mFF7"],
+            "terms": [{
+                "action": "multi_match",
+                "type": "phrase",
+                "fields": [
+                    "obj.ReturnHeader990x.schedule_parts.returnheader990x_part_i.BsnssOffcr_PrsnNm",
+                    "obj.ReturnHeader990x.schedule_parts.returnheader990x_part_i.PrprrPrsn_PrprrPrsnNm",
+                    "obj.IRS990.groups.Frm990PrtVIISctnA.PrsnNm",
+                    "obj.IRS990.groups.CntrctrCmpnstn.CntrctrNm_PrsnNm",
+                    "obj.IRS990EZ.groups.EZOffcrDrctrTrstEmpl.PrsnNm",
+                    "obj.IRS990PF.groups.PFOffcrDrTrstKyEmpl.OffcrDrTrstKyEmpl_PrsnNm",
+                    "obj.IRS990PF.groups.PFCmpnstnHghstPdEmpl.CmpnstnHghstPdEmpl_PrsnNm",
+                ],
+                "slop": 2
+            }]
+        }, {
+            "position": 0,
+            "templates": ["9q84"],
+            "terms": [{
+                "action": "multi_match",
+                "type": "phrase",
+                "fields": [
+                    "obj.IRS990.schedule_parts.part_i.ActvtyOrMssnDsc",
+                    "obj.IRS990.schedule_parts.part_iii.Dsc",
+                    "obj.IRS990.schedule_parts.part_iii.MssnDsc",
+                    "obj.IRS990.groups.PrgSrvcAccmActyOthr.Dsc",
+                    "obj.IRS990EZ.schedule_parts.ez_part_iii.PrmryExmptPrpsTxt",
+                    "obj.IRS990EZ.groups.EZPrgrmSrvcAccmplshmnt.DscrptnPrgrmSrvcAccmTxt",
+                ],
                 "slop": 5
             }]
         }
@@ -637,7 +683,8 @@ def data_calculate_recipe_990(template, es, include, exclude, skip, limit, minda
     # get response
     response = get_response(es, "federal_irs_990,federal_irs_990ez,federal_irs_990pf", q, skip, limit, count, histogram,
         date_field="row.sub_date", mindate=mindate, maxdate=maxdate,
-        filter_path=["hits.hits._source.row"]
+        filter_path=["hits.hits._source.row"],
+        highlight=True
     )
     # process rows
     if count is not True and histogram is not True:
@@ -650,7 +697,8 @@ def data_calculate_recipe_990(template, es, include, exclude, skip, limit, minda
                 "return_type": hit["_source"]["row"]["return_type"],
                 "tax_period": hit["_source"]["row"]["tax_period"],
                 "xml_url": "https://s3.amazonaws.com/irs-form-990/" + str(hit["_source"]["row"]["object_id"]) + "_public.xml",
-                "pdf_url": "https://apps.irs.gov/pub/epostcard/cor/" + str(hit["_source"]["row"]["ein"]) + "_" + str(hit["_source"]["row"]["tax_period"]) + "_" + str(hit["_source"]["row"]["return_type"]) + "_" + hit["_source"]["row"]["sub_date"][:10].replace("-", "") + str(hit["_source"]["row"]["return_id"]) + ".pdf"
+                "pdf_url": "https://apps.irs.gov/pub/epostcard/cor/" + str(hit["_source"]["row"]["ein"]) + "_" + str(hit["_source"]["row"]["tax_period"]) + "_" + str(hit["_source"]["row"]["return_type"]) + "_" + hit["_source"]["row"]["sub_date"][:10].replace("-", "") + str(hit["_source"]["row"]["return_id"]) + ".pdf",
+                "values_matched": flatten(list(hit["highlight"].values()))
             }
             elements.append(row)
         return elements
