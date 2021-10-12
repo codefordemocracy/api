@@ -356,7 +356,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "date": hit["_source"]["processed"]["date"][:10],
                 "transaction_amt": hit["_source"]["row"]["transaction_amt"],
                 "transaction_tp": hit["_source"]["row"]["transaction_tp"],
-                "reported_by": "contributor" if hit["_source"]["row"]["transaction_tp"].startswith("2") or hit["_source"]["row"]["transaction_tp"].startswith("4") and hit["_source"]["row"]["transaction_tp"] != "24I" and hit["_source"]["row"]["transaction_tp"] != "24T" else "recipient",
+                "reported_by": "contributor" if str(hit["_source"]["row"]["transaction_tp"]).startswith("2") or str(hit["_source"]["row"]["transaction_tp"]).startswith("4") and hit["_source"]["row"]["transaction_tp"] != "24I" and hit["_source"]["row"]["transaction_tp"] != "24T" else "recipient",
                 "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + str(hit["_source"]["row"]["image_num"]),
                 "sub_id": str(hit["_source"]["row"]["sub_id"])
             }
