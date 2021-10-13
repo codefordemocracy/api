@@ -98,27 +98,33 @@ def map_keys(entity, key):
     return key
 
 def clean_committees_names(name):
-    name = name.replace("COMMITTEE", "")
-    name = name.replace("POLITICAL", "")
-    name = name.replace("ACTION", "")
-    name = name.replace("CORPORATION", "")
-    name = name.replace("CORP", "")
-    name = name.replace("LLC", "")
-    name = name.replace("EMPLOYEES", "")
-    name = name.replace("EMPLOYEE", "")
-    name = name.replace("INC", "")
-    name = name.replace("PAC", "")
-    name = name.replace("FEDERAL", "")
-    name = name.replace("OF", "")
-    name = name.replace("THE", "")
-    name = name.replace("FOR", "")
-    name = name.split("- ")[0]
-    name = name.split("(")[0]
-    name = name.split(",")[0]
-    name = name.replace(".", "")
-    name = name.replace(" '", "")
-    name = name.replace("  ", " ")
-    name = name.replace("  ", " ")
+    if isinstance(name, str):
+        name = name.replace("COMMITTEE", "")
+        name = name.replace("POLITICAL", "")
+        name = name.replace("ACTION", "")
+        name = name.replace("CORPORATION", "")
+        name = name.replace("CORP", "")
+        name = name.replace("LLC", "")
+        name = name.replace("EMPLOYEES", "")
+        name = name.replace("EMPLOYEE", "")
+        name = name.replace("INC", "")
+        name = name.replace("PAC", "")
+        name = name.replace("FEDERAL", "")
+        name = name.replace("OF", "")
+        name = name.replace("THE", "")
+        name = name.replace("FOR", "")
+        name = name.split("- ")[0]
+        name = name.split("(")[0]
+        name = name.split(",")[0]
+        name = name.replace(".", "")
+        name = name.replace(" '", "")
+        name = name.replace("  ", " ")
+        name = name.replace("  ", " ")
+        name = name.replace("  ", " ")
+        name = name.replace("  ", " ")
+        name = name.replace("  ", " ")
+        name = name.replace("  ", " ")
+        name = name.strip()
     return name
 
 def calc_affinity(count_a, count_b, count_both, count_total):
