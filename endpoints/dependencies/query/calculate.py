@@ -6,24 +6,27 @@ from .builder.responses import get_response
 def data_calculate_recipe_article(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     # preprocess some recipes
     if template in ["PMYZ"]:
-        committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
-        for committee in committees:
-            include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+        if len(include["ids"][0]) > 0 or len(include["filters"][0]):
+            committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
+            for committee in committees:
+                include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+            include["terms"][0] = list(set(include["terms"][0]))
         if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
             committees = data_preview_organization_committee(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
             for committee in committees:
                 exclude["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+            exclude["terms"][0] = list(set(exclude["terms"][0]))
     if template in ["EBli"]:
         if len(include["ids"][0]) > 0 or len(include["filters"][0]):
             candidates = data_preview_person_candidate(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
             for candidate in candidates:
                 include["terms"][0].append(candidate["cand_name"])
             include["terms"][0] = list(set(include["terms"][0]))
-            if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
-                candidates = data_preview_person_candidate(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
-                for candidate in candidates:
-                    exclude["terms"][0].append(candidate["cand_name"])
-                exclude["terms"][0] = list(set(exclude["terms"][0]))
+        if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
+            candidates = data_preview_person_candidate(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
+            for candidate in candidates:
+                exclude["terms"][0].append(candidate["cand_name"])
+            exclude["terms"][0] = list(set(exclude["terms"][0]))
     # build query
     q = make_query()
     q = set_query_dates(q, "extracted.date", mindate, maxdate)
@@ -74,24 +77,27 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
 def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     # preprocess some recipes
     if template in ["D3WE", "BuW8"]:
-        committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
-        for committee in committees:
-            include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+        if len(include["ids"][0]) > 0 or len(include["filters"][0]):
+            committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
+            for committee in committees:
+                include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+            include["terms"][0] = list(set(include["terms"][0]))
         if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
             committees = data_preview_organization_committee(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
             for committee in committees:
                 exclude["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+            exclude["terms"][0] = list(set(exclude["terms"][0]))
     if template in ["Jphg"]:
         if len(include["ids"][0]) > 0 or len(include["filters"][0]):
             candidates = data_preview_person_candidate(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
             for candidate in candidates:
                 include["terms"][0].append(candidate["cand_name"])
             include["terms"][0] = list(set(include["terms"][0]))
-            if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
-                candidates = data_preview_person_candidate(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
-                for candidate in candidates:
-                    exclude["terms"][0].append(candidate["cand_name"])
-                exclude["terms"][0] = list(set(exclude["terms"][0]))
+        if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
+            candidates = data_preview_person_candidate(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
+            for candidate in candidates:
+                exclude["terms"][0].append(candidate["cand_name"])
+            exclude["terms"][0] = list(set(exclude["terms"][0]))
     # build query
     q = make_query()
     q = set_query_dates(q, "obj.ad_creation_time", mindate, maxdate)
@@ -597,24 +603,27 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
 def data_calculate_recipe_990(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
     # preprocess some recipes
     if template in ["GCv2"]:
-        committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
-        for committee in committees:
-            include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+        if len(include["ids"][0]) > 0 or len(include["filters"][0]):
+            committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
+            for committee in committees:
+                include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+            include["terms"][0] = list(set(include["terms"][0]))
         if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
             committees = data_preview_organization_committee(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
             for committee in committees:
                 exclude["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+            exclude["terms"][0] = list(set(exclude["terms"][0]))
     if template in ["mFF7"]:
         if len(include["ids"][0]) > 0 or len(include["filters"][0]):
             candidates = data_preview_person_candidate(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
             for candidate in candidates:
                 include["terms"][0].append(candidate["cand_name"])
             include["terms"][0] = list(set(include["terms"][0]))
-            if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
-                candidates = data_preview_person_candidate(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
-                for candidate in candidates:
-                    exclude["terms"][0].append(candidate["cand_name"])
-                exclude["terms"][0] = list(set(exclude["terms"][0]))
+        if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
+            candidates = data_preview_person_candidate(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
+            for candidate in candidates:
+                exclude["terms"][0].append(candidate["cand_name"])
+            exclude["terms"][0] = list(set(exclude["terms"][0]))
     # build query
     q = make_query()
     q = set_query_dates(q, "row.sub_date", mindate, maxdate)
