@@ -38,6 +38,7 @@ class DataCalculateBaseBody(BaseModel):
     dates: DatesConfig = DatesConfig()
     count: bool = Field(False)
     histogram: bool = Field(False)
+    freshness: datetime.datetime = Field(None)
 
 class DataCalculateRecipeArticleBody(DataCalculateBaseBody):
     template: str = Field(..., regex="PMYZ|WdMv|RasK|EBli|GSmB")
@@ -82,7 +83,8 @@ def data_calculate_recipe_article(body: DataCalculateRecipeArticleBody):
             mindate=mindate, maxdate=maxdate,
             orderby=body.orderby, orderdir=body.orderdir,
             count=body.count,
-            histogram=body.histogram
+            histogram=body.histogram,
+            freshness=body.freshness
         )
     return []
 
@@ -99,7 +101,8 @@ def data_calculate_recipe_ad(body: DataCalculateRecipeAdBody):
             mindate=mindate, maxdate=maxdate,
             orderby=body.orderby, orderdir=body.orderdir,
             count=body.count,
-            histogram=body.histogram
+            histogram=body.histogram,
+            freshness=body.freshness
         )
     return []
 
@@ -117,7 +120,8 @@ def data_calculate_recipe_contribution(body: DataCalculateRecipeContributionBody
             filters=body.filters.dict(),
             orderby=body.orderby, orderdir=body.orderdir,
             count=body.count,
-            histogram=body.histogram
+            histogram=body.histogram,
+            freshness=body.freshness
         )
     return []
 
@@ -135,7 +139,8 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
                 count=body.count,
-                histogram=body.histogram
+                histogram=body.histogram,
+                freshness=body.freshness
             )
         elif body.template in ["PLWg", "QJeb", "nNKT"]:
             return query.data_calculate_recipe_lobbying_disclosures_nested(body.template, es,
@@ -144,7 +149,8 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
                 count=body.count,
-                histogram=body.histogram
+                histogram=body.histogram,
+                freshness=body.freshness
             )
         elif body.template in ["A3ue", "Hsqk"]:
             return query.data_calculate_recipe_lobbying_contributions_nested(body.template, es,
@@ -153,7 +159,8 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
                 count=body.count,
-                histogram=body.histogram
+                histogram=body.histogram,
+                freshness=body.freshness
             )
         elif body.template in ["PjyR", "WGb3", "MK93", "V5Gh", "3Nrt", "Q23x"]:
             if body.template in ["PjyR", "V5Gh"]:
@@ -178,7 +185,8 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
                 count=body.count,
-                histogram=body.histogram
+                histogram=body.histogram,
+                freshness=body.freshness
             )
         elif body.template in ["rXwv", "i5xq", "JCXA", "7EyP"]:
             if body.template in ["rXwv", "JCXA"]:
@@ -229,7 +237,8 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
                 mindate=mindate, maxdate=maxdate,
                 orderby=body.orderby, orderdir=body.orderdir,
                 count=body.count,
-                histogram=body.histogram
+                histogram=body.histogram,
+                freshness=body.freshness
             )
     return []
 
@@ -246,6 +255,7 @@ def data_calculate_recipe_990(body: DataCalculateRecipe990Body):
             mindate=mindate, maxdate=maxdate,
             orderby=body.orderby, orderdir=body.orderdir,
             count=body.count,
-            histogram=body.histogram
+            histogram=body.histogram,
+            freshness=body.freshness
         )
     return []

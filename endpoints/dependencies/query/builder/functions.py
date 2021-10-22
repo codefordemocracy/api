@@ -35,6 +35,15 @@ def set_query_dates(q, field, mindate, maxdate):
         }
     })
 
+def set_freshness(q, field, freshness):
+    return add_filter_clause(q, {
+        "range": {
+            field: {
+                "gte": freshness
+            }
+        }
+    })
+
 # should subqueries
 
 def make_should_subquery():

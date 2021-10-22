@@ -1,9 +1,9 @@
 from ..helpers import clean_committees_names, flatten
 from .preview import data_preview_organization_committee, data_preview_person_candidate
-from .builder.functions import make_query, set_query_dates, set_query_clauses, add_must_clause, add_not_clause, add_filter_clause
+from .builder.functions import make_query, set_query_dates, set_freshness, set_query_clauses, add_must_clause, add_not_clause, add_filter_clause
 from .builder.responses import get_response
 
-def data_calculate_recipe_article(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_article(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, freshness=None):
     # preprocess some recipes
     if template in ["PMYZ"]:
         if len(include["ids"][0]) > 0 or len(include["filters"][0]):
@@ -54,6 +54,9 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
         q["sort"] = {
             "extracted.date": {"order": orderdir},
         }
+    # filter on freshness
+    if freshness is not None:
+        q = set_freshness(q, "context.last_indexed", freshness)
     # get response
     response = get_response(es, "news_articles", q, skip, limit, count, histogram,
         date_field="extracted.date", mindate=mindate, maxdate=maxdate,
@@ -74,7 +77,7 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
         return elements
     return response
 
-def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, freshness=None):
     # preprocess some recipes
     if template in ["D3WE", "BuW8"]:
         if len(include["ids"][0]) > 0 or len(include["filters"][0]):
@@ -134,6 +137,9 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
         q["sort"] = {
             "obj.ad_creation_time": {"order": orderdir},
         }
+    # filter on freshness
+    if freshness is not None:
+        q = set_freshness(q, "context.last_indexed", freshness)
     # get response
     response = get_response(es, "facebook_ads", q, skip, limit, count, histogram,
         date_field="obj.ad_creation_time", mindate=mindate, maxdate=maxdate,
@@ -155,7 +161,7 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
         return elements
     return response
 
-def data_calculate_recipe_contribution(template, es, include, exclude, skip, limit, mindate, maxdate, filters, orderby, orderdir, count, histogram):
+def data_calculate_recipe_contribution(template, es, include, exclude, skip, limit, mindate, maxdate, filters, orderby, orderdir, count, histogram, freshness=None):
     # preprocess some recipes
     if template in ["DXhw", "KWYZ", "WK3K", "KR64", "F7Xn", "gXjA"]:
         # get committee ids for candidates
@@ -347,6 +353,9 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
         q["sort"] = {
             "row.transaction_amt": {"order": orderdir},
         }
+    # filter on freshness
+    if freshness is not None:
+        q = set_freshness(q, "context.last_indexed", freshness)
     # get response
     response = get_response(es, "federal_fec_contributions", q, skip, limit, count, histogram,
         date_field="processed.date", mindate=mindate, maxdate=maxdate,
@@ -378,7 +387,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
         return elements
     return response
 
-def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, collapse=None):
+def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, freshness=None, collapse=None):
     # build query
     q = make_query()
     q = set_query_dates(q, "processed.date_submitted", mindate, maxdate)
@@ -419,6 +428,9 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
         q["sort"] = {
             "processed.date_submitted": {"order": orderdir},
         }
+    # filter on freshness
+    if freshness is not None:
+        q = set_freshness(q, "context.last_indexed", freshness)
     # get response
     response = get_response(es, "federal_senate_lobbying_disclosures,federal_house_lobbying_disclosures", q, skip, limit, count, histogram,
         date_field="processed.date_submitted", mindate=mindate, maxdate=maxdate,
@@ -447,7 +459,7 @@ def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, s
         return elements
     return response
 
-def data_calculate_recipe_lobbying_disclosures_nested(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, collapse=None):
+def data_calculate_recipe_lobbying_disclosures_nested(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, freshness=None, collapse=None):
     # build query
     q = make_query()
     q = set_query_dates(q, "parent.date_submitted", mindate, maxdate)
@@ -488,6 +500,9 @@ def data_calculate_recipe_lobbying_disclosures_nested(template, es, include, exc
         q["sort"] = {
             "parent.date_submitted": {"order": orderdir},
         }
+    # filter on freshness
+    if freshness is not None:
+        q = set_freshness(q, "context.last_indexed", freshness)
     # get response
     response = get_response(es, "federal_senate_lobbying_disclosures_nested,federal_house_lobbying_disclosures_nested", q, skip, limit, count, histogram,
         date_field="parent.date_submitted", mindate=mindate, maxdate=maxdate,
@@ -529,7 +544,7 @@ def data_calculate_recipe_lobbying_disclosures_nested(template, es, include, exc
         return elements
     return response
 
-def data_calculate_recipe_lobbying_contributions_nested(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_lobbying_contributions_nested(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, freshness=None):
     # build query
     q = make_query()
     q = set_query_dates(q, "child.date", mindate, maxdate)
@@ -571,6 +586,9 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
         q["sort"] = {
             "child.amount": {"order": orderdir},
         }
+    # filter on freshness
+    if freshness is not None:
+        q = set_freshness(q, "context.last_indexed", freshness)
     # get response
     response = get_response(es, "federal_senate_lobbying_contributions_nested,federal_house_lobbying_contributions_nested", q, skip, limit, count, histogram,
         date_field="child.date", mindate=mindate, maxdate=maxdate,
@@ -600,7 +618,7 @@ def data_calculate_recipe_lobbying_contributions_nested(template, es, include, e
         return elements
     return response
 
-def data_calculate_recipe_990(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram):
+def data_calculate_recipe_990(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, freshness=None):
     # preprocess some recipes
     if template in ["GCv2"]:
         if len(include["ids"][0]) > 0 or len(include["filters"][0]):
@@ -689,6 +707,9 @@ def data_calculate_recipe_990(template, es, include, exclude, skip, limit, minda
         q["sort"] = {
             "row.sub_date": {"order": orderdir},
         }
+    # filter on freshness
+    if freshness is not None:
+        q = set_freshness(q, "context.last_indexed", freshness)
     # get response
     response = get_response(es, "federal_irs_990,federal_irs_990ez,federal_irs_990pf", q, skip, limit, count, histogram,
         date_field="row.sub_date", mindate=mindate, maxdate=maxdate,
