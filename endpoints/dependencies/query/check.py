@@ -279,7 +279,7 @@ def status_check_data_contributions(es):
             "aggs": {
                 "last_indexed": {
                     "max": {
-                        "field": "context.last_indexed"
+                        "field": "context.last_augmented"
                     }
                 }
             }
