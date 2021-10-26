@@ -139,7 +139,7 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
         }
     # filter on freshness
     if freshness is not None:
-        q = set_freshness(q, "context.last_indexed", freshness)
+        q = set_freshness(q, "context.first_indexed", freshness)
     # get response
     response = get_response(es, "facebook_ads", q, skip, limit, count, histogram,
         date_field="obj.ad_creation_time", mindate=mindate, maxdate=maxdate,

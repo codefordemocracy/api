@@ -91,7 +91,7 @@ def status_check_data_ads(es):
                     "filter": [
                         {
                             "range": {
-                                "context.last_indexed": {
+                                "context.first_indexed": {
                                     "gte": datetime.datetime.now(pytz.timezone('US/Eastern'))-datetime.timedelta(days=90)
                                 }
                             }
@@ -102,7 +102,7 @@ def status_check_data_ads(es):
             "aggs": {
                 "dates": {
                     "date_histogram": {
-                        "field": "context.last_indexed",
+                        "field": "context.first_indexed",
                         "calendar_interval": "day",
                         "time_zone": "America/New_York"
                     }
@@ -117,7 +117,7 @@ def status_check_data_ads(es):
             "aggs": {
                 "last_indexed": {
                     "max": {
-                        "field": "context.last_indexed"
+                        "field": "context.first_indexed"
                     }
                 }
             }
