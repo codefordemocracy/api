@@ -12,7 +12,9 @@
         <p><strong>Count:</strong> [[articles.count.toLocaleString()]]</p>
         <p><strong>Last Indexed:</strong> [[moment(articles.last_indexed).local()]]</p>
         <p><strong>Coverage:</strong></p>
-        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(articles.coverage)"></plot>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(articles.coverage, 'quarter')"></plot>
+        <p><strong>Update Cadence:</strong></p>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(articles.cadence)"></plot>
       </template>
       <p v-else>Loading<span class="blink">...</span></p>
     </div>
@@ -24,7 +26,9 @@
         <p><strong>Count:</strong> [[ads.count.toLocaleString()]]</p>
         <p><strong>Last Indexed:</strong> [[moment(ads.last_indexed).local()]]</p>
         <p><strong>Coverage:</strong></p>
-        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(ads.coverage)"></plot>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(ads.coverage, 'quarter')"></plot>
+        <p><strong>Update Cadence:</strong></p>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(ads.cadence)"></plot>
       </template>
       <p v-else>Loading<span class="blink">...</span></p>
     </div>
@@ -38,7 +42,9 @@
           <p><strong>Count:</strong> [[contributions[_.lowerCase(source)].count.toLocaleString()]]</p>
           <p><strong>Last Indexed:</strong> [[moment(contributions[_.lowerCase(source)].last_indexed).local()]]</p>
           <p><strong>Coverage:</strong></p>
-          <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(contributions[_.lowerCase(source)].coverage)"></plot>
+          <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(contributions[_.lowerCase(source)].coverage, 'quarter')"></plot>
+          <p><strong>Update Cadence:</strong></p>
+          <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(contributions[_.lowerCase(source)].cadence)"></plot>
         </template>
       </template>
       <p v-else>Loading<span class="blink">...</span></p>
@@ -53,7 +59,9 @@
             <p><strong>Count:</strong> [[lobbying[_.lowerCase(source)][_.lowerCase(group)].count.toLocaleString()]]</p>
             <p><strong>Last Indexed:</strong> [[moment(lobbying[_.lowerCase(source)][_.lowerCase(group)].last_indexed).local()]]</p>
             <p><strong>Coverage:</strong></p>
-            <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(lobbying[_.lowerCase(source)][_.lowerCase(group)].coverage)"></plot>
+            <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(lobbying[_.lowerCase(source)][_.lowerCase(group)].coverage, 'quarter')"></plot>
+            <p><strong>Update Cadence:</strong></p>
+            <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(lobbying[_.lowerCase(source)][_.lowerCase(group)].cadence)"></plot>
           </template>
         </template>
       </template>
@@ -67,7 +75,9 @@
         <p><strong>Count:</strong> [[irs.count.toLocaleString()]]</p>
         <p><strong>Last Indexed:</strong> [[moment(irs.last_indexed).local()]]</p>
         <p><strong>Coverage:</strong></p>
-        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(irs.coverage)"></plot>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(irs.coverage, 'quarter')"></plot>
+        <p><strong>Update Cadence:</strong></p>
+        <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(irs.cadence)"></plot>
       </template>
       <p v-else>Loading<span class="blink">...</span></p>
     </div>
@@ -102,7 +112,7 @@
       irs: {}
     },
     methods: {
-      histogram(buckets) {
+      histogram(buckets, interval) {
         return {
           data: [
             {
@@ -120,7 +130,7 @@
               linecolor: '#e5e5e5',
               showgrid: false,
               showticklabels: false,
-              range: ['1998-01-01', moment().endOf('year').format('YYYY-MM-DD')]
+              range: interval == 'quarter' ? ['1998-01-01', moment().endOf('year').format('YYYY-MM-DD')] : [moment().subtract(90, 'days').format('YYYY-MM-DD'), moment().format('YYYY-MM-DD')]
             },
             yaxis: {
               zeroline: false,
