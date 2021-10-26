@@ -355,7 +355,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
         }
     # filter on freshness
     if freshness is not None:
-        q = set_freshness(q, "context.last_indexed", freshness)
+        q = set_freshness(q, "context.last_bulked", freshness)
     # get response
     response = get_response(es, "federal_fec_contributions", q, skip, limit, count, histogram,
         date_field="processed.date", mindate=mindate, maxdate=maxdate,
