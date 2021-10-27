@@ -39,6 +39,12 @@ class GraphIntermediariesLinkagesExpendituresConfig(BaseModel):
     type: str = Field("linkage", regex="linkage|expenditure")
     expenditures: GraphExpenditureAttributesConfig = GraphExpenditureAttributesConfig()
 
+class GraphIntermediariesContributionsConfig(BaseModel):
+    contributions: GraphContributionAttributesConfig = GraphContributionAttributesConfig()
+
+class GraphIntermediariesExpendituresConfig(BaseModel):
+    expenditures: GraphExpenditureAttributesConfig = GraphExpenditureAttributesConfig()
+
 class GraphIntermediariesContributionsExpendituresConfig(BaseModel):
     type: str = Field("contribution", regex="contribution|expenditure")
     contributions: GraphContributionAttributesConfig = GraphContributionAttributesConfig()
@@ -90,10 +96,10 @@ class GraphTraverseAssociationsNodeSourceBody(GraphTraverseAssociationsDatesBody
     sources: GraphSourceAttributesConfig = GraphSourceAttributesConfig()
 
 class GraphTraverseExpenditureIntermediariesBody(GraphTraverseIntermediariesDatesBody):
-    intermediaries: GraphExpenditureAttributesConfig = GraphExpenditureAttributesConfig()
+    intermediaries: GraphIntermediariesExpendituresConfig = GraphIntermediariesExpendituresConfig()
 
 class GraphTraverseContributionIntermediariesBody(GraphTraverseIntermediariesDatesBody):
-    intermediaries: GraphContributionAttributesConfig = GraphContributionAttributesConfig()
+    intermediaries: GraphIntermediariesContributionsConfig = GraphIntermediariesContributionsConfig()
 
 class GraphTraverseIntermediariesCommitteeCommitteeBody(GraphTraverseIntermediariesDatesBody):
     intermediaries: GraphIntermediariesContributionsExpendituresConfig = GraphIntermediariesContributionsExpendituresConfig()
