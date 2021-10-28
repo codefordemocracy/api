@@ -387,6 +387,133 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
         return elements
     return response
 
+def data_calculate_recipe_expenditure(template, es, include, exclude, skip, limit, mindate, maxdate, filters, orderby, orderdir, count, histogram, freshness=None):
+    # preprocess some recipes
+    if template in ["kKSg", "RncJ"]:
+        if len(include["ids"][0]) > 0 or len(include["filters"][0]):
+            committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
+            for committee in committees:
+                include["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+            include["terms"][0] = list(set(include["terms"][0]))
+        if len(exclude["ids"][0]) > 0 or len(exclude["filters"][0]) > 0:
+            committees = data_preview_organization_committee(es, None, exclude["ids"][0], exclude["filters"][0], None, None, None, 0, 10000, False)
+            for committee in committees:
+                exclude["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
+            exclude["terms"][0] = list(set(exclude["terms"][0]))
+    # build query
+    q = make_query()
+    q = set_query_dates(q, "row.transaction_dt", mindate, maxdate)
+    if template in ["qSMe", "kKSg", "Ft9G", "ZfYW"]:
+        q = add_filter_clause(q, {
+            "term": {
+                "row.type": "independent"
+            }
+        })
+    elif template in ["MJAh", "RncJ", "Wq88", "Mtr2"]:
+        q = add_filter_clause(q, {
+            "term": {
+                "row.type": "operating"
+            }
+        })
+    q = set_query_clauses(q, template, list_settings=[
+        {
+            "position": 0,
+            "templates": ["qSMe", "MJAh"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "row.spender.cmte_nm",
+                "slop": 5
+            }],
+            "ids": ["row.spender.cmte_id"],
+            "filters": ["spender"]
+        }, {
+            "position": 0,
+            "templates": ["kKSg", "Ft9G", "RncJ", "Wq88"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "processed.payee.name",
+                "slop": 5
+            }]
+        }, {
+            "position": 0,
+            "templates": ["Mtr2"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "processed.payee.name",
+                "slop": 2
+            }],
+            "filters": ["payee"]
+        }, {
+            "position": 0,
+            "templates": ["ZfYW"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "processed.content.cand_name",
+                "slop": 5
+            }],
+            "ids": ["row.content.cand_id"],
+            "filters": ["content"]
+        },
+    ], include=include, exclude=exclude)
+    # add filters
+    if filters["amount"]["min"] is not None or filters["amount"]["max"] is not None:
+        range = dict()
+        if filters["amount"]["min"] is not None:
+            range["gte"] = filters["amount"]["min"]
+        if filters["amount"]["max"] is not None:
+            range["lte"] = filters["amount"]["max"]
+        q = add_filter_clause(q, {
+            "range": {
+                "row.transaction_amt": range
+            }
+        })
+    # set sort
+    if orderby == "date":
+        q["sort"] = {
+            "row.transaction_dt": {"order": orderdir},
+        }
+    elif orderby == "amount":
+        q["sort"] = {
+            "row.transaction_amt": {"order": orderdir},
+        }
+    # filter on freshness
+    if freshness is not None:
+        q = set_freshness(q, "context.last_indexed", freshness)
+    # get response
+    response = get_response(es, "federal_fec_expenditures", q, skip, limit, count, histogram,
+        date_field="row.transaction_dt", mindate=mindate, maxdate=maxdate,
+        filter_path=["hits.hits._source.processed", "hits.hits._source.row"]
+    )
+    # process rows
+    if count is not True and histogram is not True:
+        elements = []
+        for hit in response:
+            row = {
+                "spender_cmte_id": hit["_source"]["row"]["spender"]["cmte_id"],
+                "spender_cmte_nm": hit["_source"]["row"]["spender"]["cmte_nm"],
+                "type": hit["_source"]["row"]["type"],
+                "date": hit["_source"]["row"]["transaction_dt"][:10],
+                "transaction_amt": hit["_source"]["row"]["transaction_amt"],
+                "payee_name": hit["_source"]["processed"]["payee"]["name"].upper() if hit["_source"].get("processed", {}).get("payee", {}).get("name") is not None else None,
+                "purpose": hit["_source"]["row"]["purpose"].upper() if hit["_source"].get("row", {}).get("purpose") is not None else None,
+                "url": "https://docquery.fec.gov/cgi-bin/fecimg/?" + str(hit["_source"]["row"]["image_num"])
+            }
+            if hit["_source"]["row"]["type"] == "independent":
+                row["sup_opp"] = hit["_source"]["row"]["content"]["sup_opp"]
+                row["identified_cand_id"] = hit["_source"]["row"]["content"]["cand_id"]
+                row["identified_cand_name"] = hit["_source"]["processed"]["content"]["cand_name"].upper() if hit["_source"]["processed"].get("content", {}).get("cand_name") is not None else None
+                row["identified_cand_pty_affiliation"] = hit["_source"]["row"]["content"]["cand_pty_affiliation"]
+                row["identified_cand_office"] = hit["_source"]["row"]["content"]["cand_office"]
+                row["identified_cand_office_st"] = hit["_source"]["row"]["content"]["cand_office_st"]
+                row["file_num"] = str(hit["_source"]["row"]["file_num"])
+                row["tran_id"] = str(hit["_source"]["row"]["tran_id"])
+            elif hit["_source"]["row"]["type"] == "operating":
+                row["payee_entity_tp"] = hit["_source"]["row"]["payee"]["entity_tp"]
+                row["sub_id"] = str(hit["_source"]["row"]["sub_id"])
+            elements.append(row)
+        return elements
+    return response
+
 def data_calculate_recipe_lobbying_disclosures(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, freshness=None, collapse=None):
     # build query
     q = make_query()

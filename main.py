@@ -67,6 +67,10 @@ def route_api_status_ads(request: Request):
 def route_api_status_contributions(request: Request):
     return check.status_check_data_contributions()
 
+@app.get("/api/status/expenditures/", include_in_schema=False)
+def route_api_status_expenditures(request: Request):
+    return check.status_check_data_expenditures()
+
 @app.get("/api/status/lobbying/", include_in_schema=False)
 def route_api_status_lobbying(request: Request):
     return check.status_check_data_lobbying()

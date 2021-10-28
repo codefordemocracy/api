@@ -56,6 +56,12 @@ class DataCalculateRecipeContributionBody(DataCalculateBaseBody):
     orderby: str = Field(None, regex="amount|date")
     orderdir: str = Field("desc", regex="asc|desc")
 
+class DataCalculateRecipeExpenditureBody(DataCalculateBaseBody):
+    template: str = Field(..., regex="qSMe|kKSg|Ft9G|ZfYW|MJAh|RncJ|Wq88|Mtr2")
+    filters: DataCalculateFiltersConfig = DataCalculateFiltersConfig()
+    orderby: str = Field(None, regex="amount|date")
+    orderdir: str = Field("desc", regex="asc|desc")
+
 class DataCalculateRecipeLobbyingBody(DataCalculateBaseBody):
     template: str = Field(..., regex="wLvp|kMER|MJdb|PLWg|QJeb|nNKT|PjyR|WGb3|MK93|A3ue|rXwv|i5xq|V5Gh|3Nrt|Q23x|Hsqk|JCXA|7EyP")
     orderby: str = Field(None, regex="amount|date")
@@ -114,6 +120,25 @@ def data_calculate_recipe_contribution(body: DataCalculateRecipeContributionBody
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
         maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 23, 59, 59, 999999, pytz.timezone('US/Eastern'))
         return query.data_calculate_recipe_contribution(body.template, es,
+            include = clean["include"], exclude = clean["exclude"],
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            mindate=mindate, maxdate=maxdate,
+            filters=body.filters.dict(),
+            orderby=body.orderby, orderdir=body.orderdir,
+            count=body.count,
+            histogram=body.histogram,
+            freshness=body.freshness
+        )
+    return []
+
+@router.post("/recipe/expenditure/", summary="Calculate Recipe for Expenditures")
+def data_calculate_recipe_expenditure(body: DataCalculateRecipeExpenditureBody):
+    analytics.log_query(body, es)
+    clean = helpers.prepare_lists(body.lists, db)
+    if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
+        mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
+        maxdate = datetime.datetime(body.dates.max.year, body.dates.max.month, body.dates.max.day, 23, 59, 59, 999999, pytz.timezone('US/Eastern'))
+        return query.data_calculate_recipe_expenditure(body.template, es,
             include = clean["include"], exclude = clean["exclude"],
             skip=body.pagination.skip, limit=body.pagination.limit,
             mindate=mindate, maxdate=maxdate,

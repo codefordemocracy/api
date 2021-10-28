@@ -51,6 +51,23 @@
     </div>
 
     <div class="border border-secondary p-7">
+      <h3 class="text-3xl font-medium mb-3">Expenditures</h3>
+      <template v-if="!_.isEmpty(expenditures)">
+        <p><strong>Total Count:</strong> [[expenditures.count.toLocaleString()]]</p>
+        <template v-for="type in ['Independent', 'Operating']">
+          <h5 class="text-xl mt-5 mb-3">FEC [[type]] Expenditures Data</h5>
+          <p><strong>Count:</strong> [[expenditures[_.lowerCase(type)].count.toLocaleString()]]</p>
+          <p><strong>Last Indexed:</strong> [[moment(expenditures[_.lowerCase(type)].last_indexed).local()]]</p>
+          <p><strong>Coverage:</strong></p>
+          <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(expenditures[_.lowerCase(type)].coverage, 'quarter')"></plot>
+          <p><strong>Update Cadence:</strong></p>
+          <plot class="-mx-5" :id="_.uniqueId('histogram')" :settings="histogram(expenditures[_.lowerCase(type)].cadence)"></plot>
+        </template>
+      </template>
+      <p v-else>Loading<span class="blink">...</span></p>
+    </div>
+
+    <div class="border border-secondary p-7">
       <h3 class="text-3xl font-medium mb-3">Lobbying</h3>
       <template v-if="!_.isEmpty(lobbying)">
         <template v-for="source in ['Senate', 'House']">
@@ -108,6 +125,7 @@
       articles: {},
       ads: {},
       contributions: {},
+      expenditures: {},
       lobbying: {},
       irs: {}
     },
@@ -170,6 +188,13 @@
       axios.get('/api/status/contributions/')
       .then(function(response) {
         self.contributions = response.data
+      })
+      .catch(function(error) {
+        console.error(error)
+      })
+      axios.get('/api/status/expenditures/')
+      .then(function(response) {
+        self.expenditures = response.data
       })
       .catch(function(error) {
         console.error(error)

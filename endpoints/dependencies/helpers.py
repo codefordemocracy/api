@@ -93,6 +93,8 @@ def map_keys(entity, key):
         return "row."+key
     elif entity in ["source.candidate", "source.committee", "target.committee"]:
         return "row."+entity+"."+key
+    elif entity in ["spender", "payee", "content"]:
+        return "row."+entity+"."+key
     elif entity == "donor":
         return "processed.source.donor."+key
     return key

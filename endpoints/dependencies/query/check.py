@@ -303,6 +303,178 @@ def status_check_data_contributions(es):
         }
     }
 
+def status_check_data_expenditures(es):
+    total_count = es.count(index="federal_fec_expenditures")
+    independent_count = es.count(index="federal_fec_expenditures",
+        body={
+            "query": {
+                "term": {
+                    "row.type": "independent"
+                }
+            }
+        }
+    )
+    independent_coverage = es.search(index="federal_fec_expenditures",
+        body={
+            "size": 0,
+            "query": {
+                "term": {
+                    "row.type": "independent"
+                }
+            },
+            "aggs": {
+                "dates": {
+                    "date_histogram": {
+                        "field": "row.transaction_dt",
+                        "calendar_interval": "quarter",
+                        "time_zone": "America/New_York"
+                    }
+                }
+            }
+        },
+        filter_path=["aggregations"]
+    )
+    independent_cadence = es.search(index="federal_fec_expenditures",
+        body={
+            "size": 0,
+            "query": {
+                "bool": {
+                    "filter": [
+                        {
+                            "range": {
+                                "context.last_indexed": {
+                                    "gte": datetime.datetime.now(pytz.timezone('US/Eastern'))-datetime.timedelta(days=90)
+                                }
+                            }
+                        }, {
+                            "term": {
+                                "row.type": "independent"
+                            }
+                        }
+                    ]
+                }
+            },
+            "aggs": {
+                "dates": {
+                    "date_histogram": {
+                        "field": "context.last_indexed",
+                        "calendar_interval": "day",
+                        "time_zone": "America/New_York"
+                    }
+                }
+            }
+        },
+        filter_path=["aggregations"]
+    )
+    independent_last_indexed = es.search(index="federal_fec_expenditures",
+        body={
+            "size": 0,
+            "query": {
+                "term": {
+                    "row.type": "independent"
+                }
+            },
+            "aggs": {
+                "last_indexed": {
+                    "max": {
+                        "field": "context.last_indexed"
+                    }
+                }
+            }
+        },
+        filter_path=["aggregations"]
+    )
+    operating_count = es.count(index="federal_fec_expenditures",
+        body={
+            "query": {
+                "term": {
+                    "row.type": "operating"
+                }
+            }
+        }
+    )
+    operating_coverage = es.search(index="federal_fec_expenditures",
+        body={
+            "size": 0,
+            "query": {
+                "term": {
+                    "row.type": "operating"
+                }
+            },
+            "aggs": {
+                "dates": {
+                    "date_histogram": {
+                        "field": "row.transaction_dt",
+                        "calendar_interval": "quarter",
+                        "time_zone": "America/New_York"
+                    }
+                }
+            }
+        },
+        filter_path=["aggregations"]
+    )
+    operating_cadence = es.search(index="federal_fec_expenditures",
+        body={
+            "size": 0,
+            "query": {
+                "bool": {
+                    "filter": [
+                        {
+                            "range": {
+                                "context.last_indexed": {
+                                    "gte": datetime.datetime.now(pytz.timezone('US/Eastern'))-datetime.timedelta(days=90)
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "aggs": {
+                "dates": {
+                    "date_histogram": {
+                        "field": "context.last_indexed",
+                        "calendar_interval": "day",
+                        "time_zone": "America/New_York"
+                    }
+                }
+            }
+        },
+        filter_path=["aggregations"]
+    )
+    operating_last_indexed = es.search(index="federal_fec_expenditures",
+        body={
+            "size": 0,
+            "query": {
+                "term": {
+                    "row.type": "operating"
+                }
+            },
+            "aggs": {
+                "last_indexed": {
+                    "max": {
+                        "field": "context.last_indexed"
+                    }
+                }
+            }
+        },
+        filter_path=["aggregations"]
+    )
+    return {
+        "count": total_count["count"],
+        "independent": {
+            "count": independent_count["count"],
+            "coverage": independent_coverage["aggregations"]["dates"]["buckets"],
+            "cadence": independent_cadence["aggregations"]["dates"]["buckets"],
+            "last_indexed": pytz.utc.localize(datetime.datetime.fromtimestamp(independent_last_indexed["aggregations"]["last_indexed"]["value"]/1000)).astimezone(tz=pytz.timezone('US/Eastern'))
+        },
+        "operating": {
+            "count": operating_count["count"],
+            "coverage": operating_coverage["aggregations"]["dates"]["buckets"],
+            "cadence": operating_cadence["aggregations"]["dates"]["buckets"],
+            "last_indexed": pytz.utc.localize(datetime.datetime.fromtimestamp(operating_last_indexed["aggregations"]["last_indexed"]["value"]/1000)).astimezone(tz=pytz.timezone('US/Eastern'))
+        }
+    }
+
 def status_check_data_lobbying(es):
     senate_disclosures_count = es.count(index="federal_senate_lobbying_disclosures")
     senate_disclosures_coverage = es.search(index="federal_senate_lobbying_disclosures",
