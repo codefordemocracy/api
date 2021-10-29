@@ -97,6 +97,17 @@ def data_preview_organization_employer(body: DataPreviewEntityBody):
         )
     return []
 
+@router.post("/organization/source/", summary="Preview Sources")
+def data_preview_organization_source(body: DataPreviewEntityBody):
+    if body.include.terms is not None or body.include.ids is not None:
+        return query.data_preview_organization_source(es,
+            include_terms=body.include.terms, include_ids=body.include.ids,
+            exclude_terms=body.exclude.terms, exclude_ids=body.exclude.ids,
+            skip=body.pagination.skip, limit=body.pagination.limit,
+            count=body.count
+        )
+    return []
+
 @router.post("/person/candidate/", summary="Preview Candidates")
 def data_preview_person_candidate(body: DataPreviewCandidateBody):
     if body.include.terms is not None or body.include.ids is not None or body.include.filters is not None:

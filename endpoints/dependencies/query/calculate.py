@@ -5,7 +5,7 @@ from .builder.responses import get_response
 
 def data_calculate_recipe_article(template, es, include, exclude, skip, limit, mindate, maxdate, orderby, orderdir, count, histogram, freshness=None):
     # preprocess some recipes
-    if template in ["PMYZ"]:
+    if template in ["PMYZ", "hSaE"]:
         if len(include["ids"][0]) > 0 or len(include["filters"][0]):
             committees = data_preview_organization_committee(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
             for committee in committees:
@@ -16,7 +16,7 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
             for committee in committees:
                 exclude["terms"][0].append(clean_committees_names(committee["cmte_nm"]))
             exclude["terms"][0] = list(set(exclude["terms"][0]))
-    if template in ["EBli"]:
+    if template in ["EBli", "CpsR"]:
         if len(include["ids"][0]) > 0 or len(include["filters"][0]):
             candidates = data_preview_person_candidate(es, None, include["ids"][0], include["filters"][0], None, None, None, 0, 10000, False)
             for candidate in candidates:
@@ -33,7 +33,7 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
     q = set_query_clauses(q, template, list_settings=[
         {
             "position": 0,
-            "templates": ["PMYZ", "WdMv", "RasK", "GSmB"],
+            "templates": ["PMYZ", "WdMv", "RasK", "GSmB", "hSaE", "PqAA", "FBRq", "2uJX"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "extracted.text",
@@ -41,12 +41,21 @@ def data_calculate_recipe_article(template, es, include, exclude, skip, limit, m
             }]
         }, {
             "position": 0,
-            "templates": ["EBli"],
+            "templates": ["EBli", "CpsR"],
             "terms": [{
                 "action": "match_phrase",
                 "field": "extracted.text",
                 "slop": 2
             }]
+        }, {
+            "position": 1,
+            "templates": ["hSaE", "PqAA", "FBRq", "CpsR", "2uJX"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "extracted.source.sitename",
+                "slop": 5
+            }],
+            "ids": ["extracted.source.url"],
         }
     ], include=include, exclude=exclude)
     # set sort

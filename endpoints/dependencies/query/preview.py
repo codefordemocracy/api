@@ -113,6 +113,60 @@ def data_preview_organization_employer(es, include_terms, include_ids, exclude_t
         return elements
     return response
 
+def data_preview_organization_source(es, include_terms, include_ids, exclude_terms, exclude_ids, skip, limit, count):
+    q = make_query()
+    q["collapse"] = {
+        "field": "extracted.source.url.keyword"
+    }
+    subquery = make_should_subquery()
+    if include_terms is not None:
+        for term in include_terms:
+            subquery = add_should_clause(subquery, {
+                "match_phrase": {
+                    "extracted.source.sitename": {
+                        "query": term,
+                        "slop": 5
+                    }
+                }
+            })
+    if include_ids is not None:
+        for id in include_ids:
+            subquery = add_should_clause(subquery, {
+                "term": {
+                    "extracted.source.url": id.lower()
+                }
+            })
+    q = add_must_clause(q, subquery)
+    if exclude_terms is not None:
+        for term in exclude_terms:
+            q = add_not_clause(q, {
+                "match_phrase": {
+                    "extracted.source.sitename": {
+                        "query": term,
+                        "slop": 5
+                    }
+                }
+            })
+    if exclude_ids is not None:
+        for id in exclude_ids:
+            q = add_not_clause(q, {
+                "match": {
+                    "extracted.source.url": id.lower()
+                }
+            })
+    response = get_response(es, "news_articles", q, skip, limit, count, False,
+        filter_path=["hits.hits._source.extracted.source"]
+    )
+    if count is not True:
+        elements = []
+        for hit in response:
+            elements.append({
+                "sitename": hit["_source"]["extracted"]["source"]["sitename"],
+                "url": hit["_source"]["extracted"]["source"]["url"]
+            })
+        return elements
+    return response
+
 def data_preview_person_candidate(es, include_terms, include_ids, include_filters, exclude_terms, exclude_ids, exclude_filters, skip, limit, count):
     q = make_query()
     subquery = make_should_subquery()

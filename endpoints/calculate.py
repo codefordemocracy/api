@@ -41,7 +41,7 @@ class DataCalculateBaseBody(BaseModel):
     freshness: datetime.datetime = Field(None)
 
 class DataCalculateRecipeArticleBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="PMYZ|WdMv|RasK|EBli|GSmB")
+    template: str = Field(..., regex="PMYZ|WdMv|RasK|EBli|GSmB|hSaE|PqAA|FBRq|CpsR|2uJX")
     orderby: str = Field(None, regex="date")
     orderdir: str = Field("desc", regex="asc|desc")
 
