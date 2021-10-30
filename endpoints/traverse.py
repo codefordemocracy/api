@@ -317,7 +317,7 @@ def graph_traverse_intermediaries_committee_donor(body: GraphTraverseContributio
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_intermediaries_committee_donor,
             ids=body.nodes.ids, ids2=body.nodes.ids2,
-            transaction_tp=body.intermediaries.transaction_tp, transaction_pgi=body.intermediaries.transaction_pgi, rpt_tp=body.intermediaries.rpt_tp, amndt_ind=body.intermediaries.amndt_ind, gt=body.intermediaries.gt, lte=body.intermediaries.lte,
+            transaction_tp=body.intermediaries.contributions.transaction_tp, transaction_pgi=body.intermediaries.contributions.transaction_pgi, rpt_tp=body.intermediaries.contributions.rpt_tp, amndt_ind=body.intermediaries.contributions.amndt_ind, gt=body.intermediaries.contributions.gt, lte=body.intermediaries.contributions.lte,
             skip=body.pagination.skip, limit=body.pagination.limit,
             min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
         ))
@@ -339,7 +339,7 @@ def graph_traverse_intermediaries_donor_committee(body: GraphTraverseContributio
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_intermediaries_donor_committee,
             ids=body.nodes.ids, ids2=body.nodes.ids2,
-            transaction_tp=body.intermediaries.transaction_tp, transaction_pgi=body.intermediaries.transaction_pgi, rpt_tp=body.intermediaries.rpt_tp, amndt_ind=body.intermediaries.amndt_ind, gt=body.intermediaries.gt, lte=body.intermediaries.lte,
+            transaction_tp=body.intermediaries.contributions.transaction_tp, transaction_pgi=body.intermediaries.contributions.transaction_pgi, rpt_tp=body.intermediaries.contributions.rpt_tp, amndt_ind=body.intermediaries.contributions.amndt_ind, gt=body.intermediaries.contributions.gt, lte=body.intermediaries.contributions.lte,
             skip=body.pagination.skip, limit=body.pagination.limit,
             min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
         ))
