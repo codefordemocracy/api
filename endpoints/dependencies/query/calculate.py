@@ -180,7 +180,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "templates": ["DXhw", "KWYZ"],
                 "terms": [{
                     "action": "match_phrase",
-                    "field": "processed.row.cand_name",
+                    "field": "processed.cand_name",
                     "slop": 5
                 }],
                 "ids": ["row.cand_id"],
@@ -190,7 +190,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "templates": ["WK3K", "KR64", "F7Xn"],
                 "terms": [{
                     "action": "match_phrase",
-                    "field": "processed.row.cand_name",
+                    "field": "processed.cand_name",
                     "slop": 5
                 }],
                 "ids": ["row.cand_id"],
@@ -200,7 +200,7 @@ def data_calculate_recipe_contribution(template, es, include, exclude, skip, lim
                 "templates": ["gXjA"],
                 "terms": [{
                     "action": "match_phrase",
-                    "field": "processed.row.cand_name",
+                    "field": "processed.cand_name",
                     "slop": 5
                 }],
                 "ids": ["row.cand_id"],

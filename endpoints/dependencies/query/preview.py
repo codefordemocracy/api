@@ -174,7 +174,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
         for term in include_terms:
             subquery = add_should_clause(subquery, {
                 "match_phrase": {
-                    "processed.row.cand_name": {
+                    "processed.cand_name": {
                         "query": term,
                         "slop": 5
                     }
@@ -204,7 +204,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
         for term in exclude_terms:
             q = add_not_clause(q, {
                 "match_phrase": {
-                    "processed.row.cand_name": {
+                    "processed.cand_name": {
                         "query": term,
                         "slop": 5
                     }
@@ -227,7 +227,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
                         }
                     })
     response = get_response(es, "federal_fec_candidates", q, skip, limit, count, False,
-        filter_path=["hits.hits._source.row.cand_id", "hits.hits._source.row.cand_name", "hits.hits._source.processed.row.cand_name"]
+        filter_path=["hits.hits._source.row.cand_id", "hits.hits._source.row.cand_name", "hits.hits._source.processed.cand_name"]
     )
     if count is not True:
         elements = []
