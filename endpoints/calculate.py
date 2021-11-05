@@ -57,7 +57,7 @@ class DataCalculateRecipeContributionBody(DataCalculateBaseBody):
     orderdir: str = Field("desc", regex="asc|desc")
 
 class DataCalculateRecipeExpenditureBody(DataCalculateBaseBody):
-    template: str = Field(..., regex="qSMe|kKSg|Ft9G|ZfYW|MJAh|RncJ|Wq88|Mtr2")
+    template: str = Field(..., regex="qSMe|kKSg|Ft9G|ZfYW|FEzU|MJAh|RncJ|Wq88|Mtr2|8ErS")
     filters: DataCalculateFiltersConfig = DataCalculateFiltersConfig()
     orderby: str = Field(None, regex="amount|date")
     orderdir: str = Field("desc", regex="asc|desc")

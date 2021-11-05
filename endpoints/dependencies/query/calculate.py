@@ -412,13 +412,13 @@ def data_calculate_recipe_expenditure(template, es, include, exclude, skip, limi
     # build query
     q = make_query()
     q = set_query_dates(q, "row.transaction_dt", mindate, maxdate)
-    if template in ["qSMe", "kKSg", "Ft9G", "ZfYW"]:
+    if template in ["qSMe", "kKSg", "Ft9G", "ZfYW", "FEzU"]:
         q = add_filter_clause(q, {
             "term": {
                 "row.type": "independent"
             }
         })
-    elif template in ["MJAh", "RncJ", "Wq88", "Mtr2"]:
+    elif template in ["MJAh", "RncJ", "Wq88", "Mtr2", "8ErS"]:
         q = add_filter_clause(q, {
             "term": {
                 "row.type": "operating"
@@ -462,7 +462,15 @@ def data_calculate_recipe_expenditure(template, es, include, exclude, skip, limi
             }],
             "ids": ["row.content.cand_id"],
             "filters": ["content"]
-        },
+        }, {
+            "position": 0,
+            "templates": ["FEzU", "8ErS"],
+            "terms": [{
+                "action": "match_phrase",
+                "field": "row.purpose",
+                "slop": 5
+            }]
+        }
     ], include=include, exclude=exclude)
     # add filters
     if filters["amount"]["min"] is not None or filters["amount"]["max"] is not None:
