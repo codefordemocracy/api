@@ -152,7 +152,7 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
     # get response
     response = get_response(es, "facebook_ads", q, skip, limit, count, histogram,
         date_field="obj.ad_creation_time", mindate=mindate, maxdate=maxdate,
-        filter_path=["hits.hits._source.obj.ad_creation_time", "hits.hits._source.obj.page_name", "hits.hits._source.obj.funding_entity", "hits.hits._source.obj.id"],
+        filter_path=["hits.hits._source.obj.ad_creation_time", "hits.hits._source.obj.page_name", "hits.hits._source.obj.funding_entity", "hits.hits._source.obj.currency", "hits.hits._source.obj.spend", "hits.hits._source.obj.id"],
         highlight=True
     )
     # process rows
@@ -163,6 +163,7 @@ def data_calculate_recipe_ad(template, es, include, exclude, skip, limit, mindat
                 "created_at": hit["_source"]["obj"]["ad_creation_time"][:10],
                 "page_name": hit["_source"]["obj"]["page_name"].upper(),
                 "funding_entity": hit["_source"]["obj"].get("funding_entity").upper() if hit["_source"]["obj"].get("funding_entity") is not None else None,
+                "spending": str(hit["_source"]["obj"].get("currency")) + " " + str(hit["_source"]["obj"].get("spend", {}).get("lower_bound")) + "-" + str(hit["_source"]["obj"].get("spend", {}).get("upper_bound")),
                 "archive_url": "https://facebook.com/ads/library/?id=" + str(hit["_source"]["obj"]["id"]),
                 "values_matched": flatten(list(hit["highlight"].values()))
             }
