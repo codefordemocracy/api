@@ -234,7 +234,7 @@ def data_preview_person_candidate(es, include_terms, include_ids, include_filter
         for hit in response:
             elements.append({
                 "cand_id": hit["_source"]["row"]["cand_id"],
-                "cand_name": hit["_source"].get("processed", {}).get("row", {}).get("cand_name") if hit["_source"].get("processed", {}).get("row", {}).get("cand_name") is not None else hit["_source"]["row"]["cand_id"]
+                "cand_name": hit["_source"].get("processed", {}).get("cand_name") if hit["_source"].get("processed", {}).get("cand_name") is not None else hit["_source"]["row"]["cand_name"]
             })
         return elements
     return response
