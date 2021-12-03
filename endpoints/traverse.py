@@ -327,7 +327,7 @@ def graph_traverse_intermediaries_committee_payee(body: GraphTraverseIntermediar
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_intermediaries_committee_payee,
             ids=body.nodes.ids, ids2=body.nodes.ids2,
-            sup_opp=body.intermediaries.expenditures.sup_opp, purpose=body.intermediaries.expenditures.purpose, amndt_ind=body.intermediaries.amndt_ind, gt=body.intermediaries.expenditures.gt, lte=body.intermediaries.expenditures.lte,
+            sup_opp=body.intermediaries.expenditures.sup_opp, purpose=body.intermediaries.expenditures.purpose, amndt_ind=body.intermediaries.expenditures.amndt_ind, gt=body.intermediaries.expenditures.gt, lte=body.intermediaries.expenditures.lte,
             skip=body.pagination.skip, limit=body.pagination.limit,
             min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
         ))
@@ -351,7 +351,7 @@ def graph_traverse_intermediaries_payee_committee(body: GraphTraverseIntermediar
     with driver.session() as neo4j:
         return helpers.format_graph(neo4j.read_transaction(cypher.graph_traverse_intermediaries_payee_committee,
             ids=body.nodes.ids, ids2=body.nodes.ids2,
-            sup_opp=body.intermediaries.expenditures.sup_opp, purpose=body.intermediaries.expenditures.purpose, amndt_ind=body.intermediaries.amndt_ind, gt=body.intermediaries.expenditures.gt, lte=body.intermediaries.expenditures.lte,
+            sup_opp=body.intermediaries.expenditures.sup_opp, purpose=body.intermediaries.expenditures.purpose, amndt_ind=body.intermediaries.expenditures.amndt_ind, gt=body.intermediaries.expenditures.gt, lte=body.intermediaries.expenditures.lte,
             skip=body.pagination.skip, limit=body.pagination.limit,
             min_year=body.dates.min.year, max_year=body.dates.max.year, min_month=body.dates.min.month, max_month=body.dates.max.month, min_day=body.dates.min.day, max_day=body.dates.max.day,
         ))
