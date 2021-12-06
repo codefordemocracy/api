@@ -4,6 +4,7 @@ from typing import List
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver, es, db
+from .dependencies.analytics import log_endpoint
 from .dependencies.query import preview as query
 from .dependencies.models import PaginationConfig, DataListConfig
 
@@ -14,7 +15,7 @@ from .dependencies.models import PaginationConfig, DataListConfig
 router = APIRouter(
     prefix="/data/preview",
     tags=["preview"],
-    dependencies=[Depends(get_auth)],
+    dependencies=[Depends(get_auth), Depends(log_endpoint)],
 )
 
 #########################################################

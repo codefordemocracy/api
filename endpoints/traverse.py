@@ -5,6 +5,7 @@ from typing import List
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver
 from .dependencies import helpers
+from .dependencies.analytics import log_endpoint
 from .dependencies.cypher import traverse as cypher
 from .dependencies.models import PaginationConfig, DatesConfig
 from .dependencies.models import GraphCandidateAttributesConfig, GraphCommitteeAttributesConfig, GraphDonorAttributesConfig, GraphSourceAttributesConfig, GraphContributionAttributesConfig, GraphExpenditureAttributesConfig
@@ -18,7 +19,7 @@ import datetime
 router = APIRouter(
     prefix="/graph/traverse",
     tags=["traverse"],
-    dependencies=[Depends(get_auth)],
+    dependencies=[Depends(get_auth), Depends(log_endpoint)],
 )
 
 #########################################################

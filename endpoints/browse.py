@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver, es
+from .dependencies.analytics import log_endpoint
 from .dependencies.cypher import search as cypher
 from .dependencies.query import browse as query
 from .dependencies.models import PaginationConfig, DatesConfig
@@ -17,7 +18,7 @@ import pytz
 router = APIRouter(
     prefix="/documents/browse",
     tags=["browse"],
-    dependencies=[Depends(get_auth)],
+    dependencies=[Depends(get_auth), Depends(log_endpoint)],
 )
 
 #########################################################

@@ -4,7 +4,8 @@ from typing import List
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver, es, db
-from .dependencies import helpers, analytics
+from .dependencies import helpers
+from .dependencies.analytics import log_endpoint
 from .dependencies.query import calculate as query
 from .dependencies.models import PaginationConfig, DatesConfig, DataListConfig
 
@@ -18,7 +19,7 @@ import pytz
 router = APIRouter(
     prefix="/data/calculate",
     tags=["calculate"],
-    dependencies=[Depends(get_auth)],
+    dependencies=[Depends(get_auth), Depends(log_endpoint)],
 )
 
 #########################################################
@@ -78,7 +79,6 @@ class DataCalculateRecipe990Body(DataCalculateBaseBody):
 
 @router.post("/recipe/article/", summary="Calculate Recipe for Articles")
 def data_calculate_recipe_article(body: DataCalculateRecipeArticleBody):
-    analytics.log_query(body, es)
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
@@ -96,7 +96,6 @@ def data_calculate_recipe_article(body: DataCalculateRecipeArticleBody):
 
 @router.post("/recipe/ad/", summary="Calculate Recipe for Ads")
 def data_calculate_recipe_ad(body: DataCalculateRecipeAdBody):
-    analytics.log_query(body, es)
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
@@ -114,7 +113,6 @@ def data_calculate_recipe_ad(body: DataCalculateRecipeAdBody):
 
 @router.post("/recipe/contribution/", summary="Calculate Recipe for Contributions")
 def data_calculate_recipe_contribution(body: DataCalculateRecipeContributionBody):
-    analytics.log_query(body, es)
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
@@ -133,7 +131,6 @@ def data_calculate_recipe_contribution(body: DataCalculateRecipeContributionBody
 
 @router.post("/recipe/expenditure/", summary="Calculate Recipe for Expenditures")
 def data_calculate_recipe_expenditure(body: DataCalculateRecipeExpenditureBody):
-    analytics.log_query(body, es)
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
@@ -152,7 +149,6 @@ def data_calculate_recipe_expenditure(body: DataCalculateRecipeExpenditureBody):
 
 @router.post("/recipe/lobbying/", summary="Calculate Recipe for Lobbying Activity")
 def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
-    analytics.log_query(body, es)
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
@@ -269,7 +265,6 @@ def data_calculate_recipe_lobbying(body: DataCalculateRecipeLobbyingBody):
 
 @router.post("/recipe/990/", summary="Calculate Recipe for IRS 990s")
 def data_calculate_recipe_990(body: DataCalculateRecipe990Body):
-    analytics.log_query(body, es)
     clean = helpers.prepare_lists(body.lists, db)
     if clean["include"]["terms"] is not None or clean["include"]["ids"] is not None:
         mindate = datetime.datetime(body.dates.min.year, body.dates.min.month, body.dates.min.day, 0, 0, 0, 0, pytz.timezone('US/Eastern'))

@@ -4,6 +4,7 @@ from typing import List
 
 from .dependencies.authentication import get_auth
 from .dependencies.connections import es
+from .dependencies.analytics import log_endpoint
 from .dependencies.query import check as query
 
 #########################################################
@@ -13,7 +14,7 @@ from .dependencies.query import check as query
 router = APIRouter(
     prefix="/status/check",
     tags=["check"],
-    dependencies=[Depends(get_auth)],
+    dependencies=[Depends(get_auth), Depends(log_endpoint)],
 )
 
 #########################################################

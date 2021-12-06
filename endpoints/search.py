@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver
 from .dependencies import helpers
+from .dependencies.analytics import log_endpoint
 from .dependencies.cypher import search as cypher
 from .dependencies.models import PaginationConfig, DatesConfig
 from .dependencies.models import GraphCandidateAttributesConfig, GraphCommitteeAttributesConfig, GraphDonorAttributesConfig, GraphTweeterAttributesConfig, GraphSourceAttributesConfig
@@ -15,7 +16,7 @@ from .dependencies.models import GraphCandidateAttributesConfig, GraphCommitteeA
 router = APIRouter(
     prefix="/graph/search",
     tags=["search"],
-    dependencies=[Depends(get_auth)],
+    dependencies=[Depends(get_auth), Depends(log_endpoint)],
 )
 
 #########################################################

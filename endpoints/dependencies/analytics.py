@@ -1,14 +1,16 @@
 import datetime
+from starlette.requests import Request
 
-def log_query(body, es):
-    if body.histogram is False and body.count is False:
-        obj = body.dict()
-        obj.pop("histogram")
-        obj.pop("count")
-        record = {
-            "obj": obj,
-            "context": {
-                "logged": datetime.datetime.now(datetime.timezone.utc)
-            }
+from .connections import es
+
+async def log_endpoint(request: Request):
+    es.index(index="log_endpoints", body={
+        "obj": {
+            "endpoint": request.url.path,
+            "user-agent": request.headers.get("user-agent"),
+            "body": await request.json()
+        },
+        "context": {
+            "logged": datetime.datetime.now(datetime.timezone.utc)
         }
-        es.index(index="log_queries", body=record)
+    })

@@ -6,6 +6,7 @@ from uuid import UUID
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver
 from .dependencies import helpers
+from .dependencies.analytics import log_endpoint
 from .dependencies.cypher import find as cypher
 from .dependencies.models import PaginationConfig
 
@@ -16,7 +17,7 @@ from .dependencies.models import PaginationConfig
 router = APIRouter(
     prefix="/graph/find",
     tags=["find"],
-    dependencies=[Depends(get_auth)],
+    dependencies=[Depends(get_auth), Depends(log_endpoint)],
 )
 
 #########################################################

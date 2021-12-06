@@ -5,6 +5,7 @@ from typing import List
 from .dependencies.authentication import get_auth
 from .dependencies.connections import driver
 from .dependencies import helpers
+from .dependencies.analytics import log_endpoint
 from .dependencies.cypher import uncover as cypher
 from .dependencies.models import PaginationConfig, DatesConfig
 
@@ -15,7 +16,7 @@ from .dependencies.models import PaginationConfig, DatesConfig
 router = APIRouter(
     prefix="/graph/uncover",
     tags=["uncover"],
-    dependencies=[Depends(get_auth)],
+    dependencies=[Depends(get_auth), Depends(log_endpoint)],
 )
 
 #########################################################
